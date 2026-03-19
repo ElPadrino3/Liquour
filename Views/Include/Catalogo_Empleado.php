@@ -8,23 +8,13 @@
 </head>
 <body>
 
-<header>
-    <div class="logo-container">
-        <img src="../../Assets/IMG/WhatsApp Image 2026-03-13 at 9.11.48 AM.jpeg" alt="Liquour Logo" class="logo-img">
-    </div>
-    <nav class="nav-menu">
-        <button class="nav-item active">HOME</button>
-        <button class="nav-item">RESERVA</button>
-        <button class="nav-item">MI PERFIL</button>
-    </nav>
-</header>
+<?php include '../Layout/header.php'; ?>
 
 <main class="main-content">
     <aside class="cart-section">
         <div class="cart-card">
             <h2 class="cart-title">Carrito de compras</h2>
-            <div id="cart-container" class="cart-items-list">
-                </div>
+            <div id="cart-container" class="cart-items-list"></div>
             <div class="cart-summary">
                 <div class="total-line">
                     <span>TOTAL</span>
@@ -75,6 +65,30 @@
     </section>
 </main>
 
+<div id="modal-perfil" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header-perfil">
+            <h3>Mi Perfil</h3>
+            <button id="close-modal" class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="perfil-avatar">
+                <img src="../../Assets/IMG/WhatsApp Image 2026-03-13 at 9.11.48 AM.jpeg" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+            </div>
+            <div class="perfil-info">
+                <label>Nombre:</label>
+                <p>Empleado Liquour</p>
+                <label>Rol:</label>
+                <p>Empleado</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-logout" onclick="alert('Cerrando sesión...')">Cerrar Sesión</button>
+        </div>
+    </div>
+</div>
+
 <script src="../../Assets/JS/Catalogo_Empleado.js"></script>
+
 </body>
 </html>
