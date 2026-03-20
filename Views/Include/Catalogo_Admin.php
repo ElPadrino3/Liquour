@@ -3,27 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquour Licorería - Home</title>
+    <title>Liquour Licorería - Inventario Admin</title>
     <link rel="stylesheet" href="../../Assets/CSS/style.css">
 </head>
 <body>
 
 <?php include '../Layout/header.php'; ?>
 
-<main class="main-content">
-    <aside class="cart-section">
-        <div class="cart-card">
-            <h2 class="cart-title">Carrito de compras</h2>
-            <div id="cart-container" class="cart-items-list"></div>
-            <div class="cart-summary">
-                <div class="total-line">
-                    <span>TOTAL</span>
-                    <span id="grand-total">$ 0.00</span>
-                </div>
-                <button class="btn-next" id="btn-next" onclick="openCheckoutModal()">Siguiente</button>
-            </div>
-        </div>
-    </aside>
+<main class="main-content admin-layout">
+    <section class="admin-top-bar">
+        <h1>Panel de Inventario</h1>
+        <button class="btn-add-new" onclick="abrirModalNuevo()">+ AGREGAR PRODUCTO</button>
+    </section>
 
     <section class="products-display">
         <div class="products-grid">
@@ -52,15 +43,64 @@
                     <div class="info-wrapper">
                         <h3><?php echo $p['name']; ?></h3>
                         <p>$<?php echo number_format($p['price'], 2); ?></p>
-                        <button class="btn-add" onclick="addToCart('<?php echo $p['name']; ?>', <?php echo $p['price']; ?>, '<?php echo $p['img']; ?>')">
-                            AGREGAR AL CARRITO
-                        </button>
+                        <div class="admin-btn-group">
+                            <button class="btn-edit" onclick="abrirModalAdmin('editar', <?php echo $p['id']; ?>)">EDITAR</button>
+                            <button class="btn-delete" onclick="eliminarProducto(<?php echo $p['id']; ?>)">ELIMINAR</button>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     </section>
 </main>
+
+<div id="modal-admin-prod" class="modal-overlay">
+    <div class="modal-container admin-form-modal">
+        <div class="modal-header-perfil">
+            <h3 id="admin-modal-title">Detalles del Producto</h3>
+            <button id="close-modal-admin" class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="form-admin-producto">
+                <div class="admin-input-row">
+                    <div class="admin-input-group">
+                        <label>Nombre del Producto</label>
+                        <input type="text" id="admin-p-nombre" required>
+                    </div>
+                </div>
+                <div class="admin-input-row">
+                    <div class="admin-input-group">
+                        <label>Precio Compra</label>
+                        <input type="number" id="admin-p-compra" step="0.01" required>
+                    </div>
+                    <div class="admin-input-group">
+                        <label>Precio Venta</label>
+                        <input type="number" id="admin-p-venta" step="0.01" required>
+                    </div>
+                </div>
+                <div class="admin-input-row">
+                    <div class="admin-input-group">
+                        <label>Código de Barras</label>
+                        <input type="text" id="admin-p-barcode" placeholder="750123456789">
+                    </div>
+                    <div class="admin-input-group">
+                        <label>Stock Inicial</label>
+                        <input type="number" id="admin-p-stock" value="0">
+                    </div>
+                </div>
+                <div class="admin-input-row">
+                    <div class="admin-input-group">
+                        <label>URL Imagen</label>
+                        <input type="text" id="admin-p-img">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" form="form-admin-producto" class="btn-confirmar-admin">GUARDAR DATOS</button>
+        </div>
+    </div>
+</div>
 
 <div id="modal-perfil" class="modal-overlay">
     <div class="modal-container">
@@ -74,9 +114,9 @@
             </div>
             <div class="perfil-info">
                 <label>Nombre:</label>
-                <p>Empleado Liquour</p>
+                <p>Admin Liquour</p>
                 <label>Rol:</label>
-                <p>Empleado</p>
+                <p>Administrador</p>
             </div>
         </div>
         <div class="modal-footer">
@@ -85,65 +125,7 @@
     </div>
 </div>
 
-<div id="modal-checkout" class="modal-overlay">
-    <div class="modal-checkout-container">
-        <div class="checkout-header">
-            <h2>TU CARRITO DE COMPRAS</h2>
-            <button id="close-checkout" class="close-modal">&times;</button>
-        </div>
-
-        <div class="checkout-content">
-            <div class="checkout-table-wrapper">
-                <table class="checkout-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Producto</th>
-                            <th>Precio</th>
-                            <th>Cantidad</th> <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody id="checkout-table-body"></tbody>
-                </table>
-            </div>
-
-            <div class="checkout-options">
-                <div class="purchase-options">
-                    <h3 class="options-title">OPCIONES DE COMPRA</h3>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" checked> Compra Inmediata
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox"> Compra de Reserva
-                    </label>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn-cancel" id="btn-cancel-checkout">CANCELAR</button>
-                    <button class="btn-clear" onclick="clearCart()">LIMPIAR</button>
-                    <button class="btn-confirm">CONFIRMAR</button>
-                </div>
-
-                <div class="reservation-details">
-                    <button class="btn-reserva-big" style="margin-bottom: 10px;">PEDIDO DE RESERVA</button>
-                    <div class="res-box">
-                        <div class="res-header">DETALLES DE RESERVA</div>
-                        <div class="res-body">
-                            <label>Nombre Completo</label>
-                            <input type="text" placeholder="Juan Perez">
-                            <label>Número de Teléfono</label>
-                            <input type="text" placeholder="+1 555-123-4567">
-                            <label>Fecha Límite</label>
-                            <input type="date" value="2024-12-31">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="../../Assets/JS/Catalogo_Empleado.js"></script>
+<script src="../../Assets/JS/Catalogo_Admin.js"></script>
 
 </body>
 </html>
