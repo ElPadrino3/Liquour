@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liquour Licorería - Inventario Admin</title>
-    <link rel="stylesheet" href="../../Assets/CSS/style.css">
+    <link rel="stylesheet" href="../../../Assets/CSS/style.css">
 </head>
 <body>
 
-<?php include '../Layout/header.php'; ?>
+<?php include '../../Layout/header.php'; ?>
 
 <main class="main-content admin-layout">
     <section class="admin-top-bar">
