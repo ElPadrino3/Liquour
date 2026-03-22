@@ -1,0 +1,30 @@
+para subir los archivos por primera vez
+
+git checkout nombre_rama
+git add .
+git commit -m "descripcion de cambios"
+git push -u origin nombre_rama
+
+si no es primera vez ya 
+
+git checkout nombre_rama
+git add .
+git commit -m "descripcion de cambios"
+git push
+
+
+para descargar todos los cambios de develop
+
+git checkout develop
+git pull origin develop
+
+para traer los cambios a su propia rama 
+
+git checkout tu_rama
+git merge develop
+
+si necesitan descargar cambios de otra rama
+
+git fetch --all
+git checkout tu_rama
+git merge origin/rama_de_la_que_quieren_descargar
