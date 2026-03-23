@@ -8,7 +8,8 @@
 </head>
 <body>
 
-<?php include '../../Layout/header.php'; ?>
+   <?php include '../../Layout/header_empleados.php'; ?>
+
 
 <main class="main-content admin-layout">
     <section class="admin-top-bar">
@@ -125,7 +126,7 @@
     </div>
 </div>
 
-<script src="../../Assets/JS/Catalogo_Admin.js"></script>
+<script src="../../../Assets/JS/Catalogo_Admin.js"></script>
 
 </body>
 </html>

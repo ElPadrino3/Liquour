@@ -22,8 +22,8 @@
         </div>
 
         <div class="welcome-actions">
-            <button class="btn-welcome-login" onclick="void(0)">INICIAR SESIÓN</button>
-        </div>
+         <a href="Views/login/login.php" class="btn-welcome-login" style="text-decoration: none; display: inline-block;">INICIAR SESIÓN</a>
+            </div>
 
         <div class="welcome-footer">
             <p>&copy; 2026 Liquour Licorería Profesional. Todos los derechos reservados.</p>

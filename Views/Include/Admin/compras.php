@@ -22,7 +22,8 @@
   }
   html, body { min-height: 100vh; background: var(--carbon); color: var(--cream); font-family: 'Montserrat', sans-serif; font-size: 13px; }
 
-<?php include '../../Layout/header.php'; ?>
+
+
   /* PAGE */
   .page { padding: 28px 32px; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 

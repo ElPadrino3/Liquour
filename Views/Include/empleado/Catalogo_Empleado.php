@@ -100,7 +100,8 @@
                             <th></th>
                             <th>Producto</th>
                             <th>Precio</th>
-                            <th>Cantidad</th> <th>Subtotal</th>
+                            <th>Cantidad</th> 
+                            <th>Subtotal</th>
                         </tr>
                     </thead>
                     <tbody id="checkout-table-body"></tbody>
@@ -143,7 +144,7 @@
     </div>
 </div>
 
-<script src="../../Assets/JS/Catalogo_Empleado.js"></script>
+<script src="../../../Assets/JS/Catalogo_Empleado.js"></script>
 
 </body>
 </html>
