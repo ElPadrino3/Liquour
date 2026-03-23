@@ -485,3 +485,89 @@ header {
     font-weight: bold;
     cursor: pointer;
 }
+
+.welcome-bg {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: url('../../Assets/IMG/image.png') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.welcome-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.welcome-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 20px;
+}
+
+.welcome-logo img {
+    height: 150px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px rgba(197, 168, 122, 0.3));
+}
+
+.welcome-title {
+    color: #f1e4bc;
+    font-size: 4rem;
+    letter-spacing: 10px;
+    margin: 10px 0;
+    font-weight: 300;
+}
+
+.welcome-slogan {
+    color: #a39678;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.welcome-message {
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    opacity: 0.8;
+}
+
+.btn-welcome-login {
+    background: transparent;
+    border: 1px solid #c5a87a;
+    color: #c5a87a;
+    padding: 15px 40px;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    border-radius: 2px;
+}
+
+.btn-welcome-login:hover {
+    background: #c5a87a;
+    color: #000;
+    box-shadow: 0 0 20px rgba(197, 168, 122, 0.4);
+}
+
+.welcome-footer {
+    position: absolute;
+    bottom: 30px;
+    width: 100%;
+    left: 0;
+    color: #3d3428;
+    font-size: 0.8rem;
+}
+
