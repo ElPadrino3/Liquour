@@ -8,7 +8,7 @@
         <a href="index.php" class="nav-item">Home</a>
         <a href="../../Include/Admin/dashboard.php" class="nav-item">Dasboard</a>
         <a href="../../Include/Admin/reportes.php" class="nav-item">Reportes</a>
-        <a href="../../Include/Admin/Catalogo_Admin.php" class="nav-item">Admin</a>
+        <a href="../../Include/Empleado/Catalogo_Empleado.php" class="nav-item">Empleado</a>
         <a href="../../Include/Admin/compras.php" class="nav-item">Compras</a>
         
         <a href="javascript:void(0)" class="nav-item" id="btn-mi-perfil">MI PERFIL</a>
