@@ -33,17 +33,17 @@ function renderCart() {
     totalLabel.innerText = `$ ${total.toFixed(2)}`;
 }
 
-// Función para actualizar subtotal en tiempo real
+
 function updateQty(index, newQty) {
     if (newQty < 1) return;
     cart[index].quantity = parseInt(newQty);
     
-    // Actualiza el subtotal en la fila del modal
+   
     const subCell = document.getElementById(`subtotal-${index}`);
     if (subCell) {
         subCell.innerText = `$ ${(cart[index].price * cart[index].quantity).toFixed(2)}`;
     }
-    renderCart(); // Actualiza el total general
+    renderCart();
 }
 
 function openCheckoutModal() {
@@ -51,7 +51,7 @@ function openCheckoutModal() {
     const tableBody = document.getElementById('checkout-table-body');
 
     if (cart.length === 0) {
-        alert("El carrito está vacío.");
+        alert("El carrito está vacío. ¡Agrega unas botellas primero!");
         return;
     }
 
@@ -81,20 +81,50 @@ function clearCart() {
     document.getElementById('modal-checkout').style.display = 'none';
 }
 
+
 document.addEventListener('DOMContentLoaded', () => {
+   
     const modalCheckout = document.getElementById('modal-checkout');
     const modalPerfil = document.getElementById('modal-perfil');
+    const modalPayment = document.getElementById('modal-payment');
+
 
     document.getElementById('close-checkout').onclick = () => modalCheckout.style.display = 'none';
     document.getElementById('btn-cancel-checkout').onclick = () => modalCheckout.style.display = 'none';
     
+    
+    const btnConfirmCheckout = document.getElementById('btn-confirm-checkout');
+    if(btnConfirmCheckout) {
+        btnConfirmCheckout.onclick = (e) => {
+            e.preventDefault();
+            modalCheckout.style.display = 'none';
+            modalPayment.style.display = 'flex'; 
+        }
+    }
+
 
     const btnPerfil = document.getElementById('btn-mi-perfil');
     if(btnPerfil) btnPerfil.onclick = (e) => { e.preventDefault(); modalPerfil.style.display = 'flex'; }
     document.getElementById('close-modal').onclick = () => modalPerfil.style.display = 'none';
 
+    
+    const closePayment = document.getElementById('close-payment');
+    if(closePayment) closePayment.onclick = () => modalPayment.style.display = 'none';
+
+    const btnProcesarPago = document.getElementById('btn-procesar-pago');
+    if(btnProcesarPago) {
+        btnProcesarPago.onclick = (e) => {
+            e.preventDefault();
+            alert('¡Pago procesado con éxito! Preparando el pedido...');
+            clearCart(); 
+            modalPayment.style.display = 'none';
+        }
+    }
+
+    
     window.onclick = (e) => {
         if (e.target === modalCheckout) modalCheckout.style.display = 'none';
         if (e.target === modalPerfil) modalPerfil.style.display = 'none';
+        if (e.target === modalPayment) modalPayment.style.display = 'none';
     };
 });

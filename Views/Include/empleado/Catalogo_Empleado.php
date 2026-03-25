@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liquour Licorería - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
 </head>
 <body>
@@ -11,7 +12,7 @@
 <?php include '../../Layout/header_empleados.php'; ?>
 
 <main class="main-content">
-    <aside class="cart-section">
+    <aside class="cart-section animate__animated animate__fadeInLeft" style="animation-duration: 0.6s;">
         <div class="cart-card">
             <h2 class="cart-title">Carrito de compras</h2>
             <div id="cart-container" class="cart-items-list"></div>
@@ -45,7 +46,7 @@
 
             foreach ($items as $p): 
             ?>
-                <div class="product-card">
+                <div class="product-card animate__animated animate__fadeInUp" style="animation-duration: 0.8s;">
                     <div class="img-wrapper">
                         <img src="<?php echo $p['img']; ?>" alt="<?php echo $p['name']; ?>">
                     </div>
@@ -63,7 +64,7 @@
 </main>
 
 <div id="modal-perfil" class="modal-overlay">
-    <div class="modal-container">
+    <div class="modal-container animate__animated animate__fadeInRight" style="animation-duration: 0.5s;">
         <div class="modal-header-perfil">
             <h3>Mi Perfil</h3>
             <button id="close-modal" class="close-modal">&times;</button>
@@ -86,7 +87,7 @@
 </div>
 
 <div id="modal-checkout" class="modal-overlay">
-    <div class="modal-checkout-container">
+    <div class="modal-checkout-container animate__animated animate__zoomIn" style="animation-duration: 0.4s;">
         <div class="checkout-header">
             <h2>TU CARRITO DE COMPRAS</h2>
             <button id="close-checkout" class="close-modal">&times;</button>
@@ -122,7 +123,7 @@
                 <div class="action-buttons">
                     <button class="btn-cancel" id="btn-cancel-checkout">CANCELAR</button>
                     <button class="btn-clear" onclick="clearCart()">LIMPIAR</button>
-                    <button class="btn-confirm">CONFIRMAR</button>
+                    <button class="btn-confirm" id="btn-confirm-checkout">PAGO CON TARJETA</button>
                 </div>
 
                 <div class="reservation-details">
@@ -144,7 +145,40 @@
     </div>
 </div>
 
-<script src="../../../Assets/JS/Catalogo_Empleado.js"></script>
+<div id="modal-payment" class="modal-overlay">
+    <div class="modal-container animate__animated animate__zoomIn" style="width: 400px; animation-duration: 0.4s;">
+        <div class="modal-header-perfil">
+            <h3>PAGO CON TARJETA</h3>
+            <button id="close-payment" class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="res-body" style="padding: 0;"> 
+                
+                <label>Titular de la tarjeta</label>
+                <input type="text" placeholder="Ej. Juan Perez" required style="margin-bottom: 15px;">
+
+                <label>Número de Tarjeta</label>
+                <input type="text" placeholder="0000 0000 0000 0000" maxlength="19" required style="margin-bottom: 15px;">
+
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label>Vencimiento</label>
+                        <input type="text" placeholder="MM/AA" maxlength="5" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>CVV</label>
+                        <input type="password" placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="margin-top: 20px;">
+            <button class="btn-reserva-big" id="btn-procesar-pago" style="margin-top: 0; background-color: #2a251e; color: #f1e4bc; border: 1px solid #f1e4bc;">PROCESAR PAGO</button>
+        </div>
+    </div>
+</div>
+
+<script src="../../../Assets/JS/Catalogo_Empleado.js?v=2.0"></script>
 
 </body>
 </html>
