@@ -1,22 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquour Licorería - Inventario Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="../../../Assets/CSS/style.css">
-</head>
-<body>
 
-   <?php include '../../Layout/header_admin.php'; ?>
+<?php include '../../Layout/head.php'; ?>
 
+<link rel="stylesheet" href="../../../Assets/CSS/nav.css">
+<link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Admin.css">
+
+<?php include '../../Layout/nav_admin.php'; ?> 
+   
 <main class="main-content admin-layout">
-    <section class="admin-top-bar">
-        <h1 class="animate__animated animate__fadeInDown">Panel de Inventario</h1>
-        <button type="button" class="btn-add-new" onclick="abrirModalCrear()">+ AGREGAR PRODUCTO</button>
-    </section>
 
+    <br>
+    
     <section class="products-display">
         <div class="products-grid">
             <?php
@@ -121,7 +114,7 @@
         </div>
         <div class="modal-body">
             <div class="perfil-avatar">
-                <img src="../../../Assets/IMG/WhatsApp Image 2026-03-13 at 9.11.48 AM.jpeg" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                <img src="../../../Assets/IMG/icon-7797704_640.png" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
             </div>
             <div class="perfil-info">
                 <label>Nombre:</label>

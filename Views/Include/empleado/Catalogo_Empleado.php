@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquour Licorería - Home</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="../../../Assets/CSS/style.css">
-</head>
-<body>
 
-<?php include '../../Layout/header_empleados.php'; ?>
+<?php include '../../Layout/head.php'; ?>
+
+    <link rel="stylesheet" href="../../../Assets/CSS/nav.css">
+    <link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Empleado.css">
+
+<?php include '../../Layout/nav_empleado.php'; ?>
+
 
 <main class="main-content">
     <aside class="cart-section animate__animated animate__fadeInLeft" style="animation-duration: 0.6s;">

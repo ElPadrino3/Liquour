@@ -6,55 +6,6 @@ body {
     padding: 0;
 }
 
-header {
-    background-color: #000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 5%;
-    border-bottom: 2px solid #1a1a1a;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-}
-
-.logo-img { 
-    height: 120px;
-    width: auto;
-    transition: transform 0.3s ease;
-    object-fit: contain;
-}
-
-.logo-img:hover { 
-    transform: scale(1.05);
-}
-
-.nav-menu {
-    display: flex;
-}
-
-.nav-item {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #a39678;
-    padding: 10px 25px;
-    margin-left: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.nav-item.active {
-    background: #2a251e;
-    border: 1px solid #f1e4bc;
-    color: #f1e4bc;
-}
 
 .main-content {
     display: flex;
@@ -398,24 +349,6 @@ header {
     flex-direction: column;
 }
 
-.admin-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    border-bottom: 1px solid #3d3428;
-    padding-bottom: 15px;
-}
-
-.btn-add-new {
-    background: #c5a87a;
-    color: #000;
-    border: none;
-    padding: 12px 25px;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
 .admin-btn-group {
     display: flex;

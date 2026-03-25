@@ -1,9 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Liquour — Reportes</title>
+
+<?php include '../../Layout/head.php'; ?>
+
+<link rel="stylesheet" href="../../../Assets/CSS/nav.css">
+<link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
+
+<?php include '../../Layout/nav_admin.php'; ?> 
+
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -472,5 +474,8 @@ document.getElementById('vendorFilter').addEventListener('change', e => {
 
 render();
 </script>
+
+<script src="../../../Assets/JS/Catalogo_Admin.js"></script>
+
 </body>
 </html>

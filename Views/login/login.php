@@ -9,7 +9,9 @@
 <body>
     <div class="login-container">
         <div class="logo-container">
-            <img src="../../Assets/IMG/WhatsApp Image 2026-03-13 at 9.11.48 AM.jpeg" class="animate__animated animate__jackInTheBox">
+            
+        <img src="../../Assets/IMG/Logo.jpeg" class="animate__animated animate__jackInTheBox">
+
         </div>
         <h2>ACCESO AL SISTEMA</h2>
         <form id="loginForm">
