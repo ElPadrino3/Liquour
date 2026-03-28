@@ -4,7 +4,7 @@
     </div>
     <nav class="nav-menu">
         <a href="../../../index.php" class="nav-item">HOME</a>
-        <a href="../../../Liquour/Views/" class="nav-item">RESERVA</a>
+        <a href="../../../Liquour/Views/Include/Admin/reserva.php" class="nav-item">RESERVA</a>
         <a href="javascript:void(0)" class="nav-item" id="btn-mi-perfil">MI PERFIL</a>
     </nav>
 </header>

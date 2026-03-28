@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    margin: 0;
+}
+
+.liquour-page-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-color: #0a0a0a;
+    /* Tres capas de "polvo de oro" con diferentes tamaños y opacidades */
+    background-image: 
+      radial-gradient(circle, rgba(197, 160, 89, 0.9) 1px, transparent 2px),
+      radial-gradient(circle, rgba(197, 160, 89, 0.6) 1.5px, transparent 2px),
+      radial-gradient(circle, rgba(197, 160, 89, 0.3) 2px, transparent 3px);
+    background-size: 100px 100px, 150px 150px, 250px 250px;
+    background-position: 0 0, 20px 50px, 100px 150px;
+    /* Animación más rápida para que la notes de inmediato */
+    animation: polvoDeOro 20s linear infinite;
+}
+
+@keyframes polvoDeOro {
+    0% {
+        background-position: 0px 0px, 20px 50px, 100px 150px;
+    }
+    100% {
+        /* Movimiento matemático perfecto para un bucle sin cortes */
+        background-position: 100px 100px, 170px 200px, 350px 400px;
+    }
+}
+
+.liquour-profile {
+    width: 100%;
+    max-width: 320px;
+    margin: 60px auto;
+    background-color: #1A1A1A;
+    color: #F5F5DC;
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 12px;
+    border: 1px solid #4A4A4A;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 25px;
+}
+
+.liquour-bg-animated {
+    height: 100px;
+    background: linear-gradient(135deg, #1A1A1A, #C5A059, #4A4A4A, #1A1A1A);
+    background-size: 400% 400%;
+    animation: simpleGradient 8s ease infinite;
+    border-bottom: 2px solid #C5A059;
+}
+
+@keyframes simpleGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.liquour-avatar {
+    width: 90px;
+    height: 90px;
+    position: absolute;
+    top: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    border: 4px solid #1A1A1A;
+    background-color: #4A4A4A;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    z-index: 2;
+}
+
+.liquour-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.liquour-info {
+    text-align: center;
+    margin-top: 60px;
+    padding: 0 20px;
+}
+
+.liquour-info h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #C5A059;
+    font-weight: 700;
+}
+
+.liquour-info .rango {
+    margin: 5px 0 0;
+    font-size: 0.8rem;
+    color: #F5F5DC;
+    opacity: 0.8;
+}
+
+.liquour-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 10px;
+    margin-top: 15px;
+    border-top: 1px solid #4A4A4A;
+    border-bottom: 1px solid #4A4A4A;
+}
+
+.stat-box {
+    text-align: center;
+}
+
+.stat-box h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #C5A059;
+}
+
+.stat-box span {
+    font-size: 0.7rem;
+    color: #F5F5DC;
+    opacity: 0.6;
+}
+
+.liquour-charts {
+    padding: 20px;
+}
+
+.chart-container {
+    margin-bottom: 12px;
+}
+
+.chart-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #F5F5DC;
+    margin-bottom: 4px;
+}
+
+.chart-bar-bg {
+    width: 100%;
+    height: 6px;
+    background-color: #4A4A4A;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.chart-bar-fill {
+    height: 100%;
+    background-color: #C5A059;
+    width: 0;
+    border-radius: 3px;
+    transition: width 1s ease-out;
+}
+
+.liquour-action {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.liquour-action button {
+    background-color: transparent;
+    color: #C5A059;
+    border: 1px solid #C5A059;
+    padding: 10px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+
+.liquour-action button:hover {
+    background-color: #C5A059;
+    color: #1A1A1A;
+}
+
+.action-success {
+    background-color: #C5A059 !important;
+    color: #1A1A1A !important;
+}

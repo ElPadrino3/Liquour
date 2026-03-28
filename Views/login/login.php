@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
+    
+    <div class="liquour-page-bg"></div>
+
     <div class="login-container">
         <div class="logo-container">
             <img src="../../Assets/IMG/WhatsApp Image 2026-03-13 at 9.11.48 AM.jpeg" class="animate__animated animate__jackInTheBox">
@@ -29,6 +32,7 @@
             LIQUOUR POS V1.0 CALIDAD Y EXCLUSIVIDAD
         </div>
     </div>
+    
     <script src="../../../Liquour/Assets/JS/validacion.js"></script>
 </body>
 </html>
