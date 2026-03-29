@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
+    
+    <div class="liquour-page-bg"></div>
+
     <div class="login-container">
         <div class="logo-container">
             
@@ -31,6 +34,7 @@
             LIQUOUR POS V1.0 CALIDAD Y EXCLUSIVIDAD
         </div>
     </div>
+    
     <script src="../../../Liquour/Assets/JS/validacion.js"></script>
 </body>
 </html>
