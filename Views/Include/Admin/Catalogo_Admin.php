@@ -11,7 +11,6 @@
 </head>
 <body>
 
-<?php include '../../Layout/header_admin.php'; ?>
 
 
 <link rel="stylesheet" href="../../../Assets/CSS/nav.css">

@@ -1,3 +1,42 @@
+<?php
+session_start();
+require_once '../../Config/Liquour_bdd.php';
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $usuario = trim($_POST['usuario']);
+    $password = trim($_POST['password']);
+
+    $bdd = new BDD();
+    $conn = $bdd->conectar();
+
+    $stmt = $conn->prepare("SELECT id_usuario, nombre, usuario, rol, estado FROM usuarios WHERE usuario = ? AND password = ?");
+    $stmt->execute([$usuario, $password]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        if ($user['estado'] == 1) {
+            $_SESSION['id_usuario'] = $user['id_usuario'];
+            $_SESSION['nombre'] = $user['nombre'];
+            $_SESSION['usuario'] = $user['usuario'];
+            $_SESSION['rol'] = $user['rol'];
+
+            if ($user['rol'] === 'admin') {
+                header("Location: ../Include/Admin/Catalogo_Admin.php");
+            } else {
+                header("Location: ../Include/empleado/Catalogo_Empleado.php");
+            }
+            exit;
+        } else {
+            $error = "Tu cuenta está inactiva. Contacta al administrador.";
+        }
+    } else {
+        $error = "Usuario o contraseña incorrectos.";
+    }
+    $bdd->desconectar();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,12 +51,17 @@
 
     <div class="login-container">
         <div class="logo-container">
-            
-        <img src="../../Assets/IMG/Logo.jpeg" class="animate__animated animate__jackInTheBox">
-
+            <img src="../../Assets/IMG/Logo.jpeg" class="animate__animated animate__jackInTheBox">
         </div>
         <h2>ACCESO AL SISTEMA</h2>
-        <form id="loginForm">
+
+        <?php if(!empty($error)): ?>
+            <div style="color: #e08080; background: rgba(192,80,80,.1); border: 1px solid rgba(192,80,80,.3); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;">
+                <?= $error ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="">
             <div class="form-group">
                 <label>Usuario</label>
                 <input type="text" id="usuario" name="usuario" required>
@@ -35,6 +79,5 @@
         </div>
     </div>
     
-    <script src="../../../Liquour/Assets/JS/validacion.js"></script>
 </body>
 </html>

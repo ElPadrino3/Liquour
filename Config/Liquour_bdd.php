@@ -2,7 +2,7 @@
 
 class BDD {
     private $host = 'localhost';
-    private $dbname = 'liquour_bdd';
+    private $dbname = 'tienda_licoreria';
     private $user = 'root';
     private $password = '';
     private $conexion;

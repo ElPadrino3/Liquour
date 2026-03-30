@@ -1,18 +1,13 @@
-
-<?php include '../../Layout/head.php'; ?>
-
-<link rel="stylesheet" href="../../../Assets/CSS/nav.css">
-<link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
-
 <?php include '../../Layout/nav_admin.php'; ?> 
 
+<link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../../Assets/CSS/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<?php include '../../Layout/header_admin.php'; ?>
+<?php @include '../../../Layout/nav_admin.php'; ?> 
 
 <div class="page">
 
@@ -150,7 +145,7 @@ const ORDERS = [
   { orden:'ORD-1009', fecha:'2024-12-13', proveedor:'Viñas Andinas',    producto:'Vino Blanco Reserva', qty:30, precio:'$95.00',  total:'$2,850.00', estado:'Cancelado' },
   { orden:'ORD-1010', fecha:'2024-12-10', proveedor:'Premiums Import',  producto:'Whisky Japonés',      qty:8,  precio:'$120.00', total:'$960.00',   estado:'Pendiente' },
   { orden:'ORD-1011', fecha:'2024-12-08', proveedor:'Cerveza Brava',    producto:'Sidra Premium',       qty:48, precio:'$12.00',  total:'$576.00',   estado:'Recibido'  },
-  { orden:'ORD-1012', fecha:'2024-12-05', proveedor:'Destilados Sur',   producto:'Mezcal Artesanal',    qty:10, precio:'$85.00',  total:'$850.00',   estado:'Cancelado' },
+  { orden:'ORD-1012', fecha:'2024-12-05', proveedor:'Destilados Sur',   producto:'Mezcal Artesanal',    qty:10, precio:'$85.00',  total:'$850.00',   estado:'Cancelado' }
 ];
 
 const ROWS = 7;
