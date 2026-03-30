@@ -1,51 +1,78 @@
 <?php include '../../Layout/head.php'; ?>
 
-    <link rel="stylesheet" href="../../../Assets/CSS/nav.css">
-    <link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Empleado.css">
+<link rel="stylesheet" href="../../../Assets/CSS/nav.css">
+<link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Empleado.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
-<?php include '../../Layout/nav_empleado.php'; ?>
+<?php include '../../Layout/header_empleados.php'; ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquour Licorería - Catálogo Completo</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="../../../Assets/CSS/Tienda_pos.css">
-</head>
-<body>
+<main class="catalog-page">
+    <aside class="catalog-sidebar animate__animated animate__fadeInLeft" style="animation-duration: 0.5s;">
+        <div class="sidebar-card">
+            <h2 class="sidebar-title">FILTROS</h2>
 
-<?php include '../../Layout/header_admin.php'; ?>
+            <div class="filter-group">
+                <label for="search-input" class="filter-label">Búsqueda</label>
+                <input type="text" id="search-input" class="search-box" placeholder="Buscar producto, código...">
+            </div>
 
-
-<main class="main-content-2col">
-    
-    <aside class="sidebar-filters animate__animated animate__fadeInLeft" style="animation-duration: 0.6s;">
-        <div class="filter-block">
-            <h3>BÚSQUEDA</h3>
-            <input type="text" id="search-input" class="input-dark full-width" placeholder="Buscar producto, código...">
-        </div>
-
-        <div class="filter-block">
-            <h3>CATEGORÍAS</h3>
-            <div class="category-list">
-                <label class="custom-radio"><input type="radio" name="categoria" value="Todos" checked onchange="aplicarFiltros()"> Todos</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Whisky" onchange="aplicarFiltros()"> Whisky</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Vino" onchange="aplicarFiltros()"> Vinos</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Cerveza" onchange="aplicarFiltros()"> Cervezas</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Tequila" onchange="aplicarFiltros()"> Tequila</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Vodka" onchange="aplicarFiltros()"> Vodka</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Ron" onchange="aplicarFiltros()"> Ron</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Ginebra" onchange="aplicarFiltros()"> Ginebra</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Champagne" onchange="aplicarFiltros()"> Champagne</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Mezcal" onchange="aplicarFiltros()"> Mezcal</label>
-                <label class="custom-radio"><input type="radio" name="categoria" value="Licor" onchange="aplicarFiltros()"> Licores</label>
+            <div class="filter-group">
+                <label class="filter-label">Categorías</label>
+                <div class="category-options">
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Todos" checked>
+                        <span>Todos</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Whisky">
+                        <span>Whisky</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Vino">
+                        <span>Vinos</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Cerveza">
+                        <span>Cervezas</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Tequila">
+                        <span>Tequila</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Vodka">
+                        <span>Vodka</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Ron">
+                        <span>Ron</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Ginebra">
+                        <span>Ginebra</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Champagne">
+                        <span>Champagne</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Mezcal">
+                        <span>Mezcal</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Licor">
+                        <span>Licores</span>
+                    </label>
+                </div>
             </div>
         </div>
     </aside>
 
-    <section class="products-display">
+    <section class="catalog-results">
+        <div class="results-topbar">
+            <div id="resultado-filtro" class="results-count">Mostrando todos los productos</div>
+        </div>
+
         <div class="products-grid" id="contenedor-productos">
             <?php
             $items = [
@@ -63,35 +90,41 @@
                 ["id" => 12, "barcode" => "750100012", "name" => "LICOR DE CAFÉ", "sale_price" => 22.00, "purchase_price" => 14.00, "stock" => 40, "cat" => "Licor", "img" => "https://i.pinimg.com/736x/29/28/2f/29282fcd6cd3b4e15433484719854e14.jpg"]
             ];
 
-            $delay = 0.1;
-            foreach ($items as $p): 
+            $delay = 0.05;
+            foreach ($items as $p):
             ?>
-                <div class="product-card animate__animated animate__fadeInUp item-producto" 
-                     data-categoria="<?php echo $p['cat']; ?>" 
-                     style="animation-duration: 0.6s; animation-delay: <?php echo $delay; ?>s;">
-                    <div class="img-wrapper">
-                        <img src="<?php echo $p['img']; ?>" alt="<?php echo $p['name']; ?>">
+                <article class="product-card animate__animated animate__fadeInUp item-producto"
+                    data-categoria="<?php echo $p['cat']; ?>"
+                    style="animation-duration: 0.5s; animation-delay: <?php echo $delay; ?>s;">
+                    
+                    <div class="product-image-box">
+                        <img src="<?php echo $p['img']; ?>" alt="<?php echo $p['name']; ?>" class="product-image">
                     </div>
-                    <div class="info-wrapper detail-view">
+
+                    <div class="product-body">
+                        <div class="product-brand"><?php echo strtoupper($p['cat']); ?></div>
                         <h3 class="nombre-producto"><?php echo $p['name']; ?></h3>
-                        <div class="product-specs">
-                            <span><strong>Categoría:</strong> <?php echo $p['cat']; ?></span>
-                            <span class="codigo-producto"><strong>Código:</strong> <?php echo $p['barcode']; ?></span>
-                            <span><strong>Stock:</strong> <?php echo $p['stock']; ?> uds.</span>
-                            <span><strong>P. Compra:</strong> $<?php echo number_format($p['purchase_price'], 2); ?></span>
-                            <span class="highlight-price"><strong>P. Venta:</strong> $<?php echo number_format($p['sale_price'], 2); ?></span>
+
+                        <div class="product-meta">
+                            <p><strong>Categoría:</strong> <span class="product-category"><?php echo $p['cat']; ?></span></p>
+                            <p class="codigo-producto"><strong>Código:</strong> <?php echo $p['barcode']; ?></p>
+                            <p><strong>Stock:</strong> <?php echo $p['stock']; ?> uds.</p>
+                        </div>
+
+                        <div class="product-prices">
+                            <div class="buy-price">Compra: $<?php echo number_format($p['purchase_price'], 2); ?></div>
+                            <div class="sale-price">Venta: $<?php echo number_format($p['sale_price'], 2); ?></div>
                         </div>
                     </div>
-                </div>
-            <?php 
-                $delay += 0.05;
-            endforeach; 
+                </article>
+            <?php
+                $delay += 0.03;
+            endforeach;
             ?>
         </div>
     </section>
 </main>
 
-<script src="../../Assets/Js/Catalogo_Empleado.js"></script>
-
+<script src="../../../Assets/JS/Catalogo_Empleado.js"></script>
 </body>
 </html>
