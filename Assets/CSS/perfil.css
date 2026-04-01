@@ -13,25 +13,18 @@ body {
     height: 100vh;
     z-index: -1;
     background-color: #0a0a0a;
-    /* Tres capas de "polvo de oro" con diferentes tamaños y opacidades */
     background-image: 
       radial-gradient(circle, rgba(197, 160, 89, 0.9) 1px, transparent 2px),
       radial-gradient(circle, rgba(197, 160, 89, 0.6) 1.5px, transparent 2px),
       radial-gradient(circle, rgba(197, 160, 89, 0.3) 2px, transparent 3px);
     background-size: 100px 100px, 150px 150px, 250px 250px;
     background-position: 0 0, 20px 50px, 100px 150px;
-    /* Animación más rápida para que la notes de inmediato */
     animation: polvoDeOro 20s linear infinite;
 }
 
 @keyframes polvoDeOro {
-    0% {
-        background-position: 0px 0px, 20px 50px, 100px 150px;
-    }
-    100% {
-        /* Movimiento matemático perfecto para un bucle sin cortes */
-        background-position: 100px 100px, 170px 200px, 350px 400px;
-    }
+    0% { background-position: 0px 0px, 20px 50px, 100px 150px; }
+    100% { background-position: 100px 100px, 170px 200px, 350px 400px; }
 }
 
 .liquour-profile {
@@ -154,11 +147,11 @@ body {
 }
 
 .chart-bar-fill {
-    height: 100%;
-    background-color: #C5A059;
-    width: 0;
+    height: 100% !important;
+    background-color: #C5A059 !important;
+    width: 0%;
+    transition: width 1.5s cubic-bezier(0.1, 0.5, 0.1, 1) !important;
     border-radius: 3px;
-    transition: width 1s ease-out;
 }
 
 .liquour-action {
@@ -166,9 +159,9 @@ body {
     margin-top: 10px;
 }
 
-.liquour-action button {
-    background-color: transparent;
-    color: #C5A059;
+#btnLiquourAccion {
+    background-color: #4a0000;
+    color: #F5F5DC;
     border: 1px solid #C5A059;
     padding: 10px 25px;
     border-radius: 20px;
@@ -176,10 +169,10 @@ body {
     font-weight: bold;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.8rem;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 
-.liquour-action button:hover {
+#btnLiquourAccion:hover {
     background-color: #C5A059;
     color: #1A1A1A;
 }
@@ -187,4 +180,5 @@ body {
 .action-success {
     background-color: #C5A059 !important;
     color: #1A1A1A !important;
+    opacity: 0;
 }

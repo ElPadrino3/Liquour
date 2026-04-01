@@ -181,3 +181,16 @@ body {
     margin-top: 20px;
     cursor: pointer;
 }
+
+.admin-input-group select {
+    width: 100%;
+    background: #000;
+    border: 1px solid #3d3428;
+    color: #fff;
+    padding: 10px;
+    outline: none;
+}
+
+.admin-input-group select:focus {
+    border-color: #C5A059;
+}

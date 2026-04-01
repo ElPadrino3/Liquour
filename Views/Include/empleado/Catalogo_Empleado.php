@@ -22,14 +22,20 @@ $items = $stmt->fetchAll();
 
 $bdd->desconectar();
 ?>
-<?php include '../../Layout/head.php'; ?>
-
-<link rel="stylesheet" href="../../../Assets/CSS/nav.css">
-<link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Empleado.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Empleado</title>
+    <link rel="stylesheet" href="../../../Assets/CSS/nav.css">
+    <link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Empleado.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
 
 <?php @include '../../Layout/nav_admin.php'; ?> 
-
+<link rel="stylesheet" href="/LIQUOUR/Assets/CSS/nav.css">
 <main class="catalog-page">
     <aside class="catalog-sidebar animate__animated animate__fadeInLeft" style="animation-duration: 0.5s;">
         <div class="sidebar-card">
@@ -102,6 +108,8 @@ $bdd->desconectar();
             $delay = 0.05;
             foreach ($items as $p):
                 $imagen = !empty($p['img']) ? $p['img'] : 'https://via.placeholder.com/150?text=Sin+Imagen';
+                $stock_actual = isset($p['stock']) && $p['stock'] !== '' ? $p['stock'] : 0;
+                $codigo_actual = !empty($p['barcode']) ? $p['barcode'] : 'N/A';
             ?>
                 <article class="product-card animate__animated animate__fadeInUp item-producto"
                     data-categoria="<?php echo htmlspecialchars($p['cat']); ?>"
@@ -117,13 +125,13 @@ $bdd->desconectar();
 
                         <div class="product-meta">
                             <p><strong>Categoría:</strong> <span class="product-category"><?php echo htmlspecialchars($p['cat']); ?></span></p>
-                            <p class="codigo-producto"><strong>Código:</strong> <?php echo htmlspecialchars($p['barcode']); ?></p>
-                            <p><strong>Stock:</strong> <?php echo htmlspecialchars($p['stock']); ?> uds.</p>
+                            <p class="codigo-producto"><strong>Código:</strong> <?php echo htmlspecialchars($codigo_actual); ?></p>
+                            <p><strong>Stock:</strong> <?php echo htmlspecialchars($stock_actual); ?> uds.</p>
                         </div>
 
                         <div class="product-prices">
-                            <div class="buy-price">Compra: $<?php echo number_format($p['purchase_price'], 2); ?></div>
-                            <div class="sale-price">Venta: $<?php echo number_format($p['sale_price'], 2); ?></div>
+                            <div class="buy-price">Compra: $<?php echo number_format((float)$p['purchase_price'], 2); ?></div>
+                            <div class="sale-price">Venta: $<?php echo number_format((float)$p['sale_price'], 2); ?></div>
                         </div>
                     </div>
                 </article>
@@ -133,12 +141,12 @@ $bdd->desconectar();
             
             if (count($items) === 0):
             ?>
-                <p style="color: var(--cream); text-align: center; grid-column: 1 / -1;">No hay productos registrados en la base de datos.</p>
+                <p style="color: #F5F5DC; text-align: center; grid-column: 1 / -1; font-weight: bold; margin-top: 20px;">No hay productos registrados en la base de datos.</p>
             <?php endif; ?>
         </div>
     </section>
 </main>
 
-<script src="../../../Assets/JS/Catalogo_Empleado.js"></script>
+<script src="../../../Assets/JS/Catalogo_Empleado.js?v=<?php echo time(); ?>"></script>
 </body>
-</html>     
+</html>

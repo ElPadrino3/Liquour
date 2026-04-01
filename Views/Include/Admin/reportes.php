@@ -1,20 +1,84 @@
+<?php
+require_once '../../../Config/Liquour_bdd.php';
 
-<?php include '../../Layout/head.php'; ?>
+$db = new BDD();
+$conexion = $db->conectar();
 
-<link rel="stylesheet" href="../../../Assets/CSS/nav.css">
-<link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
+$stmtSum = $conexion->query("SELECT IFNULL(SUM(total), 0) as total_ventas, COUNT(id_venta) as transacciones, COUNT(DISTINCT id_usuario) as vendedores FROM ventas");
+$summary = $stmtSum->fetch();
+$totalVentas = $summary['total_ventas'];
+$transacciones = $summary['transacciones'];
+$vendedores = $summary['vendedores'];
+$promedio = $transacciones > 0 ? $totalVentas / $transacciones : 0;
 
-<?php include '../../Layout/nav_admin.php'; ?> 
+$stmtUsers = $conexion->query("SELECT DISTINCT u.nombre FROM ventas v JOIN usuarios u ON v.id_usuario = u.id_usuario");
+$listaVendedores = $stmtUsers->fetchAll();
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+$stmtVentas = $conexion->query("
+    SELECT DATE(v.fecha) as fecha, v.id_venta as id, p.nombre as producto, dv.cantidad, 
+           CONCAT('$', FORMAT(dv.precio, 2)) as precio, CONCAT('$', FORMAT(dv.subtotal, 2)) as subtotal, u.nombre as vendedor
+    FROM detalle_ventas dv
+    JOIN ventas v ON dv.id_venta = v.id_venta
+    JOIN productos p ON dv.id_producto = p.id_producto
+    JOIN usuarios u ON v.id_usuario = u.id_usuario
+    ORDER BY v.fecha DESC
+");
+$ventas = $stmtVentas->fetchAll();
+
+$stmtProductos = $conexion->query("
+    SELECT MAX(DATE(v.fecha)) as fecha, p.codigo_barras as id, p.nombre as producto, SUM(dv.cantidad) as cantidad, 
+           CONCAT('$', FORMAT(p.precio_venta, 2)) as precio, CONCAT('$', FORMAT(SUM(dv.subtotal), 2)) as subtotal, '-' as vendedor
+    FROM detalle_ventas dv
+    JOIN productos p ON dv.id_producto = p.id_producto
+    JOIN ventas v ON dv.id_venta = v.id_venta
+    GROUP BY p.id_producto
+    ORDER BY cantidad DESC
+");
+$productos = $stmtProductos->fetchAll();
+
+$stmtInventario = $conexion->query("
+    SELECT DATE(CURRENT_DATE) as fecha, p.codigo_barras as id, p.nombre as producto, p.stock as cantidad, 
+           CONCAT('$', FORMAT(p.precio_venta, 2)) as precio, CONCAT('$', FORMAT(p.stock * p.precio_venta, 2)) as subtotal, 'Almacén' as vendedor
+    FROM productos p
+    ORDER BY p.stock DESC
+");
+$inventario = $stmtInventario->fetchAll();
+
+$stmtCompras = $conexion->query("
+    SELECT DATE(c.fecha) as fecha, c.id_compra as id, p.nombre as producto, dc.cantidad, 
+           CONCAT('$', FORMAT(dc.precio_compra, 2)) as precio, CONCAT('$', FORMAT(dc.subtotal, 2)) as subtotal, prov.nombre as vendedor
+    FROM detalle_compras dc
+    JOIN compras c ON dc.id_compra = c.id_compra
+    JOIN productos p ON dc.id_producto = p.id_producto
+    JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor
+    ORDER BY c.fecha DESC
+");
+$compras = $stmtCompras->fetchAll();
+
+$DATA_DB = [
+    'ventas' => $ventas ?: [],
+    'productos' => $productos ?: [],
+    'inventario' => $inventario ?: [],
+    'compras' => $compras ?: []
+];
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes | Liquour</title>
+    <link rel="stylesheet" href="../../../Assets/CSS/nav.css">
+    <link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
 </head>
 <body>
 
-<?php include '../../Layout/header_admin.php'; ?>
+<?php @include '../../Layout/nav_admin.php'; ?> 
 
 <div class="page">
-
   <div class="section-heading">Seleccionar Reporte</div>
 
   <div class="tab-bar" id="tabBar">
@@ -25,10 +89,10 @@
   </div>
 
   <div class="summary-row" id="summaryRow">
-    <div class="sum-card"><div class="sum-lbl">Total Ventas</div><div class="sum-val"><span>$</span>4,218.00</div></div>
-    <div class="sum-card"><div class="sum-lbl">Transacciones</div><div class="sum-val">24</div></div>
-    <div class="sum-card"><div class="sum-lbl">Promedio / Venta</div><div class="sum-val"><span>$</span>175.75</div></div>
-    <div class="sum-card"><div class="sum-lbl">Vendedores</div><div class="sum-val">3</div></div>
+    <div class="sum-card"><div class="sum-lbl">Total Ventas</div><div class="sum-val"><span>$</span><?php echo number_format($totalVentas, 2); ?></div></div>
+    <div class="sum-card"><div class="sum-lbl">Transacciones</div><div class="sum-val"><?php echo $transacciones; ?></div></div>
+    <div class="sum-card"><div class="sum-lbl">Promedio / Venta</div><div class="sum-val"><span>$</span><?php echo number_format($promedio, 2); ?></div></div>
+    <div class="sum-card"><div class="sum-lbl">Vendedores</div><div class="sum-val"><?php echo $vendedores; ?></div></div>
   </div>
 
   <div class="table-card">
@@ -37,13 +101,13 @@
         <input class="search-input" type="text" placeholder="Buscar…" id="searchInput" />
         <select class="filter-select" id="vendorFilter">
           <option value="">Todos los vendedores</option>
-          <option value="Juan Perez">Juan Perez</option>
-          <option value="Marp Perez">Marp Perez</option>
-          <option value="Vendedor">Vendedor</option>
+          <?php foreach($listaVendedores as $v): ?>
+            <option value="<?php echo htmlspecialchars($v['nombre']); ?>"><?php echo htmlspecialchars($v['nombre']); ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       <div class="toolbar-right">
-        <span class="record-count" id="recordCount">Mostrando 7 registros</span>
+        <span class="record-count" id="recordCount">Mostrando 0 registros</span>
         <button class="export-btn">↓ Exportar CSV</button>
       </div>
     </div>
@@ -52,13 +116,13 @@
       <table id="mainTable">
         <thead>
           <tr>
-            <th data-col="fecha">Fecha de Venta <span class="sort-icon">↕</span></th>
-            <th data-col="id">ID del Cliente <span class="sort-icon">↕</span></th>
+            <th data-col="fecha">Fecha <span class="sort-icon">↕</span></th>
+            <th data-col="id">ID / Código <span class="sort-icon">↕</span></th>
             <th data-col="producto">Producto <span class="sort-icon">↕</span></th>
             <th data-col="cantidad" style="text-align:center">Cantidad <span class="sort-icon">↕</span></th>
-            <th data-col="precio">Precio Unitario <span class="sort-icon">↕</span></th>
+            <th data-col="precio">Precio <span class="sort-icon">↕</span></th>
             <th data-col="subtotal">Subtotal <span class="sort-icon">↕</span></th>
-            <th data-col="vendedor">Vendedor <span class="sort-icon">↕</span></th>
+            <th data-col="vendedor">Usuario / Relación <span class="sort-icon">↕</span></th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -66,51 +130,14 @@
     </div>
 
     <div class="pagination">
-      <div class="page-info" id="pageInfo">Página 1 de 2</div>
+      <div class="page-info" id="pageInfo">Página 1 de 1</div>
       <div class="page-btns" id="pageBtns"></div>
     </div>
   </div>
-
 </div>
 
 <script>
-const DATA = {
-  ventas: [
-    { fecha:'2024-12-24', id:'20001', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$139.00', subtotal:'$348.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-24', id:'20002', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$159.00', subtotal:'$190.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-24', id:'20003', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$190.00', subtotal:'$190.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-24', id:'20004', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$228.00', subtotal:'$238.00', vendedor:'Marp Perez' },
-    { fecha:'2024-12-24', id:'20005', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$570.00', subtotal:'$700.00', vendedor:'Vendedor' },
-    { fecha:'2024-12-24', id:'20007', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$270.00', subtotal:'$700.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-24', id:'20008', producto:'VINO TINTO RESERVA', cantidad:1, precio:'$118.00', subtotal:'$118.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-23', id:'19990', producto:'WHISKY SINGLE MALT', cantidad:2, precio:'$95.00',  subtotal:'$190.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-23', id:'19991', producto:'RON AÑEJO 12 AÑOS',  cantidad:1, precio:'$65.00',  subtotal:'$65.00',  vendedor:'Marp Perez' },
-    { fecha:'2024-12-22', id:'19980', producto:'CHAMPAGNE BRUT',     cantidad:3, precio:'$55.00',  subtotal:'$165.00', vendedor:'Vendedor' },
-    { fecha:'2024-12-22', id:'19981', producto:'VODKA PREMIUM',      cantidad:2, precio:'$48.00',  subtotal:'$96.00',  vendedor:'Juan Perez' },
-    { fecha:'2024-12-21', id:'19970', producto:'GIN BOTANICO',       cantidad:1, precio:'$72.00',  subtotal:'$72.00',  vendedor:'Marp Perez' },
-  ],
-  productos: [
-    { fecha:'2024-12-24', id:'P001', producto:'VINO TINTO RESERVA',  cantidad:7, precio:'$190.00', subtotal:'$1,330.00', vendedor:'Juan Perez' },
-    { fecha:'2024-12-23', id:'P002', producto:'WHISKY SINGLE MALT',  cantidad:5, precio:'$95.00',  subtotal:'$475.00',  vendedor:'Juan Perez' },
-    { fecha:'2024-12-22', id:'P003', producto:'RON AÑEJO 12 AÑOS',   cantidad:4, precio:'$65.00',  subtotal:'$260.00',  vendedor:'Marp Perez' },
-    { fecha:'2024-12-21', id:'P004', producto:'CHAMPAGNE BRUT',      cantidad:3, precio:'$55.00',  subtotal:'$165.00',  vendedor:'Vendedor' },
-    { fecha:'2024-12-20', id:'P005', producto:'VODKA PREMIUM',       cantidad:2, precio:'$48.00',  subtotal:'$96.00',   vendedor:'Juan Perez' },
-  ],
-  inventario: [
-    { fecha:'2024-12-24', id:'INV01', producto:'VINO TINTO RESERVA',  cantidad:42, precio:'$139.00', subtotal:'$5,838.00', vendedor:'Bodega A' },
-    { fecha:'2024-12-24', id:'INV02', producto:'WHISKY SINGLE MALT',  cantidad:18, precio:'$95.00',  subtotal:'$1,710.00', vendedor:'Bodega B' },
-    { fecha:'2024-12-24', id:'INV03', producto:'RON AÑEJO 12 AÑOS',   cantidad:8,  precio:'$65.00',  subtotal:'$520.00',   vendedor:'Bodega A' },
-    { fecha:'2024-12-24', id:'INV04', producto:'CHAMPAGNE BRUT',      cantidad:66, precio:'$55.00',  subtotal:'$3,630.00', vendedor:'Bodega C' },
-    { fecha:'2024-12-24', id:'INV05', producto:'VODKA PREMIUM',       cantidad:6,  precio:'$48.00',  subtotal:'$288.00',   vendedor:'Bodega B' },
-    { fecha:'2024-12-24', id:'INV06', producto:'GIN BOTANICO',        cantidad:11, precio:'$72.00',  subtotal:'$792.00',   vendedor:'Bodega A' },
-  ],
-  compras: [
-    { fecha:'2024-12-20', id:'C001', producto:'VINO TINTO RESERVA',  cantidad:50, precio:'$110.00', subtotal:'$5,500.00', vendedor:'Proveedor A' },
-    { fecha:'2024-12-18', id:'C002', producto:'WHISKY SINGLE MALT',  cantidad:24, precio:'$80.00',  subtotal:'$1,920.00', vendedor:'Proveedor B' },
-    { fecha:'2024-12-15', id:'C003', producto:'CHAMPAGNE BRUT',      cantidad:72, precio:'$40.00',  subtotal:'$2,880.00', vendedor:'Proveedor C' },
-    { fecha:'2024-12-10', id:'C004', producto:'VODKA PREMIUM',       cantidad:20, precio:'$35.00',  subtotal:'$700.00',   vendedor:'Proveedor A' },
-  ]
-};
+const DATA = <?php echo json_encode($DATA_DB); ?>;
 
 const ROWS_PER_PAGE = 7;
 let currentTab    = 'ventas';
@@ -121,6 +148,7 @@ let searchTerm    = '';
 let vendorFilter  = '';
 
 function initials(name) {
+  if (!name || name === '-') return '-';
   return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
 }
 
@@ -152,17 +180,21 @@ function render() {
   const slice = rows.slice((currentPage-1)*ROWS_PER_PAGE, currentPage*ROWS_PER_PAGE);
 
   const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = slice.map(r => `
-    <tr>
-      <td class="td-date">${r.fecha}</td>
-      <td class="td-id">${r.id}</td>
-      <td class="td-prod">${r.producto}</td>
-      <td class="td-qty" style="text-align:center">${r.cantidad}</td>
-      <td class="td-price">${r.precio}</td>
-      <td class="td-sub">${r.subtotal}</td>
-      <td><div class="td-vendor"><div class="vendor-av">${initials(r.vendedor)}</div>${r.vendedor}</div></td>
-    </tr>
-  `).join('');
+  if (slice.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">No hay datos registrados.</td></tr>`;
+  } else {
+      tbody.innerHTML = slice.map(r => `
+        <tr>
+          <td class="td-date">${r.fecha || '-'}</td>
+          <td class="td-id">${r.id || '-'}</td>
+          <td class="td-prod">${r.producto || '-'}</td>
+          <td class="td-qty" style="text-align:center">${r.cantidad || '0'}</td>
+          <td class="td-price">${r.precio || '$0.00'}</td>
+          <td class="td-sub">${r.subtotal || '$0.00'}</td>
+          <td><div class="td-vendor"><div class="vendor-av">${initials(r.vendedor)}</div>${r.vendedor || '-'}</div></td>
+        </tr>
+      `).join('');
+  }
 
   document.getElementById('recordCount').textContent = `Mostrando ${total} registro${total!==1?'s':''}`;
   document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${pages}`;

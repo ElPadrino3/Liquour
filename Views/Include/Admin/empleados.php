@@ -77,7 +77,7 @@ $bdd->desconectar();
 </head>
 <body>
 
-<?php @include '../../../Layout/nav_admin.php'; ?> 
+<?php @include '../../Layout/nav_admin.php'; ?> 
 <?php @include '../../../Layout/header_admin.php'; ?>
 
 <div id="modalNewEmp" class="modal-overlay" style="display: none;">

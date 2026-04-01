@@ -1,7 +1,63 @@
 <?php
-$rol = 'admin';
-$nombre = "Tu Nombre";
-$avatar = "https://ui-avatars.com/api/?name=Tu+Nombre&background=C5A059&color=1A1A1A&size=128";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '../../../Config/Liquour_bdd.php';
+$db = new BDD();
+$conexion = $db->conectar();
+
+$rol = $_SESSION['rol'] ?? 'empleado';
+$nombre = $_SESSION['nombre'] ?? 'Usuario';
+$id_usuario = $_SESSION['id_usuario'] ?? 0;
+
+$nombre_url = urlencode($nombre);
+$avatar = "https://ui-avatars.com/api/?name={$nombre_url}&background=C5A059&color=1A1A1A&size=128";
+
+$admin_ventas_mes = 0;
+$admin_inventario = 0;
+$admin_alertas = 0;
+
+$emp_caja_hoy = 0;
+$emp_tickets = 0;
+$emp_articulos = 0;
+
+if ($rol === 'admin') {
+    $stmtVentas = $conexion->query("SELECT IFNULL(SUM(total), 0) as total FROM ventas WHERE MONTH(fecha) = MONTH(CURRENT_DATE()) AND YEAR(fecha) = YEAR(CURRENT_DATE())");
+    $admin_ventas_mes = $stmtVentas->fetch()['total'];
+
+    $stmtInv = $conexion->query("SELECT IFNULL(SUM(stock), 0) as total FROM productos WHERE estado = 1");
+    $admin_inventario = $stmtInv->fetch()['total'];
+
+    $stmtAlertas = $conexion->query("SELECT COUNT(id_producto) as total FROM productos WHERE stock <= 10 AND estado = 1");
+    $admin_alertas = $stmtAlertas->fetch()['total'];
+    
+    $meta_mensual_admin = 20000; 
+    $pct_meta = min(100, round(($admin_ventas_mes / $meta_mensual_admin) * 100));
+    
+    $meta_stock = 1500;
+    $pct_stock = min(100, round(($admin_inventario / $meta_stock) * 100));
+    
+    $pct_crecimiento = 92; 
+    
+} else {
+    $stmtCaja = $conexion->prepare("SELECT IFNULL(SUM(total), 0) as total, COUNT(id_venta) as tickets FROM ventas WHERE DATE(fecha) = CURRENT_DATE() AND id_usuario = ?");
+    $stmtCaja->execute([$id_usuario]);
+    $rowCaja = $stmtCaja->fetch();
+    $emp_caja_hoy = $rowCaja['total'];
+    $emp_tickets = $rowCaja['tickets'];
+
+    $stmtArt = $conexion->prepare("SELECT IFNULL(SUM(dv.cantidad), 0) as total FROM detalle_ventas dv JOIN ventas v ON dv.id_venta = v.id_venta WHERE DATE(v.fecha) = CURRENT_DATE() AND v.id_usuario = ?");
+    $stmtArt->execute([$id_usuario]);
+    $emp_articulos = $stmtArt->fetch()['total'];
+    
+    $meta_diaria_emp = 1000;
+    $pct_meta_diaria = min(100, round(($emp_caja_hoy / $meta_diaria_emp) * 100));
+    
+    $pct_efectividad = $emp_tickets > 0 ? min(100, round(($emp_articulos / ($emp_tickets * 2)) * 100)) : 0;
+    
+    $pct_puntualidad = 100;
+}
 ?>
 <link rel="stylesheet" href="../../../Assets/CSS/perfil.css">
 
@@ -14,7 +70,7 @@ $avatar = "https://ui-avatars.com/api/?name=Tu+Nombre&background=C5A059&color=1A
     </div>
     
     <div class="liquour-info">
-        <h2><?php echo $nombre; ?></h2>
+        <h2><?php echo htmlspecialchars($nombre); ?></h2>
         <?php if ($rol === 'admin') { ?>
             <p class="rango">Gerente de la Licorería</p>
         <?php } else { ?>
@@ -25,29 +81,29 @@ $avatar = "https://ui-avatars.com/api/?name=Tu+Nombre&background=C5A059&color=1A
     <div class="liquour-stats">
         <?php if ($rol === 'admin') { ?>
             <div class="stat-box">
-                <h3>$15,420</h3>
+                <h3>$<?php echo number_format($admin_ventas_mes, 2); ?></h3>
                 <span>Ventas Mes</span>
             </div>
             <div class="stat-box">
-                <h3>842</h3>
-                <span>Inventario</span>
+                <h3><?php echo number_format($admin_inventario); ?></h3>
+                <span>Stock Inventario</span>
             </div>
             <div class="stat-box">
-                <h3>3</h3>
-                <span>Alertas</span>
+                <h3><?php echo $admin_alertas; ?></h3>
+                <span>Alertas Stock Bajo</span>
             </div>
         <?php } else { ?>
             <div class="stat-box">
-                <h3>$850</h3>
+                <h3>$<?php echo number_format($emp_caja_hoy, 2); ?></h3>
                 <span>Caja Hoy</span>
             </div>
             <div class="stat-box">
-                <h3>42</h3>
-                <span>Tickets</span>
+                <h3><?php echo $emp_tickets; ?></h3>
+                <span>Tickets de Hoy</span>
             </div>
             <div class="stat-box">
-                <h3>38</h3>
-                <span>Clientes</span>
+                <h3><?php echo $emp_articulos; ?></h3>
+                <span>Artículos Vendidos</span>
             </div>
         <?php } ?>
     </div>
@@ -57,56 +113,56 @@ $avatar = "https://ui-avatars.com/api/?name=Tu+Nombre&background=C5A059&color=1A
             <div class="chart-container">
                 <div class="chart-label">
                     <span>Meta Mensual</span>
-                    <span>85%</span>
+                    <span><?php echo $pct_meta; ?>%</span>
                 </div>
                 <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" data-width="85%"></div>
+                    <div class="chart-bar-fill"></div>
                 </div>
             </div>
             <div class="chart-container">
                 <div class="chart-label">
                     <span>Stock Licores</span>
-                    <span>60%</span>
+                    <span><?php echo $pct_stock; ?>%</span>
                 </div>
                 <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" data-width="60%"></div>
+                    <div class="chart-bar-fill"></div>
                 </div>
             </div>
             <div class="chart-container">
                 <div class="chart-label">
                     <span>Crecimiento</span>
-                    <span>92%</span>
+                    <span><?php echo $pct_crecimiento; ?>%</span>
                 </div>
                 <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" data-width="92%"></div>
+                    <div class="chart-bar-fill"></div>
                 </div>
             </div>
         <?php } else { ?>
             <div class="chart-container">
                 <div class="chart-label">
                     <span>Meta Diaria</span>
-                    <span>75%</span>
+                    <span><?php echo $pct_meta_diaria; ?>%</span>
                 </div>
                 <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" data-width="75%"></div>
+                    <div class="chart-bar-fill"></div>
                 </div>
             </div>
             <div class="chart-container">
                 <div class="chart-label">
                     <span>Efectividad</span>
-                    <span>90%</span>
+                    <span><?php echo $pct_efectividad; ?>%</span>
                 </div>
                 <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" data-width="90%"></div>
+                    <div class="chart-bar-fill"></div>
                 </div>
             </div>
             <div class="chart-container">
                 <div class="chart-label">
                     <span>Puntualidad</span>
-                    <span>100%</span>
+                    <span><?php echo $pct_puntualidad; ?>%</span>
                 </div>
                 <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" data-width="100%"></div>
+                    <div class="chart-bar-fill"></div>
                 </div>
             </div>
         <?php } ?>
@@ -117,4 +173,10 @@ $avatar = "https://ui-avatars.com/api/?name=Tu+Nombre&background=C5A059&color=1A
     </div>
 </div>
 
-<script src="../../Assets/JS/perfil.js"></script>
+<div id="logout-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(13,13,13,0.95); z-index:10000; flex-direction:column; align-items:center; justify-content:center; color:#C5A059; font-family:'Montserrat',sans-serif;">
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.8/dist/dotlottie-wc.js" type="module"></script>
+    <dotlottie-wc src="https://lottie.host/740a259b-34b2-405b-bc0e-19202def1508/hkqFNkkmGo.lottie" style="width: 300px; height: 300px" autoplay loop></dotlottie-wc>
+    <h3 style="margin-top:-20px; letter-spacing:2px; text-transform:uppercase;">Cerrando Turno...</h3>
+</div>
+
+<script src="../../../Assets/JS/perfil.js"></script>

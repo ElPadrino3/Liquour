@@ -1,13 +1,81 @@
-<?php include '../../Layout/nav_admin.php'; ?> 
+<?php
+require_once '../../../Config/Liquour_bdd.php';
 
-<link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../../../Assets/CSS/style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+$db = new BDD();
+$conexion = $db->conectar();
+
+$stmtKpi = $conexion->query("
+    SELECT 
+        IFNULL(SUM(total), 0) as total_mes, 
+        COUNT(id_compra) as ordenes_mes,
+        IFNULL(AVG(total), 0) as promedio_mes
+    FROM compras 
+    WHERE MONTH(fecha) = MONTH(CURRENT_DATE()) AND YEAR(fecha) = YEAR(CURRENT_DATE())
+");
+$kpi = $stmtKpi->fetch();
+
+$stmtProv = $conexion->query("
+    SELECT 
+        (SELECT COUNT(*) FROM proveedores WHERE estado = 1) as activos,
+        (SELECT COUNT(*) FROM proveedores) as totales
+");
+$provKpi = $stmtProv->fetch();
+
+$stmtTopProv = $conexion->query("
+    SELECT prov.nombre, COUNT(DISTINCT c.id_compra) as ordenes, SUM(dc.subtotal) as total_comprado 
+    FROM detalle_compras dc 
+    JOIN compras c ON dc.id_compra = c.id_compra 
+    JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor 
+    GROUP BY prov.id_proveedor 
+    ORDER BY total_comprado DESC LIMIT 4
+");
+$topProveedores = $stmtTopProv->fetchAll();
+
+$chartData = array_fill(0, 12, 0);
+$stmtChart = $conexion->query("
+    SELECT MONTH(fecha) as mes, SUM(total) as total_mes 
+    FROM compras 
+    WHERE YEAR(fecha) = YEAR(CURRENT_DATE()) 
+    GROUP BY MONTH(fecha)
+");
+while($row = $stmtChart->fetch()) {
+    $chartData[$row['mes'] - 1] = (float)$row['total_mes'];
+}
+
+$stmtOrders = $conexion->query("
+    SELECT 
+        CONCAT('ORD-', c.id_compra) as orden,
+        DATE(c.fecha) as fecha,
+        prov.nombre as proveedor,
+        p.nombre as producto,
+        dc.cantidad as qty,
+        CONCAT('$', FORMAT(dc.precio_compra, 2)) as precio,
+        CONCAT('$', FORMAT(dc.subtotal, 2)) as total,
+        'Recibido' as estado 
+    FROM detalle_compras dc
+    JOIN compras c ON dc.id_compra = c.id_compra
+    JOIN productos p ON dc.id_producto = p.id_producto
+    JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor
+    ORDER BY c.fecha DESC
+");
+$ordersData = $stmtOrders->fetchAll();
+
+$proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Compras | Liquour</title>
+    <link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../../../Assets/CSS/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<?php @include '../../../Layout/nav_admin.php'; ?> 
+<?php @include '../../Layout/nav_admin.php'; ?> 
 
 <div class="page">
 
@@ -16,25 +84,25 @@
   <div class="kpi-row">
     <div class="kpi">
       <div class="kpi-lbl">Total Comprado (Mes)</div>
-      <div class="kpi-val"><sup>$</sup>18,450.00</div>
-      <div class="kpi-sub">32 órdenes este mes</div>
-      <div class="kpi-tag">↑ 14% vs anterior</div>
+      <div class="kpi-val"><sup>$</sup><?php echo number_format($kpi['total_mes'], 2); ?></div>
+      <div class="kpi-sub"><?php echo $kpi['ordenes_mes']; ?> órdenes este mes</div>
+      <div class="kpi-tag">Actualizado</div>
     </div>
     <div class="kpi">
       <div class="kpi-lbl">Órdenes Pendientes</div>
-      <div class="kpi-val">7</div>
+      <div class="kpi-val">0</div>
       <div class="kpi-sub">En espera de entrega</div>
       <div class="kpi-tag warn">Revisar</div>
     </div>
     <div class="kpi">
       <div class="kpi-lbl">Proveedores Activos</div>
-      <div class="kpi-val">5</div>
-      <div class="kpi-sub">De 8 registrados</div>
-      <div class="kpi-tag">↑ 1 nuevo</div>
+      <div class="kpi-val"><?php echo $provKpi['activos']; ?></div>
+      <div class="kpi-sub">De <?php echo $provKpi['totales']; ?> registrados</div>
+      <div class="kpi-tag">Sistema</div>
     </div>
     <div class="kpi">
       <div class="kpi-lbl">Promedio por Orden</div>
-      <div class="kpi-val"><sup>$</sup>576.56</div>
+      <div class="kpi-val"><sup>$</sup><?php echo number_format($kpi['promedio_mes'], 2); ?></div>
       <div class="kpi-sub">Basado en este mes</div>
       <div class="kpi-tag">Estable</div>
     </div>
@@ -55,34 +123,17 @@
         <button class="card-action">Ver todos</button>
       </div>
       <div class="prov-list">
+        <?php foreach($topProveedores as $prov): 
+            $iniciales = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $prov['nombre']), 0, 2));
+        ?>
         <div class="prov-item">
           <div class="prov-left">
-            <div class="prov-av">VA</div>
-            <div><div class="prov-name">Viñas Andinas</div><div class="prov-cat">Vinos · Champagnes</div></div>
+            <div class="prov-av"><?php echo htmlspecialchars($iniciales); ?></div>
+            <div><div class="prov-name"><?php echo htmlspecialchars($prov['nombre']); ?></div><div class="prov-cat">Proveedor</div></div>
           </div>
-          <div class="prov-right"><div class="prov-total">$6,200</div><div class="prov-orders">12 órdenes</div></div>
+          <div class="prov-right"><div class="prov-total">$<?php echo number_format($prov['total_comprado'], 2); ?></div><div class="prov-orders"><?php echo $prov['ordenes']; ?> órdenes</div></div>
         </div>
-        <div class="prov-item">
-          <div class="prov-left">
-            <div class="prov-av">DS</div>
-            <div><div class="prov-name">Destilados Sur</div><div class="prov-cat">Whisky · Ron · Gin</div></div>
-          </div>
-          <div class="prov-right"><div class="prov-total">$4,850</div><div class="prov-orders">9 órdenes</div></div>
-        </div>
-        <div class="prov-item">
-          <div class="prov-left">
-            <div class="prov-av">PI</div>
-            <div><div class="prov-name">Premiums Import</div><div class="prov-cat">Vodka · Tequila</div></div>
-          </div>
-          <div class="prov-right"><div class="prov-total">$3,900</div><div class="prov-orders">7 órdenes</div></div>
-        </div>
-        <div class="prov-item">
-          <div class="prov-left">
-            <div class="prov-av">CB</div>
-            <div><div class="prov-name">Cerveza Brava</div><div class="prov-cat">Cervezas · Sidras</div></div>
-          </div>
-          <div class="prov-right"><div class="prov-total">$2,100</div><div class="prov-orders">4 órdenes</div></div>
-        </div>
+        <?php endforeach; ?>
       </div>
     </div>
   </div>
@@ -99,10 +150,9 @@
         </select>
         <select class="filter-select" id="provFilter">
           <option value="">Todos los proveedores</option>
-          <option value="Viñas Andinas">Viñas Andinas</option>
-          <option value="Destilados Sur">Destilados Sur</option>
-          <option value="Premiums Import">Premiums Import</option>
-          <option value="Cerveza Brava">Cerveza Brava</option>
+          <?php foreach($proveedoresFiltro as $pf): ?>
+            <option value="<?php echo htmlspecialchars($pf); ?>"><?php echo htmlspecialchars($pf); ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       <button class="export-btn">↓ Exportar CSV</button>
@@ -125,7 +175,7 @@
       </table>
     </div>
     <div class="pagination">
-      <div class="page-info" id="pageInfo">Página 1 de 2</div>
+      <div class="page-info" id="pageInfo">Página 1 de 1</div>
       <div class="page-btns" id="pageBtns"></div>
     </div>
   </div>
@@ -133,20 +183,8 @@
 </div>
 
 <script>
-const ORDERS = [
-  { orden:'ORD-1001', fecha:'2024-12-24', proveedor:'Viñas Andinas',    producto:'Vino Tinto Reserva',  qty:50, precio:'$110.00', total:'$5,500.00', estado:'Recibido'  },
-  { orden:'ORD-1002', fecha:'2024-12-22', proveedor:'Destilados Sur',   producto:'Whisky Single Malt',  qty:24, precio:'$80.00',  total:'$1,920.00', estado:'Recibido'  },
-  { orden:'ORD-1003', fecha:'2024-12-20', proveedor:'Viñas Andinas',    producto:'Champagne Brut',      qty:72, precio:'$40.00',  total:'$2,880.00', estado:'Recibido'  },
-  { orden:'ORD-1004', fecha:'2024-12-19', proveedor:'Premiums Import',  producto:'Vodka Premium',       qty:20, precio:'$35.00',  total:'$700.00',   estado:'Pendiente' },
-  { orden:'ORD-1005', fecha:'2024-12-18', proveedor:'Destilados Sur',   producto:'Ron Añejo 12 Años',   qty:18, precio:'$55.00',  total:'$990.00',   estado:'Recibido'  },
-  { orden:'ORD-1006', fecha:'2024-12-17', proveedor:'Premiums Import',  producto:'Tequila Reposado',    qty:12, precio:'$62.00',  total:'$744.00',   estado:'Pendiente' },
-  { orden:'ORD-1007', fecha:'2024-12-16', proveedor:'Cerveza Brava',    producto:'Cerveza Artesanal',   qty:96, precio:'$8.00',   total:'$768.00',   estado:'Recibido'  },
-  { orden:'ORD-1008', fecha:'2024-12-15', proveedor:'Destilados Sur',   producto:'Gin Botánico',        qty:15, precio:'$58.00',  total:'$870.00',   estado:'Pendiente' },
-  { orden:'ORD-1009', fecha:'2024-12-13', proveedor:'Viñas Andinas',    producto:'Vino Blanco Reserva', qty:30, precio:'$95.00',  total:'$2,850.00', estado:'Cancelado' },
-  { orden:'ORD-1010', fecha:'2024-12-10', proveedor:'Premiums Import',  producto:'Whisky Japonés',      qty:8,  precio:'$120.00', total:'$960.00',   estado:'Pendiente' },
-  { orden:'ORD-1011', fecha:'2024-12-08', proveedor:'Cerveza Brava',    producto:'Sidra Premium',       qty:48, precio:'$12.00',  total:'$576.00',   estado:'Recibido'  },
-  { orden:'ORD-1012', fecha:'2024-12-05', proveedor:'Destilados Sur',   producto:'Mezcal Artesanal',    qty:10, precio:'$85.00',  total:'$850.00',   estado:'Cancelado' }
-];
+const ORDERS = <?php echo json_encode($ordersData); ?>;
+const CHART_DATA = <?php echo json_encode($chartData); ?>;
 
 const ROWS = 7;
 let page = 1, search = '', statusF = '', provF = '';
@@ -167,17 +205,22 @@ function render() {
   if (page > pages) page = 1;
   const slice = rows.slice((page-1)*ROWS, page*ROWS);
 
-  document.getElementById('tableBody').innerHTML = slice.map(r => `
-    <tr>
-      <td class="td-id">${r.orden}</td>
-      <td class="td-date">${r.fecha}</td>
-      <td>${r.proveedor}</td>
-      <td style="color:var(--cream);font-weight:500">${r.producto}</td>
-      <td style="text-align:center">${r.qty}</td>
-      <td>${r.precio}</td>
-      <td class="td-price">${r.total}</td>
-      <td><span class="badge ${BADGE[r.estado]}">${r.estado}</span></td>
-    </tr>`).join('');
+  const tbody = document.getElementById('tableBody');
+  if(slice.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">No hay compras registradas.</td></tr>';
+  } else {
+      tbody.innerHTML = slice.map(r => `
+        <tr>
+          <td class="td-id">${r.orden}</td>
+          <td class="td-date">${r.fecha}</td>
+          <td>${r.proveedor}</td>
+          <td style="color:var(--cream);font-weight:500">${r.producto}</td>
+          <td style="text-align:center">${r.qty}</td>
+          <td>${r.precio}</td>
+          <td class="td-price">${r.total}</td>
+          <td><span class="badge ${BADGE[r.estado] || 'badge-ok'}">${r.estado}</span></td>
+        </tr>`).join('');
+  }
 
   document.getElementById('pageInfo').textContent = `Página ${page} de ${pages}`;
 
@@ -208,7 +251,7 @@ new Chart(document.getElementById('comprasChart'),{
     labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
     datasets:[{
       label:'Compras',
-      data:[9200,8400,11000,10200,13500,12100,14800,13200,15600,16100,17200,18450],
+      data: CHART_DATA,
       backgroundColor:'rgba(197,160,89,.22)',borderColor:'#C5A059',borderWidth:1,borderRadius:4
     }]
   },
