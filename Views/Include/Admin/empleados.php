@@ -74,6 +74,67 @@ $bdd->desconectar();
     <link rel="stylesheet" href="../../../Assets/CSS/nav.css">
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
     <link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
+
+    <style>
+      .estado-switch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 56px;
+        height: 30px;
+      }
+
+      .switch input {
+        display: none;
+      }
+
+      .slider {
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
+        border-radius: 999px;
+        background: #111111;
+        border: 2px solid #111111;
+        transition: all 0.25s ease;
+      }
+
+      .slider::before {
+        content: "";
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        left: 3px;
+        top: 2px;
+        border-radius: 50%;
+        background: #f2deb0;
+        transition: all 0.25s ease;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+      }
+
+      .switch input:checked + .slider {
+        background: #39b51f;
+        border-color: #39b51f;
+      }
+
+      .switch input:checked + .slider::before {
+        transform: translateX(26px);
+      }
+
+      .switch.switch-red .slider {
+        background: #8b0000;
+        border-color: #8b0000;
+      }
+
+      .estado-on,
+      .estado-off {
+        display: none !important;
+      }
+    </style>
 </head>
 <body>
 
@@ -155,14 +216,21 @@ $bdd->desconectar();
     <div class="emp-grid">
       <?php foreach (array_slice($empleados, 0, 6) as $emp): 
             $iniciales = strtoupper(substr($emp['nombre'], 0, 2));
-            $claseEstado = $emp['estado'] ? 'active' : 'inactive';
-            $textoEstado = $emp['estado'] ? 'Activo' : 'Inactivo';
       ?>
       <div class="emp-card">
         <div class="emp-avatar"><?= $iniciales ?></div>
         <div class="emp-name"><?= htmlspecialchars($emp['nombre']) ?></div>
         <div class="emp-role" style="text-transform: capitalize;"><?= htmlspecialchars($emp['rol']) ?></div>
-        <div class="status-pill <?= $claseEstado ?>"><?= $textoEstado ?></div>
+
+        <div style="margin-bottom: 10px;">
+          <span class="estado-switch">
+            <label class="switch <?= $emp['estado'] ? '' : 'switch-red' ?>">
+              <input type="checkbox" data-id="<?= $emp['id_usuario'] ?>" <?= $emp['estado'] ? 'checked' : '' ?>>
+              <span class="slider"></span>
+            </label>
+          </span>
+        </div>
+
         <div class="emp-stats">
           <div><div class="emp-stat-lbl">Ventas</div><div class="emp-stat-val">$<?= number_format($emp['total_ventas'], 2) ?></div></div>
           <div><div class="emp-stat-lbl">Órdenes</div><div class="emp-stat-val"><?= $emp['total_ordenes'] ?></div></div>
@@ -221,7 +289,6 @@ $bdd->desconectar();
           <option value="0">Inactivo</option>
         </select>
       </div>
-      <button class="add-btn btn-open-modal">+ Nuevo Empleado</button>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -247,23 +314,49 @@ $bdd->desconectar();
 const dbEmpleados = <?= $empleadosJSON ?>;
 const maxVentasGbl = <?= ($mejorVendedorVentas > 0) ? $mejorVendedorVentas : 1 ?>;
 
-const SBADGE = { '1':'active', '0':'inactive' };
-const SLBL   = { '1':'Activo', '0':'Inactivo' };
-
 function initials(n){ return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 
-let search='', roleF='', statusF='';
+let search = '', roleF = '', statusF = '';
 
-function filtered(){
-  return dbEmpleados.filter(r=>{
+function estadoSwitchHTML(estado, id) {
+  const activo = estado == 1;
+
+  return `
+    <span class="estado-switch">
+      <label class="switch ${activo ? '' : 'switch-red'}">
+        <input type="checkbox" data-id="${id}" ${activo ? 'checked' : ''}>
+        <span class="slider"></span>
+      </label>
+    </span>
+  `;
+}
+
+function filtered() {
+  return dbEmpleados.filter(r => {
     const q = search.toLowerCase();
     const m = !q || r.nombre.toLowerCase().includes(q) || r.rol.toLowerCase().includes(q);
-    return m && (!roleF||r.rol===roleF) && (!statusF||String(r.estado)===statusF);
+    return m && (!roleF || r.rol === roleF) && (!statusF || String(r.estado) === statusF);
   });
 }
 
-function render(){
-  document.getElementById('tableBody').innerHTML = filtered().map(r=>{
+function activarSwitches() {
+  const switches = document.querySelectorAll('.switch input');
+
+  switches.forEach((sw) => {
+    sw.addEventListener('change', function () {
+      const label = this.closest('.switch');
+
+      if (this.checked) {
+        label.classList.remove('switch-red');
+      } else {
+        label.classList.add('switch-red');
+      }
+    });
+  });
+}
+
+function render() {
+  document.getElementById('tableBody').innerHTML = filtered().map(r => {
       let pct = (r.total_ventas / maxVentasGbl) * 100;
       return `
     <tr>
@@ -282,16 +375,22 @@ function render(){
           <div class="prog-bg"><div class="prog-fg" style="width:${pct}%"></div></div>
         </div>
       </td>
-      <td><span class="badge status-pill ${SBADGE[r.estado]}">${SLBL[r.estado]}</span></td>
-    </tr>`}).join('');
+      <td>${estadoSwitchHTML(r.estado, r.id_usuario)}</td>
+    </tr>`;
+  }).join('');
+
+  activarSwitches();
 }
 
-document.getElementById('searchInput').addEventListener('input', e=>{search=e.target.value;render();});
-document.getElementById('roleFilter').addEventListener('change', e=>{roleF=e.target.value;render();});
-document.getElementById('statusFilter').addEventListener('change', e=>{statusF=e.target.value;render();});
+document.getElementById('searchInput').addEventListener('input', e => { search = e.target.value; render(); });
+document.getElementById('roleFilter').addEventListener('change', e => { roleF = e.target.value; render(); });
+document.getElementById('statusFilter').addEventListener('change', e => { statusF = e.target.value; render(); });
+
 render();
 
-Chart.defaults.color='#4A4A4A'; Chart.defaults.font.family='Montserrat'; Chart.defaults.font.size=10;
+Chart.defaults.color = '#4A4A4A';
+Chart.defaults.font.family = 'Montserrat';
+Chart.defaults.font.size = 10;
 
 const topNombres = dbEmpleados.slice(0, 7).map(e => e.nombre.split(' ')[0]);
 const topVentasData = dbEmpleados.slice(0, 7).map(e => e.total_ventas);
@@ -303,7 +402,9 @@ new Chart(document.getElementById('empChart'),{
     datasets:[{
       data: topVentasData.length > 0 ? topVentasData : [0],
       backgroundColor:'rgba(197,160,89,.2)',
-      borderColor:'#C5A059',borderWidth:1,borderRadius:5
+      borderColor:'#C5A059',
+      borderWidth:1,
+      borderRadius:5
     }]
   },
   options:{
