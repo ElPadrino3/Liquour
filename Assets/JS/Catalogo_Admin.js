@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-    // ===== MODAL COMPRA =====
     const modalCompra = document.getElementById('modal-comprar-producto');
 
     window.onclick = (e) => {
@@ -9,31 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ===== SWITCH ACTIVO / INACTIVO =====
     const switches = document.querySelectorAll('.switch input');
 
     switches.forEach((sw) => {
         sw.addEventListener('change', function () {
-
             const estado = this.checked ? 1 : 0;
             const id = this.dataset.id;
 
             console.log(`Empleado ${id} → Estado: ${estado}`);
-
-            // 🔥 Aquí puedes mandar a PHP si quieres guardar en DB
-            /*
-            fetch('cambiar_estado.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id, estado: estado })
-            });
-            */
         });
     });
 });
 
-
-// ===== FUNCIONES MODAL =====
 window.abrirModalCompra = function(id, nombre, precio) {
     const modal = document.getElementById('modal-comprar-producto');
 

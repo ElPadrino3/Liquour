@@ -1,5 +1,14 @@
 <?php
-require_once '../../../Model/conexion.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '../../../Config/Liquour_bdd.php';
+
+$db = new BDD();
+$conexion = $db->conectar();
+
+$rol_usuario = $_SESSION['rol'] ?? ''; 
 
 $sql = "
     SELECT 
@@ -23,10 +32,18 @@ $sql = "
 $stmt = $conexion->prepare($sql);
 $stmt->execute();
 $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if ($rol_usuario === 'empleado') {
+    $url_regreso = "/LIQUOUR/Views/Include/empleado/Catalogo_Empleado.php";
+    $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php"; 
+} else {
+    $url_regreso = "/LIQUOUR/Views/Include/Admin/dashboard.php";
+    $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
+}
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="../../../Assets/CSS/pos.css">
+<link rel="stylesheet" href="../../../Assets/CSS/pos.css?v=<?php echo time(); ?>">
 
 <div class="register">
   <div class="left">
@@ -47,7 +64,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <span id="display-total">$0.00</span>
     </div>
 
-    <div class="buttons">
+    <div class="buttons" id="keyboard-area">
       <button class="btn-special op-plus"><i class="fas fa-plus"></i></button>
       <button class="btn-special op-minus"><i class="fas fa-minus"></i></button>
       <button class="btn-special op-reset"><i class="fas fa-times"></i> Reiniciar</button>
@@ -72,12 +89,12 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <div class="right">
     <div class="categories">
       <ul>
-        <li><a href="#" data-filter="Todos" style="color: #C5A059;">Todos</a></li>
-        <li><a href="#" data-filter="Whisky">Whisky</a></li>
-        <li><a href="#" data-filter="Vino">Vinos</a></li>
-        <li><a href="#" data-filter="Tequila">Tequila</a></li>
-        <li><a href="#" data-filter="Cerveza">Cervezas</a></li>
-        <li><a href="#" data-filter="Ron">Ron</a></li>
+        <li><a href="#" data-filter="Todos" style="color: #C5A059;">TODOS</a></li>
+        <li><a href="#" data-filter="Whisky">WHISKY</a></li>
+        <li><a href="#" data-filter="Vino">VINOS</a></li>
+        <li><a href="#" data-filter="Tequila">TEQUILA</a></li>
+        <li><a href="#" data-filter="Cerveza">CERVEZAS</a></li>
+        <li><a href="#" data-filter="Ron">RON</a></li>
       </ul>
     </div>
 
@@ -86,100 +103,88 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php if (!empty($items)): ?>
           <?php foreach ($items as $p): ?>
             <li class="product-card" data-categoria="<?php echo htmlspecialchars($p['categoria'] ?? 'Sin categoría'); ?>">
-              
               <div class="product-stock">
                 <span class="stock-label">STOCK</span>
                 <span class="stock-value"><?php echo (int)$p['stock']; ?></span>
               </div>
-
               <div class="product-image-container">
-                <img 
-                  src="<?php echo !empty($p['imagen']) ? htmlspecialchars($p['imagen']) : '../../../Assets/IMG/image.png'; ?>" 
-                  alt="<?php echo htmlspecialchars($p['nombre']); ?>" 
-                  class="product-img"
-                >
+                <img src="<?php echo !empty($p['imagen']) ? htmlspecialchars($p['imagen']) : '../../../Assets/IMG/image.png'; ?>" alt="<?php echo htmlspecialchars($p['nombre']); ?>" class="product-img">
               </div>
-
               <div class="product-info">
                 <span class="item"><?php echo htmlspecialchars($p['nombre']); ?></span>
                 <span class="category"><?php echo htmlspecialchars($p['categoria'] ?? 'Sin categoría'); ?></span>
               </div>
-
-              <div class="product-price">
-                $<?php echo number_format((float)$p['precio_venta'], 2); ?>
-              </div>
-
+              <div class="product-price">$<?php echo number_format((float)$p['precio_venta'], 2); ?></div>
               <div class="product-controls">
-                <button 
-                  class="btn-qty btn-minus"
-                  data-id="<?php echo (int)$p['id_producto']; ?>"
-                  data-name="<?php echo htmlspecialchars($p['nombre']); ?>"
-                  data-price="<?php echo (float)$p['precio_venta']; ?>"
-                  data-stock="<?php echo (int)$p['stock']; ?>"
-                >
-                  <i class="fas fa-minus"></i>
-                </button>
-
+                <button class="btn-qty btn-minus" data-id="<?php echo (int)$p['id_producto']; ?>"><i class="fas fa-minus"></i></button>
                 <span class="qty-counter">0</span>
-
-                <button 
-                  class="btn-qty btn-plus"
-                  data-id="<?php echo (int)$p['id_producto']; ?>"
-                  data-name="<?php echo htmlspecialchars($p['nombre']); ?>"
-                  data-price="<?php echo (float)$p['precio_venta']; ?>"
-                  data-stock="<?php echo (int)$p['stock']; ?>"
-                >
-                  <i class="fas fa-plus"></i>
-                </button>
+                <button class="btn-qty btn-plus" data-id="<?php echo (int)$p['id_producto']; ?>" data-stock="<?php echo (int)$p['stock']; ?>"><i class="fas fa-plus"></i></button>
               </div>
             </li>
           <?php endforeach; ?>
-        <?php else: ?>
-          <li style="list-style: none; color: #C5A059; padding: 20px; text-align: center;">
-            No hay productos registrados en la base de datos.
-          </li>
         <?php endif; ?>
       </ul>
     </div>
 
     <div class="payment-keys">
       <ul>
-        <li id="toggle-keyboard" style="cursor: pointer;">
-          <i class="fas fa-keyboard fa-2x fa-fw" data-fa-transform="up-2"></i> Teclado
+        <li id="toggle-keyboard">
+            <i class="fas fa-keyboard fa-2x fa-fw"></i>
+            <span>TECLADO</span>
         </li>
-
-        <li>
-          <a href="ventas_efectivo.php" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
-            <i class="fas fa-money-bill-alt fa-2x fa-fw" data-fa-transform="up-2"></i> Efectivo
-          </a>
+        <li onclick="abrirModalEfectivo()">
+            <i class="fas fa-money-bill-alt fa-2x fa-fw"></i>
+            <span>EFECTIVO</span>
         </li>
-
-        <li>
-          <a href="ventas_tarjeta.php" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
-            <i class="fas fa-credit-card fa-2x fa-fw" data-fa-transform="up-2"></i> Tarjeta
-          </a>
+        <li onclick="location.href='ventas_tarjeta.php'">
+            <i class="fas fa-credit-card fa-2x fa-fw"></i>
+            <span>TARJETA</span>
         </li>
-
-        <li>
-          <a href="promociones.php" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
-            <i class="fas fa-tags fa-2x fa-fw" data-fa-transform="up-2"></i> Descuento
-          </a>
+        <li onclick="location.href='promociones.php'">
+            <i class="fas fa-tags fa-2x fa-fw"></i>
+            <span>DESCUENTO</span>
         </li>
-
-        <li>
-          <a href="perfil_empleado.php" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
-            <i class="fas fa-user fa-2x fa-fw" data-fa-transform="up-2"></i> Empleado
-          </a>
+        <li onclick="location.href='<?php echo $url_perfil; ?>'">
+            <i class="fas fa-user fa-2x fa-fw"></i>
+            <span>PERFIL</span>
         </li>
-
-        <li>
-          <a href="../../Include/Admin/dashboard.php" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
-            <i class="fas fa-sign-out-alt fa-2x fa-fw" data-fa-transform="up-2"></i> Salir
-          </a>
+        <li onclick="location.href='<?php echo $url_regreso; ?>'">
+            <i class="fas fa-sign-out-alt fa-2x fa-fw"></i>
+            <span>SALIR</span>
         </li>
       </ul>
     </div>
   </div>
 </div>
 
-<script src="../../../Assets/JS/pos.js"></script>
+<div id="modal-pago-efectivo" class="modal-pago-emergente" style="display: none;">
+    <div class="modal-pago-caja">
+        <div class="modal-pago-cabecera">
+            <h2><i class="fas fa-wallet"></i> Cobro en Efectivo</h2>
+            <span class="btn-cerrar-modal" id="cerrar-modal-pago">&times;</span>
+        </div>
+        <div class="modal-pago-cuerpo">
+            <div class="pago-detalle-fila">
+                <span class="pago-etiqueta">Total Venta:</span>
+                <span class="pago-valor total-oro" id="pago-total-mostrar">$0.00</span>
+            </div>
+            <div class="pago-detalle-fila caja-ingreso">
+                <label for="efectivo-recibido" class="pago-etiqueta">Efectivo Recibido:</label>
+                <div class="input-con-icono">
+                    <span class="icono-dolar">$</span>
+                    <input type="number" id="efectivo-recibido" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+            <div class="pago-detalle-fila linea-separadora">
+                <span class="pago-etiqueta">Cambio a Entregar:</span>
+                <span class="pago-valor cambio-blanco" id="pago-cambio">$0.00</span>
+            </div>
+        </div>
+        <div class="modal-pago-pie">
+            <button class="btn-pago-cancelar" id="btn-cancelar-pago">CANCELAR</button>
+            <button class="btn-pago-confirmar" id="btn-finalizar-venta">FINALIZAR VENTA</button>
+        </div>
+    </div>
+</div>
+
+<script src="../../../Assets/JS/pos.js?v=<?php echo time(); ?>"></script>

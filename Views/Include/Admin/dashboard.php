@@ -31,6 +31,35 @@ $totalVentas = $conn->query("SELECT COUNT(*) FROM ventas")->fetchColumn();
 
 $maxUnidades = (count($topProductos) > 0) ? $topProductos[0]['unidades_vendidas'] : 1;
 
+$ventas_semana_actual = array_fill(0, 7, 0);
+$ventas_semana_pasada = array_fill(0, 7, 0);
+$transacciones_semana = array_fill(0, 7, 0);
+
+$stmtCurrentWeek = $conn->query("
+    SELECT WEEKDAY(fecha) as dia, SUM(total) as total, COUNT(id_venta) as transacciones
+    FROM ventas 
+    WHERE YEARWEEK(fecha, 1) = YEARWEEK(CURDATE(), 1)
+    GROUP BY dia
+");
+while($row = $stmtCurrentWeek->fetch()) {
+    $ventas_semana_actual[$row['dia']] = (float)$row['total'];
+    $transacciones_semana[$row['dia']] = (int)$row['transacciones'];
+}
+
+$stmtPrevWeek = $conn->query("
+    SELECT WEEKDAY(fecha) as dia, SUM(total) as total
+    FROM ventas 
+    WHERE YEARWEEK(fecha, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+    GROUP BY dia
+");
+while($row = $stmtPrevWeek->fetch()) {
+    $ventas_semana_pasada[$row['dia']] = (float)$row['total'];
+}
+
+$jsonCurrentWeek = json_encode(array_values($ventas_semana_actual));
+$jsonPrevWeek = json_encode(array_values($ventas_semana_pasada));
+$jsonTransacciones = json_encode(array_values($transacciones_semana));
+
 $bdd->desconectar();
 ?>
 <!DOCTYPE html>
@@ -91,16 +120,16 @@ $bdd->desconectar();
     <div class="charts-row">
       <div class="card">
         <div class="card-title">
-          Ventas Mensuales
+          Ventas Semanales
           <div class="legend">
-            <div class="leg-item"><div class="leg-dot" style="background:#C5A059"></div>Este mes</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#4A4A4A"></div>Mes pasado</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#C5A059"></div>Esta Semana</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#4A4A4A"></div>Semana Pasada</div>
           </div>
         </div>
         <canvas id="lineChart" height="120"></canvas>
       </div>
       <div class="card">
-        <div class="card-title">Distribución Diaria</div>
+        <div class="card-title">Transacciones Diarias</div>
         <canvas id="barChart" height="120"></canvas>
       </div>
     </div>
@@ -213,8 +242,8 @@ $bdd->desconectar();
       labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
       datasets: [
         {
-          label: 'Este mes',
-          data: [420, 580, 510, 690, 750, 870, 920],
+          label: 'Esta semana',
+          data: <?= $jsonCurrentWeek ?>,
           borderColor: gold,
           backgroundColor: 'rgba(197,160,89,.08)',
           borderWidth: 2,
@@ -224,8 +253,8 @@ $bdd->desconectar();
           fill: true
         },
         {
-          label: 'Mes pasado',
-          data: [350, 490, 430, 600, 620, 710, 780],
+          label: 'Semana pasada',
+          data: <?= $jsonPrevWeek ?>,
           borderColor: oxford,
           backgroundColor: 'transparent',
           borderWidth: 1.5,
@@ -251,7 +280,7 @@ $bdd->desconectar();
     data: {
       labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
       datasets: [{
-        data: [180, 240, 210, 290, 320, 410, 380],
+        data: <?= $jsonTransacciones ?>,
         backgroundColor: 'rgba(197,160,89,.22)',
         borderColor: gold,
         borderWidth: 1,

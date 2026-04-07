@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 sessionStorage.setItem('usuario', user);
                 sessionStorage.setItem('rol', 'admin');
                 alert('Bienvenido Administrador');
-                window.location.href = "../../Views/Include/Admin/Catalogo_Admin.php";
+                window.location.href = "../../Views/Include/Admin/dashboard.php";
             } 
             else if (user === "empleado" && pass === "emp123") {
                 sessionStorage.setItem('usuario', user);
