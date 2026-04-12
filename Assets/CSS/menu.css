@@ -1,0 +1,244 @@
+/* Importar fuente moderna */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    /* Fondo oscuro más profundo y lujoso */
+    background: linear-gradient(120deg, #050505, #111111, #1a150b, #000000);
+    background-size: 300% 300%;
+    animation: luxuryBreathe 12s ease-in-out infinite;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+/* Animación nueva: un "respiro" lento y elegante */
+@keyframes luxuryBreathe {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Un toque más de cristal y borde dorado más definido */
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(229, 193, 88, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.brand {
+    font-weight: 700;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #e5c158; /* Dorado más vivo */
+    text-transform: uppercase;
+}
+
+/* Animación para el puntito de la marca (como luz LED) */
+.brand .dot {
+    height: 8px;
+    width: 8px;
+    background-color: #e5c158;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+    box-shadow: 0 0 10px #e5c158;
+    animation: pulseDot 2s infinite alternate;
+}
+
+@keyframes pulseDot {
+    0% { box-shadow: 0 0 5px #e5c158; opacity: 0.8; }
+    100% { box-shadow: 0 0 15px #e5c158, 0 0 20px #e5c158; opacity: 1; }
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(145deg, rgba(229, 193, 88, 0.05), rgba(229, 193, 88, 0.15));
+    border: 1px solid rgba(229, 193, 88, 0.4);
+    padding: 5px 15px;
+    border-radius: 30px;
+    box-shadow: inset 0 0 10px rgba(229, 193, 88, 0.05);
+}
+
+.user-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.username {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.role {
+    font-size: 0.6rem;
+    opacity: 0.9;
+    color: #e5c158;
+    text-transform: uppercase;
+}
+
+.btn-exit {
+    color: #e5c158;
+    text-decoration: none;
+    font-size: 0.8rem;
+    background: transparent;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(229, 193, 88, 0.3);
+}
+
+.btn-exit:hover {
+    background: #e5c158;
+    color: #050505;
+    box-shadow: 0 0 15px rgba(229, 193, 88, 0.4);
+    transform: scale(1.05);
+}
+
+.main-container {
+    margin-top: 120px;
+    width: 100%;
+    max-width: 1000px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.8rem;
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #e5c158;
+    text-shadow: 0 0 20px rgba(229, 193, 88, 0.2);
+}
+
+.header p {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-bottom: 50px;
+    font-weight: 300;
+    color: #cccccc;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+/* Tarjetas más estilizadas con efecto de vidrio */
+.card {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.8), rgba(5, 5, 5, 0.95));
+    padding: 35px 20px;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    border: 1px solid rgba(229, 193, 88, 0.15);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Brillo sutil de fondo en la tarjeta al pasar el mouse */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(229, 193, 88, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(229, 193, 88, 0.8);
+    box-shadow: 0 15px 35px rgba(229, 193, 88, 0.2), inset 0 0 15px rgba(229, 193, 88, 0.05);
+}
+
+.card i {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    color: #e5c158;
+    transition: transform 0.3s ease;
+}
+
+.card:hover i {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(229, 193, 88, 0.5);
+}
+
+.card h3 {
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.card p {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-weight: 300;
+}
+
+@media (max-width: 900px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+    .header h1 {
+        font-size: 2rem;
+    }
+}

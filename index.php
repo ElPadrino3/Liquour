@@ -30,6 +30,6 @@
         </div>
     </div>
 </div>
-
+<script src="Assets/JS/validacion.js"></script>
 </body>
 </html>

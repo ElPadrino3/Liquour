@@ -11,8 +11,17 @@ $rol = $_SESSION['rol'] ?? 'empleado';
 $nombre = $_SESSION['nombre'] ?? 'Usuario';
 $id_usuario = $_SESSION['id_usuario'] ?? 0;
 
-$nombre_url = urlencode($nombre);
-$avatar = "https://ui-avatars.com/api/?name={$nombre_url}&background=C5A059&color=1A1A1A&size=128";
+$stmtFoto = $conexion->prepare("SELECT foto_perfil FROM usuarios WHERE id_usuario = ?");
+$stmtFoto->execute([$id_usuario]);
+$rowFoto = $stmtFoto->fetch();
+$foto_db = $rowFoto['foto_perfil'] ?? null;
+
+if (!empty($foto_db)) {
+    $avatar = $foto_db . '?v=' . time(); 
+} else {
+    $nombre_url = urlencode($nombre);
+    $avatar = "https://ui-avatars.com/api/?name={$nombre_url}&background=C5A059&color=1A1A1A&size=128";
+}
 
 $admin_ventas_mes = 0;
 $admin_inventario = 0;
@@ -66,7 +75,7 @@ if ($rol === 'admin') {
 <div class="liquour-profile">
     <div class="liquour-bg-animated"></div>
     <div class="liquour-avatar">
-        <img src="<?php echo $avatar; ?>" alt="Avatar">
+        <img src="<?php echo $avatar; ?>" alt="Avatar" style="object-fit: cover; width: 100%; height: 100%; border-radius: 50%;">
     </div>
     
     <div class="liquour-info">
@@ -179,4 +188,32 @@ if ($rol === 'admin') {
     <h3 style="margin-top:-20px; letter-spacing:2px; text-transform:uppercase;">Cerrando Turno...</h3>
 </div>
 
-<script src="../../../Assets/JS/perfil.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const barras = document.querySelectorAll('.chart-bar-fill');
+    setTimeout(() => {
+        barras.forEach(barra => {
+            const contenedor = barra.closest('.chart-container');
+            if (contenedor) {
+                const porcentajeTexto = contenedor.querySelector('.chart-label span:last-child').textContent;
+                barra.style.width = porcentajeTexto;
+            }
+        });
+    }, 500);
+});
+
+window.ejecutarAccion = () => {
+    if (confirm("¿Estás seguro de que deseas cerrar el turno y salir del sistema?")) {
+        const btn = document.getElementById("btnLiquourAccion");
+        const overlay = document.getElementById("logout-overlay");
+        
+        btn.classList.add("action-success");
+        btn.textContent = "CERRANDO...";
+        overlay.style.display = "flex";
+        
+        setTimeout(() => {
+            window.location.href = "../../../Controller/Public/Logout.php";
+        }, 2500);
+    }
+}
+</script>

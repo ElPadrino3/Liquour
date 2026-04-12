@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['rol'] = $user['rol'];
 
             if ($user['rol'] === 'admin') {
-                header("Location: ../Include/Admin/Catalogo_Admin.php");
+                header("Location: ../Layout/menu.php");
             } else {
-                header("Location: ../Include/empleado/Catalogo_Empleado.php");
+                header("Location: ../Layout/menu.php");
             }
             exit;
         } else {
