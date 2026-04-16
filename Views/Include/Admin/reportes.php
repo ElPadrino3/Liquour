@@ -73,6 +73,9 @@ $DATA_DB = [
     <link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
@@ -108,7 +111,7 @@ $DATA_DB = [
       </div>
       <div class="toolbar-right">
         <span class="record-count" id="recordCount">Mostrando 0 registros</span>
-        <button class="export-btn">↓ Exportar CSV</button>
+        <button class="export-btn" id="exportPdfBtn">↓ Exportar PDF</button>
       </div>
     </div>
 
@@ -245,6 +248,38 @@ document.getElementById('searchInput').addEventListener('input', e => {
 
 document.getElementById('vendorFilter').addEventListener('change', e => {
   vendorFilter = e.target.value; currentPage = 1; render();
+});
+
+document.getElementById('exportPdfBtn').addEventListener('click', () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('landscape');
+  
+  const title = `Reporte Liquour - ${currentTab.toUpperCase()}`;
+  doc.setFontSize(16);
+  doc.text(title, 14, 15);
+  
+  const rows = getFiltered();
+  
+  if (rows.length === 0) {
+      alert('No hay datos para exportar.');
+      return;
+  }
+  
+  const headers = Object.keys(rows[0]).map(k => k.toUpperCase());
+  const body = rows.map(r => Object.values(r));
+  
+  doc.autoTable({
+      startY: 25,
+      head: [headers],
+      body: body,
+      theme: 'grid',
+      headStyles: { fillColor: [197, 160, 89] },
+      styles: { fontSize: 9, cellPadding: 3 },
+      alternateRowStyles: { fillColor: [245, 245, 245] }
+  });
+  
+  const dateStr = new Date().toISOString().slice(0,10);
+  doc.save(`Liquour_${currentTab}_${dateStr}.pdf`);
 });
 
 render();
