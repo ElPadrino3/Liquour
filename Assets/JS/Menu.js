@@ -1,4 +1,16 @@
 document.addEventListener("DOMContentLoaded", function() {
+    
+    const colorGuardado = localStorage.getItem('temaColorLiquour');
+    const logoGuardado = localStorage.getItem('temaLogoLiquour');
+
+    if (colorGuardado) {
+        document.documentElement.style.setProperty('--tema-color', colorGuardado);
+    }
+    if (logoGuardado) {
+        const logoImg = document.getElementById('logo-sistema');
+        if (logoImg) logoImg.src = logoGuardado;
+    }
+
     const roleElement = document.querySelector('.role');
     let rol = roleElement ? roleElement.innerText.trim().toLowerCase() : 'empleado';
 
@@ -26,23 +38,91 @@ document.addEventListener("DOMContentLoaded", function() {
                 window.location.href = "../Include/Admin/empleados.php";
             }
             else if (titulo === "ESTADÍSTICAS") {
-                window.location.href = "../Include/Admin/reportes.php";
+                window.location.href = "../Include/Admin/dashboard.php"; 
             }
             else if (titulo === "VENTAS") {
-                window.location.href = "../Include/Admin/dashboard.php"; 
+                window.location.href = "../Include/Admin/reportes.php";
+            }
+            else if (titulo === "AJUSTES") {
+                Swal.fire({
+                    html: `
+                        <div style="text-align: left; padding: 10px;">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+                                <i class="fa-solid fa-sliders" style="font-size: 2rem; color: var(--tema-color);"></i>
+                                <h2 style="margin: 0; color: #fff; font-size: 1.5rem; letter-spacing: 1px;">Configuración del Sistema</h2>
+                            </div>
+                            
+                            <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+                                <label style="display: block; color: #aaa; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Color de Acento Global</label>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <input type="color" id="input-color" value="${colorGuardado || '#e5c158'}" style="width: 50px; height: 50px; border: none; border-radius: 50%; cursor: pointer; background: transparent; padding: 0;">
+                                    <span style="color: #fff; font-size: 0.9rem;">Selecciona el color que definirá la identidad visual del POS.</span>
+                                </div>
+                            </div>
+                            
+                            <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                <label style="display: block; color: #aaa; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Logotipo de la Empresa</label>
+                                <input type="text" id="input-logo" placeholder="Ingresa la URL de la imagen..." value="${logoGuardado || '/LIQUOUR/Assets/IMG/Logo.jpeg'}" style="width: 100%; padding: 12px 15px; border-radius: 6px; border: 1px solid #333; background: #111; color: #fff; outline: none; font-size: 0.95rem; box-sizing: border-box;">
+                            </div>
+                        </div>
+                    `,
+                    background: '#1a1a1a',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-check"></i> Aplicar Cambios',
+                    cancelButtonText: 'Cancelar',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'modal-elegante',
+                        confirmButton: 'swal2-confirm btn-guardar',
+                        cancelButton: 'swal2-cancel btn-cancelar'
+                    },
+                    showClass: {
+                        popup: '' 
+                    },
+                    hideClass: {
+                        popup: 'swal2-hide'
+                    },
+                    preConfirm: () => {
+                        return {
+                            color: document.getElementById('input-color').value,
+                            logo: document.getElementById('input-logo').value
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        localStorage.setItem('temaColorLiquour', result.value.color);
+                        localStorage.setItem('temaLogoLiquour', result.value.logo);
+                        
+                        Swal.fire({
+                            title: 'Aplicando...',
+                            html: 'Actualizando la interfaz del sistema.',
+                            timer: 1000,
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                            background: '#1a1a1a',
+                            color: '#fff',
+                            customClass: { popup: 'modal-elegante' },
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                });
             }
             else {
                 Swal.fire({
-                    title: '<span style="color:#e5c158; letter-spacing: 2px;">EN CONSTRUCCIÓN</span>',
+                    title: '<span style="color:var(--tema-color); letter-spacing: 2px;">EN CONSTRUCCIÓN</span>',
                     html: '<span style="color:#cccccc; font-weight: 300;">Estamos preparándote una experiencia VIP. ¡Pronto estará lista! 🚧</span>',
                     icon: 'info',
-                    iconColor: '#e5c158',
-                    background: 'linear-gradient(145deg, rgba(20, 20, 20, 0.98), rgba(5, 5, 5, 0.98))',
-                    confirmButtonColor: '#e5c158',
-                    confirmButtonText: '<span style="color:#050505; font-weight: bold;">Aceptar</span>',
-                    backdrop: `rgba(0,0,0,0.85)`,
+                    iconColor: 'var(--tema-color)',
+                    background: '#1a1a1a',
+                    confirmButtonText: 'Aceptar',
+                    buttonsStyling: false,
                     customClass: {
-                        popup: 'border-gold'
+                        popup: 'modal-elegante',
+                        confirmButton: 'swal2-confirm btn-guardar'
                     }
                 });
             }
@@ -56,20 +136,19 @@ document.addEventListener("DOMContentLoaded", function() {
             const url = this.getAttribute('href');
             
             Swal.fire({
-                title: '<span style="color:#e5c158; letter-spacing: 2px;">¿CERRAR SESIÓN?</span>',
+                title: '<span style="color:var(--tema-color); letter-spacing: 2px;">¿CERRAR SESIÓN?</span>',
                 html: '<span style="color:#cccccc; font-weight: 300;">Saldrás de tu panel de Liquour.</span>',
                 icon: 'warning',
-                iconColor: '#e5c158',
+                iconColor: 'var(--tema-color)',
                 showCancelButton: true,
-                background: 'linear-gradient(145deg, rgba(20, 20, 20, 0.98), rgba(5, 5, 5, 0.98))',
-                confirmButtonColor: '#e5c158',
-                cancelButtonColor: 'transparent',
-                confirmButtonText: '<span style="color:#050505; font-weight: bold;">Sí, salir</span>',
-                cancelButtonText: '<span style="color:#cccccc;">Cancelar</span>',
-                backdrop: `rgba(0,0,0,0.85)`,
+                background: '#1a1a1a',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar',
+                buttonsStyling: false,
                 customClass: {
-                    cancelButton: 'border-gray',
-                    popup: 'border-gold'
+                    popup: 'modal-elegante',
+                    confirmButton: 'swal2-confirm btn-guardar',
+                    cancelButton: 'swal2-cancel btn-cancelar'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
