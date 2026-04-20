@@ -183,12 +183,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchTerm = e.target.value.toLowerCase();
             products.forEach(prod => {
                 const prodName = prod.querySelector('.item').innerText.toLowerCase();
-                if (prodName.includes(searchTerm)) {
+                const prodCode = prod.getAttribute('data-codigo').toLowerCase(); 
+                
+                if (prodName.includes(searchTerm) || prodCode.includes(searchTerm)) {
                     prod.style.display = 'flex';
                 } else {
                     prod.style.display = 'none';
                 }
             });
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const codigoEscrito = searchInput.value.trim();
+                
+                if (codigoEscrito.length > 0) {
+                    procesarCodigoEscaneado(codigoEscrito); 
+                    searchInput.value = ''; 
+                    searchInput.dispatchEvent(new Event('input')); 
+                }
+            }
         });
     }
 
@@ -477,122 +492,172 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-   document.getElementById('btn-finalizar-venta')?.addEventListener('click', () => {
-    const recibido = parseFloat(inputRecibido.value) || 0;
-    
-    if (recibido < window.totalGeneral) { 
-        mostrarNotificacion("El efectivo recibido es insuficiente.", 'error'); 
-        return; 
-    }
+    document.getElementById('btn-finalizar-venta')?.addEventListener('click', () => {
+        const recibido = parseFloat(inputRecibido.value) || 0;
+        
+        if (recibido < window.totalGeneral) { 
+            mostrarNotificacion("El efectivo recibido es insuficiente.", 'error'); 
+            return; 
+        }
 
-    const datosVenta = {
-        total: window.totalGeneral,
-        recibido: recibido,
-        descuento_global: descuentoGlobalPorcentaje,
-        carrito: cart 
-    };
+        const datosVenta = {
+            total: window.totalGeneral,
+            recibido: recibido,
+            descuento_global: descuentoGlobalPorcentaje,
+            carrito: cart 
+        };
 
-    const subtotalParaTicket = window.subtotalSinDescuento;
-    const descuentoParaTicket = window.totalDescuentoAplicado;
-    const totalParaTicket = window.totalGeneral;
-    const cambioParaTicket = recibido - window.totalGeneral;
+        const subtotalParaTicket = window.subtotalSinDescuento;
+        const descuentoParaTicket = window.totalDescuentoAplicado;
+        const totalParaTicket = window.totalGeneral;
+        const cambioParaTicket = recibido - window.totalGeneral;
 
-    fetch('procesar_venta.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosVenta)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            modalPago.style.display = 'none';
+        fetch('procesar_venta.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosVenta)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                modalPago.style.display = 'none';
+                
+                const successAnim = document.createElement('div');
+                successAnim.innerHTML = `
+                    <div style="background: rgba(0,0,0,0.85); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--dorado-mate); backdrop-filter: blur(5px);">
+                        <i class="fas fa-check-circle" style="font-size: 6rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></i>
+                        <h2 style="margin-top: 20px; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; animation: slideUp 0.5s ease-out;">¡Venta Exitosa!</h2>
+                    </div>
+                    <style>
+                        @keyframes popIn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+                        @keyframes slideUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+                    </style>
+                `;
+                document.body.appendChild(successAnim);
+                setTimeout(() => {
+                    successAnim.style.opacity = '0';
+                    successAnim.style.transition = 'opacity 0.4s ease';
+                    setTimeout(() => successAnim.remove(), 400);
+                }, 2000);
+
+                let vrItems = document.querySelectorAll('.vr-item h4');
+                if(vrItems.length >= 2) {
+                    let contadorVentas = parseInt(vrItems[0].innerText) || 0;
+                    let acumuladoActual = parseFloat(vrItems[1].innerText.replace('$', '')) || 0;
+                    
+                    contadorVentas++;
+                    acumuladoActual += totalParaTicket;
+                    
+                    vrItems[0].innerText = contadorVentas;
+                    vrItems[1].innerText = "$" + acumuladoActual.toFixed(2);
+                    vrItems[2].innerText = new Date().toLocaleDateString('es-ES');
+                    
+                    const ventasLista = document.querySelector('.ventas-lista');
+                    if(ventasLista) {
+                        const vendedorStr = window.vendedorActual || "Usuario";
+                        const nuevaVentaHTML = `
+                            <div class="venta-item">
+                                <div class="v-badge">#Nuevo</div>
+                                <div class="v-info">
+                                    <strong>VENTA #Nuevo</strong>
+                                    <span><i class="far fa-calendar-alt"></i> ${new Date().toLocaleString('es-ES')}</span>
+                                </div>
+                                <div class="v-monto">$${totalParaTicket.toFixed(2)}</div>
+                                <div class="v-acciones">
+                                    <button class="btn-icon" onclick="window.imprimirTicketDirecto(${JSON.stringify(cart).replace(/"/g, '&quot;')}, ${subtotalParaTicket}, ${descuentoParaTicket}, ${totalParaTicket}, ${recibido}, ${cambioParaTicket}, '${vendedorStr}')"><i class="fas fa-print"></i></button>
+                                    <button class="btn-icon text-red" onclick="window.descargarTicketDirecto(${JSON.stringify(cart).replace(/"/g, '&quot;')}, ${subtotalParaTicket}, ${descuentoParaTicket}, ${totalParaTicket}, ${recibido}, ${cambioParaTicket}, '${vendedorStr}')"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                        `;
+                        ventasLista.insertAdjacentHTML('afterbegin', nuevaVentaHTML);
+                    }
+                }
+                
+                cart.forEach(cartItem => {
+                    products.forEach(prod => {
+                        if(prod.querySelector('.item').innerText === cartItem.name) {
+                            const stockPill = prod.querySelector('.stock-pill');
+                            let currentStock = parseInt(stockPill.innerText.replace('STOCK', '').trim());
+                            let newStock = currentStock - cartItem.qty;
+                            stockPill.innerText = `STOCK ${newStock}`;
+                            
+                            const btnPlus = prod.querySelector('.btn-plus');
+                            if(btnPlus) btnPlus.setAttribute('data-stock', newStock);
+
+                            const tIcon = prod.querySelector('.toggle-icon');
+                            const qtyS = prod.querySelector('.qty-counter');
+                            if(tIcon) {
+                                tIcon.classList.replace('fa-toggle-on', 'fa-toggle-off');
+                                tIcon.classList.remove('active-gold');
+                            }
+                            if(qtyS) qtyS.innerText = "0";
+                        }
+                    });
+                });
+
+                cart = [];
+                descuentoGlobalPorcentaje = 0;
+                descuentosIndividuales = {};
+                renderCart();
+                
+                document.getElementById('dot-ventas').style.display = 'block';
+                
+            } else {
+                mostrarNotificacion("Error en BD: " + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            mostrarNotificacion("Error de conexión con el servidor.", 'error');
+        });
+    });
+
+    let barcodeRaw = "";
+    let barcodeTimeout;
+
+    document.addEventListener('keypress', function(e) {
+        if (e.target.id === 'search-input' || e.target.tagName === 'INPUT') return;
+
+        if (e.key === 'Enter') {
+            if (barcodeRaw.length > 3) { 
+                procesarCodigoEscaneado(barcodeRaw);
+            }
+            barcodeRaw = ""; 
+            e.preventDefault();
+            return;
+        }
+
+        barcodeRaw += e.key;
+
+        clearTimeout(barcodeTimeout);
+        barcodeTimeout = setTimeout(() => {
+            barcodeRaw = "";
+        }, 50); 
+    });
+
+    function procesarCodigoEscaneado(codigoEscaner) {
+        let productoEncontrado = false;
+
+        products.forEach(prod => {
+            const codigoProducto = prod.getAttribute('data-codigo');
             
-            const successAnim = document.createElement('div');
-            successAnim.innerHTML = `
-                <div style="background: rgba(0,0,0,0.85); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--dorado-mate); backdrop-filter: blur(5px);">
-                    <i class="fas fa-check-circle" style="font-size: 6rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></i>
-                    <h2 style="margin-top: 20px; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; animation: slideUp 0.5s ease-out;">¡Venta Exitosa!</h2>
-                </div>
-                <style>
-                    @keyframes popIn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
-                    @keyframes slideUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-                </style>
-            `;
-            document.body.appendChild(successAnim);
-            setTimeout(() => {
-                successAnim.style.opacity = '0';
-                successAnim.style.transition = 'opacity 0.4s ease';
-                setTimeout(() => successAnim.remove(), 400);
-            }, 2000);
-
-            let vrItems = document.querySelectorAll('.vr-item h4');
-            if(vrItems.length >= 2) {
-                let contadorVentas = parseInt(vrItems[0].innerText) || 0;
-                let acumuladoActual = parseFloat(vrItems[1].innerText.replace('$', '')) || 0;
+            if (codigoProducto === codigoEscaner) {
+                productoEncontrado = true;
                 
-                contadorVentas++;
-                acumuladoActual += totalParaTicket;
+                const toggleIcon = prod.querySelector('.toggle-icon');
+                const btnPlus = prod.querySelector('.btn-plus');
                 
-                vrItems[0].innerText = contadorVentas;
-                vrItems[1].innerText = "$" + acumuladoActual.toFixed(2);
-                vrItems[2].innerText = new Date().toLocaleDateString('es-ES');
-                
-                const ventasLista = document.querySelector('.ventas-lista');
-                if(ventasLista) {
-                    const vendedorStr = window.vendedorActual || "Usuario";
-                    const nuevaVentaHTML = `
-                        <div class="venta-item">
-                            <div class="v-badge">#Nuevo</div>
-                            <div class="v-info">
-                                <strong>VENTA #Nuevo</strong>
-                                <span><i class="far fa-calendar-alt"></i> ${new Date().toLocaleString('es-ES')}</span>
-                            </div>
-                            <div class="v-monto">$${totalParaTicket.toFixed(2)}</div>
-                            <div class="v-acciones">
-                                <button class="btn-icon" onclick="window.imprimirTicketDirecto(${JSON.stringify(cart).replace(/"/g, '&quot;')}, ${subtotalParaTicket}, ${descuentoParaTicket}, ${totalParaTicket}, ${recibido}, ${cambioParaTicket}, '${vendedorStr}')"><i class="fas fa-print"></i></button>
-                                <button class="btn-icon text-red" onclick="window.descargarTicketDirecto(${JSON.stringify(cart).replace(/"/g, '&quot;')}, ${subtotalParaTicket}, ${descuentoParaTicket}, ${totalParaTicket}, ${recibido}, ${cambioParaTicket}, '${vendedorStr}')"><i class="fas fa-download"></i></button>
-                            </div>
-                        </div>
-                    `;
-                    ventasLista.insertAdjacentHTML('afterbegin', nuevaVentaHTML);
+                if (toggleIcon && toggleIcon.classList.contains('fa-toggle-off')) {
+                    toggleIcon.click();
+                    mostrarNotificacion("Producto agregado: " + prod.querySelector('.item').innerText, "exito");
+                } else if (btnPlus) {
+                    btnPlus.click();
+                    mostrarNotificacion("Cantidad aumentada", "info");
                 }
             }
-            
-            cart.forEach(cartItem => {
-                products.forEach(prod => {
-                    if(prod.querySelector('.item').innerText === cartItem.name) {
-                        const stockPill = prod.querySelector('.stock-pill');
-                        let currentStock = parseInt(stockPill.innerText.replace('STOCK', '').trim());
-                        let newStock = currentStock - cartItem.qty;
-                        stockPill.innerText = `STOCK ${newStock}`;
-                        
-                        const btnPlus = prod.querySelector('.btn-plus');
-                        if(btnPlus) btnPlus.setAttribute('data-stock', newStock);
+        });
 
-                        const tIcon = prod.querySelector('.toggle-icon');
-                        const qtyS = prod.querySelector('.qty-counter');
-                        if(tIcon) {
-                            tIcon.classList.replace('fa-toggle-on', 'fa-toggle-off');
-                            tIcon.classList.remove('active-gold');
-                        }
-                        if(qtyS) qtyS.innerText = "0";
-                    }
-                });
-            });
-
-            cart = [];
-            descuentoGlobalPorcentaje = 0;
-            descuentosIndividuales = {};
-            renderCart();
-            
-            document.getElementById('dot-ventas').style.display = 'block';
-            
-        } else {
-            mostrarNotificacion("Error en BD: " + data.error, 'error');
+        if (!productoEncontrado) {
+            mostrarNotificacion("Código " + codigoEscaner + " no registrado en inventario.", "error");
         }
-    })
-    .catch(error => {
-        mostrarNotificacion("Error de conexión con el servidor.", 'error');
-    });
-});
+    }
 });

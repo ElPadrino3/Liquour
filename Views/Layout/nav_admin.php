@@ -21,11 +21,11 @@ $rol_usuario = $_SESSION['rol'] ?? '';
             <a href="/LIQUOUR/Views/Include/Admin/empleados.php" class="nav-item">Empleados</a>
             <a href="/LIQUOUR/Views/Include/Admin/reportes.php" class="nav-item">Reportes</a>
             <a href="/LIQUOUR/Views/Include/Admin/compras.php" class="nav-item">Compras</a>
-            <a href="/LIQUOUR/Views/Include/Admin/perfil_Admin.php" class="nav-item">Perfil</a>
+            <a href="/LIQUOUR/Views/Include/Layout/menu.php" class="nav-item">Home</a>
         <?php elseif ($rol_usuario === 'empleado'): ?>
             <a href="/LIQUOUR/Views/Include/Admin/Tienda_pos.php" class="nav-item">Punto de Venta</a>
             <a href="/LIQUOUR/Views/Include/empleado/Catalogo_Empleado.php" class="nav-item">Inventario</a>
-            <a href="/LIQUOUR/Views/Include/Admin/perfil_Admin.php" class="nav-item">Perfil</a>
+            <a href="/LIQUOUR/Views/Include/Layout/menu.php" class="nav-item">Home</a>
         <?php endif; ?>
     </nav>
 </header>

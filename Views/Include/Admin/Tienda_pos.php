@@ -121,26 +121,184 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="../../../Assets/CSS/pos.css?v=<?php echo time(); ?>">
 
+<style>
+    :root {
+        --tema-color: #e5c158; 
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Inter', sans-serif;
+        color: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        overflow-x: hidden;
+        background-color: #050505;
+    }
+    .video-background {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: -2;
+        overflow: hidden;
+        background-color: #000;
+    }
+    .video-background video {
+        position: absolute;
+        top: 50%; left: 50%;
+        min-width: 100%; min-height: 100%;
+        width: auto; height: auto;
+        transform: translate(-50%, -50%);
+        object-fit: cover;
+        opacity: 1;
+    }
+    .video-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: -1;
+        background: rgba(0, 0, 0, 0.4); 
+        backdrop-filter: blur(3px);
+    }
+    .top-bar {
+        position: fixed; top: 0; left: 0; width: 100%;
+        padding: 15px 30px;
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(10, 10, 10, 0.75);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        transition: border-color 0.3s ease;
+    }
+    .top-bar:hover { border-bottom: 1px solid var(--tema-color); }
+    .brand {
+        font-weight: 700; letter-spacing: 2px;
+        display: flex; align-items: center; font-size: 0.95rem;
+        color: var(--tema-color); text-transform: uppercase;
+        text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+    .user-section { display: flex; align-items: center; gap: 20px; }
+    .user-info {
+        display: flex; align-items: center; gap: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 6px 18px; border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+    .user-info:hover {
+        border-color: var(--tema-color);
+        background: rgba(20, 20, 20, 0.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+    .user-text { display: flex; flex-direction: column; text-align: left; }
+    .username { font-size: 0.8rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+    .role { font-size: 0.65rem; font-weight: 600; color: var(--tema-color); text-transform: uppercase; }
+    .btn-exit {
+        color: #fff; text-decoration: none; font-size: 0.85rem; font-weight: 600;
+        background: rgba(255,255,255,0.1); padding: 8px 18px;
+        border-radius: 8px; transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-exit:hover {
+        background: #e74c3c; color: #fff; border-color: #e74c3c;
+        box-shadow: 0 0 15px rgba(231, 76, 60, 0.4); transform: scale(1.05);
+    }
+    .main-container { margin-top: 130px; width: 100%; max-width: 1000px; text-align: center; }
+    .header h1 {
+        font-size: 3rem; letter-spacing: 4px; margin-bottom: 10px; font-weight: 800;
+        color: #fff;
+        text-shadow: 0 4px 15px rgba(0,0,0,0.9);
+    }
+    .header p {
+        font-size: 1.1rem; opacity: 0.9; margin-bottom: 50px; font-weight: 400; color: #ddd;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    }
+    .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .card {
+        text-decoration: none; color: #fff;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: rgba(15, 15, 15, 0.65) !important; 
+        padding: 30px 15px; border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important; 
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        position: relative; overflow: hidden;
+        z-index: 1;
+    }
+    .card::before {
+        content: ''; position: absolute; top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        transform: skewX(-25deg); transition: left 0.6s ease; z-index: -1;
+    }
+    .card:hover::before { left: 150%; }
+    .card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: var(--tema-color) !important;
+        background: rgba(20, 20, 20, 0.85) !important; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255, 0.1) !important;
+    }
+    .card i {
+        font-size: 2.2rem; margin-bottom: 12px; color: #fff;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    .card:hover i {
+        transform: scale(1.25) translateY(-5px);
+        color: var(--tema-color) !important;
+        text-shadow: 0 5px 15px rgba(0,0,0,0.9);
+    }
+    .card h3 { 
+        font-size: 0.95rem; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700; 
+        text-transform: uppercase; transition: color 0.3s ease;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .card:hover h3 { color: var(--tema-color); }
+    .card p { 
+        font-size: 0.8rem; font-weight: 400; color: #ccc; 
+        text-shadow: 0 1px 5px rgba(0,0,0,0.8);
+    }
+    @media (max-width: 900px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .grid-container { grid-template-columns: 1fr; } .header h1 { font-size: 2rem; } }
+    @keyframes modalAparicion { 0% { opacity: 0; transform: translateY(30px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    .swal2-popup.modal-elegante {
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; border-top: 4px solid var(--tema-color) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important; border-radius: 12px !important; font-family: 'Inter', sans-serif !important;
+        animation: modalAparicion 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+    }
+    .swal2-cancel.btn-cancelar { border: 1px solid rgba(255, 255, 255, 0.2) !important; transition: all 0.3s ease; }
+    .swal2-cancel.btn-cancelar:hover { background: rgba(255, 255, 255, 0.1) !important; }
+    .swal2-confirm.btn-guardar { background-color: var(--tema-color) !important; color: #000 !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; transition: all 0.3s ease; }
+    .swal2-confirm.btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0, 0.4) !important; }
+</style>
+
+<div class="video-background">
+    <video autoplay muted loop playsinline id="bg-video">
+        <source src="../../Assets/IMG/licores.mp4" type="video/mp4">
+    </video>
+</div>
+<div class="video-overlay"></div>
+
 <div class="register">
   <div class="left">
     <div class="resumen-card">
         <h3 class="resumen-title">Resumen de venta</h3>
-        
         <div class="table-headers">
             <span style="width: 15%;">CANT.</span>
             <span style="flex: 1;">PRODUCTO</span>
             <span style="width: 20%;">P. UNIT</span>
             <span style="width: 25%; text-align: right;">SUBTOTAL</span>
         </div>
-
-        <div class="cart-items" id="cart-body">
-        </div>
-
+        <div class="cart-items" id="cart-body"></div>
         <div class="totales-pequenos">
             <p>TOTAL PRODUCTOS: <span id="tot-prod">0</span></p>
             <p>CON DESCUENTO: <span id="tot-desc">$0.00</span></p>
         </div>
-
         <div class="totales-grandes">
             <div class="box-total">
                 <span class="label-tot">TOTAL</span>
@@ -151,7 +309,6 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                 <h2 id="display-discount" style="color: #e74c3c;">$0.00</h2>
             </div>
         </div>
-
         <div class="action-buttons">
             <button id="btn-pagar" class="btn-pagar">
                 <i class="fas fa-shopping-cart"></i> Pagar
@@ -169,7 +326,6 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
             <label>BUSCAR PRODUCTO</label>
             <input type="text" placeholder="Nombre o código..." id="search-input">
         </div>
-        
         <div class="category-box">
             <label>CATEGORÍAS</label>
             <select id="category-select">
@@ -182,7 +338,6 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                 <option value="Vodka">Vodka</option>
             </select>
         </div>
-        
         <div class="nav-icons">
             <i class="fas fa-home" onclick="location.href='../../Layout/menu.php'" title="Menú Principal"></i>
             <i class="fas fa-user" onclick="location.href='<?php echo $url_perfil; ?>'" title="Perfil"></i>
@@ -198,32 +353,26 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
         <?php if (!empty($items)): ?>
           <?php foreach ($items as $p): ?>
             <li class="product-card" data-categoria="<?php echo htmlspecialchars($p['categoria'] ?? 'Sin categoría'); ?>" data-codigo="<?php echo htmlspecialchars($p['codigo_barras'] ?? 'N/A'); ?>">
-              
               <div class="product-top-info">
                   <span class="stock-pill">STOCK <?php echo (int)$p['stock']; ?></span>
                   <i class="fas fa-toggle-off toggle-icon"></i>
               </div>
-
               <div class="product-image-container">
                 <img src="<?php echo !empty($p['imagen']) ? htmlspecialchars($p['imagen'], ENT_QUOTES) : '../../../Assets/IMG/image.png'; ?>" alt="<?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?>" class="product-img">
               </div>
-              
               <div class="product-info">
                 <span class="item"><?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?></span>
                 <span class="category"><?php echo htmlspecialchars($p['categoria'] ?? 'Sin categoría', ENT_QUOTES); ?></span>
               </div>
-
               <div class="product-price-pill">
                   $<?php echo number_format((float)$p['precio_venta'], 2); ?>
               </div>
-              
               <div class="product-controls">
                 <button class="btn-qty btn-minus" data-id="<?php echo (int)$p['id_producto']; ?>"><i class="fas fa-minus"></i></button>
                 <span class="qty-counter">0</span>
                 <button class="btn-qty btn-plus" data-id="<?php echo (int)$p['id_producto']; ?>" data-stock="<?php echo (int)$p['stock']; ?>"><i class="fas fa-plus"></i></button>
                 <i class="fas fa-eye eye-icon"></i>
               </div>
-
             </li>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -283,7 +432,6 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                     <p>ÚLTIMA VENTA</p>
                 </div>
             </div>
-            
             <div class="ventas-lista">
                 <?php if (count($ultimas_ventas) > 0): ?>
                     <?php foreach ($ultimas_ventas as $v): ?>
@@ -351,7 +499,6 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                     </tbody>
                 </table>
             </div>
-
             <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--gris-fondo); border: 1px solid var(--gris-oxford); padding: 15px; border-radius: 8px;">
                 <label style="color: var(--dorado-mate); font-weight: bold;">Descuento a TODO el carrito (%):</label>
                 <div style="display: flex; align-items: center; gap: 5px;">
