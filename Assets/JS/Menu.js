@@ -43,6 +43,12 @@ document.addEventListener("DOMContentLoaded", function() {
             else if (titulo === "VENTAS") {
                 window.location.href = "../Include/Admin/reportes.php";
             }
+            else if (titulo === "VENTAS") {
+                window.location.href = "../Include/Admin/reportes.php";
+            }
+            else if (titulo === "COMPRAS") {
+                window.location.href = "../Include/Admin/compras.php";
+            }
             else if (titulo === "AJUSTES") {
                 Swal.fire({
                     html: `

@@ -16,12 +16,12 @@ $rol_usuario = $_SESSION['rol'] ?? '';
         <?php if ($rol_usuario === 'admin'): ?>
             <a href="/LIQUOUR/Views/Include/Admin/dashboard.php" class="nav-item">Dashboard</a>
             <a href="/LIQUOUR/Views/Include/Admin/Tienda_pos.php" class="nav-item">Punto de Venta</a>
-            <a href="/LIQUOUR/Views/Include/Admin/Catalogo_Admin.php" class="nav-item">Catálogo</a>
+            <a href="/LIQUOUR/Views/Include/Admin/Catalogo_Admin.php" class="nav-item">Inventario</a>
             <a href="/LIQUOUR/Views/Include/Admin/Proveedores.php" class="nav-item">Proveedores</a>
             <a href="/LIQUOUR/Views/Include/Admin/empleados.php" class="nav-item">Empleados</a>
             <a href="/LIQUOUR/Views/Include/Admin/reportes.php" class="nav-item">Reportes</a>
             <a href="/LIQUOUR/Views/Include/Admin/compras.php" class="nav-item">Compras</a>
-            <a href="/LIQUOUR/Views/Include/Layout/menu.php" class="nav-item">Home</a>
+            <a href="/LIQUOUR/Views/Layout/menu.php" class="nav-item">Home</a>
         <?php elseif ($rol_usuario === 'empleado'): ?>
             <a href="/LIQUOUR/Views/Include/Admin/Tienda_pos.php" class="nav-item">Punto de Venta</a>
             <a href="/LIQUOUR/Views/Include/empleado/Catalogo_Empleado.php" class="nav-item">Inventario</a>

@@ -279,8 +279,8 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
             </a>
             <a href="#" class="card">
                 <i class="fa-solid fa-calendar-check"></i>
-                <h3>RESERVAS</h3>
-                <p>Gestión de eventos</p>
+                <h3>COMPRAS</h3>
+                <p>Gestión de compras</p>
             </a>
             <?php endif; ?>
         </div>
