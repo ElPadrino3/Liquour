@@ -1,3 +1,38 @@
+window.procesarPDFBackend = function(carrito, subtotal, descuento, total, recibido, cambio, vendedor, fecha, accion) {
+    const datosVenta = { carrito, subtotal, descuento, total, recibido, cambio, vendedor, fecha, accion };
+
+    // Llama al archivo PHP que crearemos para usar mPDF
+    fetch('../empleado/Generar_Ticket.php',{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datosVenta)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Error al generar PDF");
+        return response.blob();
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        
+        if (accion === 'D') {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Ticket_Liquour_${new Date().getTime()}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            window.open(url, '_blank');
+        }
+        
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Ocurrió un error al generar el ticket PDF.");
+    });
+};
+
 window.manejarImpresion = function(idVenta) {
     if (window.datosVentasHistoricas && window.datosVentasHistoricas[idVenta]) {
         const v = window.datosVentasHistoricas[idVenta];
@@ -16,110 +51,14 @@ window.manejarDescarga = function(idVenta) {
     }
 };
 
-window.generarTicketHTML = function(carrito, subtotal, descuento, total, recibido, cambio, vendedor = "Usuario", fechaTicket = null) {
-    let fecha = fechaTicket ? fechaTicket : new Date().toLocaleString('es-ES');
-    let itemsHTML = '';
-    
-    carrito.forEach(item => {
-        let sub = item.qty * item.price;
-        itemsHTML += `
-            <tr>
-                <td>${item.qty}x</td>
-                <td>${item.name}</td>
-                <td class="t-right">$${sub.toFixed(2)}</td>
-            </tr>
-        `;
-    });
-
-    let descuentoRow = '';
-    if (descuento > 0) {
-        descuentoRow = `<div class="row discount"><span>Descuento:</span><span>-$${descuento.toFixed(2)}</span></div>`;
-    }
-
-    return `
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <title>Ticket de Venta - LIQUOUR</title>
-            <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e5e5e5; margin: 0; padding: 40px; display: flex; justify-content: center; }
-                .ticket-container { background: #fff; width: 100%; max-width: 380px; padding: 30px; box-shadow: 0 15px 25px rgba(0,0,0,0.15); border-radius: 8px; }
-                .t-header { text-align: center; border-bottom: 2px dashed #1a1a1a; padding-bottom: 20px; margin-bottom: 20px; }
-                .t-header h1 { font-size: 32px; margin: 0; color: #1a1a1a; letter-spacing: 3px; text-transform: uppercase; }
-                .t-header p { margin: 8px 0 0; color: #4a4a4a; font-size: 14px; font-weight: bold;}
-                .t-vendedor { font-size: 13px; color: #666; margin-top: 5px; font-style: italic; }
-                .t-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; color: #1a1a1a; }
-                .t-table th { text-align: left; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px; text-transform: uppercase; font-size: 12px; }
-                .t-table td { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-                .t-right { text-align: right; }
-                .t-totals { font-size: 15px; line-height: 1.8; border-bottom: 2px dashed #1a1a1a; padding-bottom: 20px; margin-bottom: 20px; color: #1a1a1a; }
-                .t-totals .row { display: flex; justify-content: space-between; }
-                .t-totals .row.discount { color: #e74c3c; }
-                .t-totals .row.grand-total { font-size: 22px; font-weight: bold; margin-top: 10px; color: #1a1a1a; }
-                .t-footer { text-align: center; font-size: 13px; color: #4a4a4a; font-style: italic; }
-            </style>
-        </head>
-        <body>
-            <div class="ticket-container">
-                <div class="t-header">
-                    <h1>LIQUOUR</h1>
-                    <p>COMPROBANTE DE COMPRA</p>
-                    <p style="font-weight: normal; font-size: 12px;">${fecha}</p>
-                    <div class="t-vendedor">Atendido por: ${vendedor}</div>
-                </div>
-                <table class="t-table">
-                    <thead><tr><th>Cant.</th><th>Descripción</th><th class="t-right">Importe</th></tr></thead>
-                    <tbody>${itemsHTML}</tbody>
-                </table>
-                <div class="t-totals">
-                    <div class="row"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
-                    ${descuentoRow}
-                    <div class="row grand-total"><span>TOTAL:</span><span>$${total.toFixed(2)}</span></div>
-                </div>
-                <div class="t-totals" style="border: none; padding-bottom: 0;">
-                    <div class="row"><span>Efectivo:</span><span>$${recibido.toFixed(2)}</span></div>
-                    <div class="row"><span>Cambio:</span><span>$${cambio.toFixed(2)}</span></div>
-                </div>
-                <div class="t-footer">
-                    <p>¡Gracias por su compra!</p>
-                </div>
-            </div>
-            <script>
-                window.onload = function() { window.print(); };
-            </script>
-        </body>
-        </html>
-    `;
-};
-
 window.imprimirTicketDirecto = function(carrito, subtotal, descuento, total, recibido, cambio, vendedor, fecha = null) {
-    try {
-        const ticketWindow = window.open('', '_blank');
-        ticketWindow.document.write(window.generarTicketHTML(carrito, subtotal, descuento, total, recibido, cambio, vendedor, fecha));
-        ticketWindow.document.close();
-    } catch(e) {
-        console.error(e);
-    }
+    let f = fecha ? fecha : new Date().toLocaleString('es-ES');
+    window.procesarPDFBackend(carrito, subtotal, descuento, total, recibido, cambio, vendedor, f, 'I');
 };
 
 window.descargarTicketDirecto = function(carrito, subtotal, descuento, total, recibido, cambio, vendedor, fecha = null) {
-    try {
-        const htmlContent = window.generarTicketHTML(carrito, subtotal, descuento, total, recibido, cambio, vendedor, fecha);
-        
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Ticket_Liquour_${new Date().getTime()}.html`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    } catch(e) {
-        console.error(e);
-    }
+    let f = fecha ? fecha : new Date().toLocaleString('es-ES');
+    window.procesarPDFBackend(carrito, subtotal, descuento, total, recibido, cambio, vendedor, f, 'D');
 };
 
 window.imprimirTicket = function(carritoStr, subtotal, descuento, total, recibido, cambio, vendedor = null) {

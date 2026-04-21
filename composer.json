@@ -1,0 +1,17 @@
+{
+    "name": "emers/liquour",
+    "autoload": {
+        "psr-4": {
+            "Emers\\Liquour\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Magmacraft89",
+            "email": "Emerson409denis@gmail.com"
+        }
+    ],
+    "require": {
+        "mpdf/mpdf": "^8.3"
+    }
+}
