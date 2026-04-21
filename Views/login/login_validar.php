@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['usuario'] = $user;
         $_SESSION['rol'] = "admin";
         
-        header("Location: ../Include/Admin/Catalogo_Admin.php");
+        header("Location: ../Include/Admin/dashboard.php");
         exit();
     } 
     else if ($user == "empleado" && $pass == "emp123") {

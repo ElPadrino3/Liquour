@@ -1,180 +1,152 @@
+<?php
+require_once '../../../Config/Liquour_bdd.php';
 
-<?php include '../../Layout/head.php'; ?>
+$bdd = new BDD();
+$conn = $bdd->conectar();
 
+$stmt = $conn->query("
+    SELECT 
+        p.id_producto as id, 
+        p.codigo_barras as barcode, 
+        p.nombre as name, 
+        p.precio_venta as sale_price, 
+        p.precio_compra as purchase_price, 
+        p.stock, 
+        p.imagen as img, 
+        COALESCE(c.nombre, 'Sin categoría') as cat 
+    FROM productos p 
+    LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
+    ORDER BY p.nombre ASC
+");
+$items = $stmt->fetchAll();
+
+$bdd->desconectar();
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Empleado</title>
     <link rel="stylesheet" href="../../../Assets/CSS/nav.css">
     <link rel="stylesheet" href="../../../Assets/CSS/Catalogo_Empleado.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
 
-<?php include '../../Layout/nav_empleado.php'; ?>
+<?php @include '../../Layout/nav_admin.php'; ?> 
+<link rel="stylesheet" href="/LIQUOUR/Assets/CSS/nav.css">
+<main class="catalog-page">
+    <aside class="catalog-sidebar animate__animated animate__fadeInLeft" style="animation-duration: 0.5s;">
+        <div class="sidebar-card">
+            <h2 class="sidebar-title">FILTROS</h2>
 
+            <div class="filter-group">
+                <label for="search-input" class="filter-label">Búsqueda</label>
+                <input type="text" id="search-input" class="search-box" placeholder="Buscar producto, código...">
+            </div>
 
-<main class="main-content">
-    <aside class="cart-section animate__animated animate__fadeInLeft" style="animation-duration: 0.6s;">
-        <div class="cart-card">
-            <h2 class="cart-title">Carrito de compras</h2>
-            <div id="cart-container" class="cart-items-list"></div>
-            <div class="cart-summary">
-                <div class="total-line">
-                    <span>TOTAL</span>
-                    <span id="grand-total">$ 0.00</span>
+            <div class="filter-group">
+                <label class="filter-label">Categorías</label>
+                <div class="category-options">
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Todos" checked>
+                        <span>Todos</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Whisky">
+                        <span>Whisky</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Vino">
+                        <span>Vinos</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Cerveza">
+                        <span>Cervezas</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Tequila">
+                        <span>Tequila</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Vodka">
+                        <span>Vodka</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Ron">
+                        <span>Ron</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Ginebra">
+                        <span>Ginebra</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Champagne">
+                        <span>Champagne</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Mezcal">
+                        <span>Mezcal</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="categoria" value="Licor">
+                        <span>Licores</span>
+                    </label>
                 </div>
-                <button class="btn-next" id="btn-next" onclick="openCheckoutModal()">Siguiente</button>
             </div>
         </div>
     </aside>
 
-    <section class="products-display">
-        <div class="products-grid">
-            <?php
-            $items = [
-                ["id" => 1, "name" => "WHISKY ESCOCÉS 12 AÑOS", "price" => 139.00, "img" => "https://images.pexels.com/photos/11271794/pexels-photo-11271794.jpeg"],
-                ["id" => 2, "name" => "VINO TINTO RESERVA", "price" => 159.00, "img" => "https://images.pexels.com/photos/2912108/pexels-photo-2912108.jpeg"],
-                ["id" => 3, "name" => "BUDWEISER BLACK LAGER", "price" => 18.00, "img" => "https://i.pinimg.com/1200x/d2/72/e1/d272e13fea9d56f79c44d63a085bdf2d.jpg"],
-                ["id" => 4, "name" => "BLUE LABEL - JOHNNY WALKER", "price" => 220.99, "img" => "https://i.pinimg.com/736x/f0/67/97/f0679774f573ddd6dc3c82fd10624a6f.jpg"],
-                ["id" => 5, "name" => "TEQUILA REPOSADO PREMIUM", "price" => 85.00, "img" => "https://i.pinimg.com/736x/4e/df/d7/4edfd76539603505ef771b0ec4a1f343.jpg"],
-                ["id" => 6, "name" => "VODKA GREY GOOSE", "price" => 45.50, "img" => "https://i.pinimg.com/736x/4f/c9/c4/4fc9c44c6d835350c9aa4e8009f61a83.jpg"],
-                ["id" => 7, "name" => "RON AÑEJO 7 AÑOS", "price" => 32.00, "img" => "https://i.pinimg.com/736x/ea/ff/a2/eaffa23a48caa3aab3487219f25de1fe.jpg"],
-                ["id" => 8, "name" => "GINEBRA TANQUERAY", "price" => 29.99, "img" => "https://i.pinimg.com/1200x/ad/90/61/ad9061891a96361c0aac6fab61ab63f0.jpg"],
-                ["id" => 9, "name" => "CHAMPAGNE MOËT & CHANDON", "price" => 110.00, "img" => "https://i.pinimg.com/736x/3c/e4/88/3ce488c312dc2d9b152d8f23b9d243ea.jpg"],
-                ["id" => 10, "name" => "MEZCAL ARTESANAL", "price" => 65.00, "img" => "https://i.pinimg.com/736x/2e/91/4f/2e914fd9c44a0fd9f425a8b7639730a0.jpg"],
-                ["id" => 11, "name" => "CERVEZA ARTESANAL IPA", "price" => 4.50, "img" => "https://i.pinimg.com/736x/39/d7/57/39d757e939c56ff67c1270603d7dadb1.jpg"],
-                ["id" => 12, "name" => "LICOR DE CAFÉ", "price" => 22.00, "img" => "https://i.pinimg.com/736x/29/28/2f/29282fcd6cd3b4e15433484719854e14.jpg"]
-            ];
+    <section class="catalog-results">
+        <div class="results-topbar">
+            <div id="resultado-filtro" class="results-count">Mostrando todos los productos</div>
+        </div>
 
-            foreach ($items as $p): 
+        <div class="products-grid" id="contenedor-productos">
+            <?php
+            $delay = 0.05;
+            foreach ($items as $p):
+                $imagen = !empty($p['img']) ? $p['img'] : 'https://via.placeholder.com/150?text=Sin+Imagen';
+                $stock_actual = isset($p['stock']) && $p['stock'] !== '' ? $p['stock'] : 0;
+                $codigo_actual = !empty($p['barcode']) ? $p['barcode'] : 'N/A';
             ?>
-                <div class="product-card animate__animated animate__fadeInUp" style="animation-duration: 0.8s;">
-                    <div class="img-wrapper">
-                        <img src="<?php echo $p['img']; ?>" alt="<?php echo $p['name']; ?>">
+                <article class="product-card animate__animated animate__fadeInUp item-producto"
+                    data-categoria="<?php echo htmlspecialchars($p['cat']); ?>"
+                    style="animation-duration: 0.5s; animation-delay: <?php echo $delay; ?>s;">
+                    
+                    <div class="product-image-box">
+                        <img src="<?php echo htmlspecialchars($imagen); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" class="product-image">
                     </div>
-                    <div class="info-wrapper">
-                        <h3><?php echo $p['name']; ?></h3>
-                        <p>$<?php echo number_format($p['price'], 2); ?></p>
-                        <button class="btn-add" onclick="addToCart('<?php echo $p['name']; ?>', <?php echo $p['price']; ?>, '<?php echo $p['img']; ?>')">
-                            AGREGAR AL CARRITO
-                        </button>
+
+                    <div class="product-body">
+                        <div class="product-brand"><?php echo strtoupper(htmlspecialchars($p['cat'])); ?></div>
+                        <h3 class="nombre-producto"><?php echo htmlspecialchars($p['name']); ?></h3>
+
+                        <div class="product-meta">
+                            <p><strong>Categoría:</strong> <span class="product-category"><?php echo htmlspecialchars($p['cat']); ?></span></p>
+                            <p class="codigo-producto"><strong>Código:</strong> <?php echo htmlspecialchars($codigo_actual); ?></p>
+                            <p><strong>Stock:</strong> <?php echo htmlspecialchars($stock_actual); ?> uds.</p>
+                        </div>
+
+                        <div class="product-prices">
+                            <div class="buy-price">Compra: $<?php echo number_format((float)$p['purchase_price'], 2); ?></div>
+                            <div class="sale-price">Venta: $<?php echo number_format((float)$p['sale_price'], 2); ?></div>
+                        </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
+                </article>
+            <?php
+                $delay += 0.03;
+            endforeach;
+            
+            if (count($items) === 0):
+            ?>
+                <p style="color: #F5F5DC; text-align: center; grid-column: 1 / -1; font-weight: bold; margin-top: 20px;">No hay productos registrados en la base de datos.</p>
+            <?php endif; ?>
         </div>
     </section>
 </main>
 
-<div id="modal-perfil" class="modal-overlay">
-    <div class="modal-container animate__animated animate__fadeInRight" style="animation-duration: 0.5s;">
-        <div class="modal-header-perfil">
-            <h3>Mi Perfil</h3>
-            <button id="close-modal" class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="perfil-avatar">
-                <img src="../../../Assets/IMG/WhatsApp Image 2026-03-13 at 9.11.48 AM.jpeg" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
-            </div>
-            <div class="perfil-info">
-                <label>Nombre:</label>
-                <p>Empleado Liquour</p>
-                <label>Rol:</label>
-                <p>Empleado</p>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-logout" onclick="alert('Cerrando sesión...')">Cerrar Sesión</button>
-        </div>
-    </div>
-</div>
-
-<div id="modal-checkout" class="modal-overlay">
-    <div class="modal-checkout-container animate__animated animate__zoomIn" style="animation-duration: 0.4s;">
-        <div class="checkout-header">
-            <h2>TU CARRITO DE COMPRAS</h2>
-            <button id="close-checkout" class="close-modal">&times;</button>
-        </div>
-
-        <div class="checkout-content">
-            <div class="checkout-table-wrapper">
-                <table class="checkout-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Producto</th>
-                            <th>Precio</th>
-                            <th>Cantidad</th> 
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody id="checkout-table-body"></tbody>
-                </table>
-            </div>
-
-            <div class="checkout-options">
-                <div class="purchase-options">
-                    <h3 class="options-title">OPCIONES DE COMPRA</h3>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" checked> Compra Inmediata
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox"> Compra de Reserva
-                    </label>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn-cancel" id="btn-cancel-checkout">CANCELAR</button>
-                    <button class="btn-clear" onclick="clearCart()">LIMPIAR</button>
-                    <button class="btn-confirm" id="btn-confirm-checkout">PAGO CON TARJETA</button>
-                </div>
-
-                <div class="reservation-details">
-                    <button class="btn-reserva-big" style="margin-bottom: 10px;">PEDIDO DE RESERVA</button>
-                    <div class="res-box">
-                        <div class="res-header">DETALLES DE RESERVA</div>
-                        <div class="res-body">
-                            <label>Nombre Completo</label>
-                            <input type="text" placeholder="Juan Perez">
-                            <label>Número de Teléfono</label>
-                            <input type="text" placeholder="+1 555-123-4567">
-                            <label>Fecha Límite</label>
-                            <input type="date" value="2024-12-31">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="modal-payment" class="modal-overlay">
-    <div class="modal-container animate__animated animate__zoomIn" style="width: 400px; animation-duration: 0.4s;">
-        <div class="modal-header-perfil">
-            <h3>PAGO CON TARJETA</h3>
-            <button id="close-payment" class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="res-body" style="padding: 0;"> 
-                
-                <label>Titular de la tarjeta</label>
-                <input type="text" placeholder="Ej. Juan Perez" required style="margin-bottom: 15px;">
-
-                <label>Número de Tarjeta</label>
-                <input type="text" placeholder="0000 0000 0000 0000" maxlength="19" required style="margin-bottom: 15px;">
-
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label>Vencimiento</label>
-                        <input type="text" placeholder="MM/AA" maxlength="5" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label>CVV</label>
-                        <input type="password" placeholder="123" maxlength="4" required>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer" style="margin-top: 20px;">
-            <button class="btn-reserva-big" id="btn-procesar-pago" style="margin-top: 0; background-color: #2a251e; color: #f1e4bc; border: 1px solid #f1e4bc;">PROCESAR PAGO</button>
-        </div>
-    </div>
-</div>
-
-<script src="../../../Assets/JS/Catalogo_Empleado.js?v=2.0"></script>
-
+<script src="../../../Assets/JS/Catalogo_Empleado.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

@@ -1,0 +1,157 @@
+:root {
+    --negro-carbon: #1A1A1A;
+    --dorado-mate: #C5A059;
+    --gris-oxford: #4A4A4A;
+    --blanco-crema: #F5F5DC;
+}
+
+body, body.bg-light {
+    background-color: #0a0a0a !important;
+    color: var(--blanco-crema);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2.text-primary {
+    color: var(--dorado-mate) !important;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+h2.text-primary::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background-color: var(--dorado-mate);
+    margin-top: 12px;
+}
+
+p.text-muted {
+    color: var(--gris-oxford) !important;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+.card {
+    border: 1px solid rgba(197, 160, 89, 0.15) !important;
+    border-radius: 8px;
+    background-color: var(--negro-carbon) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(197, 160, 89, 0.15) !important;
+    background-color: transparent !important;
+    padding: 20px 20px 15px 20px !important;
+}
+
+.card-header.bg-dark h5, .card-header.bg-secondary h5 {
+    color: var(--dorado-mate) !important;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+
+.card-body {
+    background-color: transparent !important;
+    color: var(--blanco-crema) !important;
+    padding: 25px !important;
+}
+
+.form-label {
+    color: var(--dorado-mate) !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-control {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(197, 160, 89, 0.3) !important;
+    color: var(--blanco-crema) !important;
+    border-radius: 4px;
+    padding: 12px 15px;
+}
+
+.form-control:focus {
+    background-color: rgba(197, 160, 89, 0.05) !important;
+    border-color: var(--dorado-mate) !important;
+    color: var(--blanco-crema) !important;
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.1) !important;
+    outline: none !important;
+}
+
+::placeholder {
+    color: var(--gris-oxford) !important;
+    opacity: 0.6 !important;
+}
+
+.btn-primary {
+    background-color: var(--dorado-mate) !important;
+    border: none !important;
+    color: #000 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 14px !important;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #d4b272 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(197, 160, 89, 0.25) !important;
+}
+
+.table {
+    margin-bottom: 0 !important;
+}
+
+.table-dark th {
+    background-color: transparent !important;
+    color: var(--gris-oxford) !important;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.15) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    padding: 15px !important;
+}
+
+.table > tbody > tr > *, 
+.table-striped > tbody > tr:nth-of-type(odd) > *,
+.table-striped > tbody > tr:nth-of-type(even) > * {
+    background-color: transparent !important;
+    color: var(--blanco-crema) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    padding: 18px 15px !important;
+    vertical-align: middle;
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: rgba(197, 160, 89, 0.05) !important;
+}
+
+.badge.bg-success {
+    background-color: rgba(197, 160, 89, 0.1) !important;
+    color: var(--dorado-mate) !important;
+    border: 1px solid var(--dorado-mate) !important;
+    padding: 6px 14px;
+    font-weight: 500;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-danger {
+    background-color: rgba(74, 74, 74, 0.1) !important;
+    color: var(--gris-oxford) !important;
+    border: 1px solid var(--gris-oxford) !important;
+    padding: 6px 14px;
+    font-weight: 500;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+}

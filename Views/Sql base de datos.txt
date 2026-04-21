@@ -141,3 +141,7 @@ CREATE TABLE detalle_compras (
     FOREIGN KEY (id_producto) REFERENCES productos(id_producto),
     FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor)
 );
+
+ALTER TABLE ventas ADD id_empleado INT NULL; //////// agregan eso por si les da error 
+ALTER TABLE usuarios ADD num_caja INT NULL;
+ALTER TABLE usuarios ADD foto_perfil VARCHAR(255) NULL;

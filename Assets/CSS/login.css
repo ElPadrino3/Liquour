@@ -1,20 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
 body {
     background-color: #000000;
-    font-family: Arial, sans-serif;
+    /* Usamos Montserrat para darle más clase, sino ponle Arial */
+    font-family: 'Montserrat', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden; /* Importante para que no salgan barras de desplazamiento por la animación */
 }
 
+/* --- ESTO ES LO NUEVO: EL FONDO ANIMADO --- */
+.liquour-page-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* Lo manda detrás de todo */
+    background-color: #000000;
+    /* Tres capas de partículas doradas con diferentes opacidades y tamaños */
+    background-image: 
+      radial-gradient(circle, rgba(181, 148, 83, 0.9) 1px, transparent 2px),
+      radial-gradient(circle, rgba(181, 148, 83, 0.6) 1.5px, transparent 2px),
+      radial-gradient(circle, rgba(181, 148, 83, 0.3) 2px, transparent 3px);
+    background-size: 100px 100px, 150px 150px, 250px 250px;
+    background-position: 0 0, 20px 50px, 100px 150px;
+    animation: polvoDeOroLogin 20s linear infinite;
+}
+
+@keyframes polvoDeOroLogin {
+    0% {
+        background-position: 0px 0px, 20px 50px, 100px 150px;
+    }
+    100% {
+        /* Movimiento matemático perfecto para un bucle sin cortes */
+        background-position: 100px 100px, 170px 200px, 350px 400px;
+    }
+}
+
+/* --- TUS ESTILOS ORIGINALES MANTENIDOS AL 100% --- */
 .login-container {
-    background-color: #636363;
+    background-color: #636363; /* Tu color gris original */
     width: 400px;
     padding: 40px;
     border-radius: 20px;
-    border: 2px solid #b59453;
+    border: 2px solid #b59453; /* Tu dorado original */
     text-align: center;
+    position: relative; /* Asegura que la caja esté sobre el fondo animado */
+    z-index: 1;
 }
 
 .logo-container img {
@@ -51,6 +87,14 @@ h2 {
     color: white;
     box-sizing: border-box;
     outline: none;
+    font-family: 'Montserrat', sans-serif;
+    transition: 0.3s ease;
+}
+
+/* Toque de caché: el input brilla en dorado cuando haces clic */
+.form-group input:focus {
+    border-color: #F5F5DC;
+    box-shadow: 0 0 10px rgba(181, 148, 83, 0.4);
 }
 
 .btn-ingresar {
@@ -65,6 +109,12 @@ h2 {
     cursor: pointer;
     margin-top: 10px;
     text-transform: uppercase;
+    transition: 0.3s ease;
+}
+
+.btn-ingresar:hover {
+    background-color: #F5F5DC; /* Cambia a blanco crema al pasar el mouse */
+    box-shadow: 0 0 15px rgba(181, 148, 83, 0.5);
 }
 
 .footer-text {
@@ -73,4 +123,3 @@ h2 {
     margin-top: 30px;
     text-transform: uppercase;
 }
-
