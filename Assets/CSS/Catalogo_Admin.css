@@ -376,3 +376,36 @@ body {
 .btn-confirmar-admin:hover {
     background: #f1e4bc;
 }
+
+input[type=range] {
+    -webkit-appearance: none;
+    background: #3d3428;
+    height: 8px;
+    border-radius: 5px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #c5a87a;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+    transition: 0.2s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(197, 168, 122, 0.5);
+}
+
+input[type=range]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #c5a87a;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+}

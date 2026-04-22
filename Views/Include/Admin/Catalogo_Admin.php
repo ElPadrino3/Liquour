@@ -43,9 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $codigo_barras = $_POST['codigo_barras'];
         $precio_compra = (float)$_POST['precio_compra'];
         $precio_venta = (float)$_POST['precio_venta'];
-        $stock = (int)$_POST['stock'];
+        $nuevo_stock_total = (int)$_POST['stock'];
         $id_categoria = $_POST['id_categoria'];
-        
+        $id_proveedor = !empty($_POST['id_proveedor']) ? (int)$_POST['id_proveedor'] : 1;
+
+        $stmtOld = $conexion->prepare("SELECT stock FROM productos WHERE id_producto = ?");
+        $stmtOld->execute([$id_producto]);
+        $stock_anterior = $stmtOld->fetchColumn();
+        $cantidad_agregada = $nuevo_stock_total - $stock_anterior;
+
         $imagen_actual = $_POST['imagen_actual'];
         $imagen_path = $imagen_actual;
 
@@ -58,10 +64,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         try {
+            $conexion->beginTransaction();
+
             $stmt = $conexion->prepare("UPDATE productos SET nombre=?, codigo_barras=?, precio_compra=?, precio_venta=?, stock=?, id_categoria=?, imagen=? WHERE id_producto=?");
-            $stmt->execute([$nombre, $codigo_barras, $precio_compra, $precio_venta, $stock, $id_categoria, $imagen_path, $id_producto]);
-            $mensaje = "Producto actualizado correctamente.";
+            $stmt->execute([$nombre, $codigo_barras, $precio_compra, $precio_venta, $nuevo_stock_total, $id_categoria, $imagen_path, $id_producto]);
+
+            if ($cantidad_agregada > 0) {
+                $subtotal = $cantidad_agregada * $precio_compra;
+                $stmtC = $conexion->prepare("INSERT INTO compras (fecha, total, id_usuario) VALUES (NOW(), ?, ?)");
+                $stmtC->execute([$subtotal, $_SESSION['id_usuario'] ?? 1]);
+                $id_compra_auto = $conexion->lastInsertId();
+
+                $stmtD = $conexion->prepare("INSERT INTO detalle_compras (id_compra, id_producto, cantidad, precio_compra, subtotal, id_proveedor) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmtD->execute([$id_compra_auto, $id_producto, $cantidad_agregada, $precio_compra, $subtotal, $id_proveedor]);
+            }
+
+            $conexion->commit();
+            $mensaje = "Stock actualizado y compra registrada.";
         } catch (Exception $e) {
+            $conexion->rollBack();
             $error = "Error al actualizar: " . $e->getMessage();
         }
     }
@@ -94,9 +115,7 @@ $alertas_stock = 0;
 
 foreach ($productos as $p) {
     $stock_global += $p['stock'];
-    if ($p['stock'] <= 10) {
-        $alertas_stock++;
-    }
+    if ($p['stock'] <= 10) { $alertas_stock++; }
 }
 ?>
 <!DOCTYPE html>
@@ -178,38 +197,26 @@ foreach ($productos as $p) {
             <div class="table-body" id="inventory-body">
                 <?php foreach ($productos as $p): 
                     $imagen = !empty($p['imagen']) ? $p['imagen'] : 'https://images.pexels.com/photos/11271794/pexels-photo-11271794.jpeg';
-                    $codigo = !empty($p['codigo_barras']) ? $p['codigo_barras'] : 'Sin Código';
-                    $categoria = !empty($p['nombre_categoria']) ? $p['nombre_categoria'] : 'Sin Categoría';
                     $stock = (int)$p['stock'];
                     $porcentaje = min(($stock / 100) * 100, 100);
                     $colorBarra = $stock <= 10 ? '#e74c3c' : '#c5a87a';
                     $prodJSON = htmlspecialchars(json_encode($p), ENT_QUOTES, 'UTF-8');
                 ?>
                 <div class="table-row animate__animated animate__fadeIn">
-                    <div class="col-img">
-                        <img src="<?php echo htmlspecialchars($imagen); ?>" alt="Img">
-                    </div>
+                    <div class="col-img"><img src="<?php echo htmlspecialchars($imagen); ?>"></div>
                     <div class="col-info">
                         <strong><?php echo htmlspecialchars($p['nombre']); ?></strong>
-                        <small><?php echo htmlspecialchars($codigo); ?></small>
+                        <small><?php echo htmlspecialchars($p['codigo_barras']); ?></small>
                     </div>
-                    <div class="col-brand">
-                        <?php echo htmlspecialchars($categoria); ?>
-                    </div>
-                    <div class="col-price">
-                        $<?php echo number_format($p['precio_compra'], 2); ?>
-                    </div>
+                    <div class="col-brand"><?php echo htmlspecialchars($p['nombre_categoria']); ?></div>
+                    <div class="col-price">$<?php echo number_format($p['precio_compra'], 2); ?></div>
                     <div class="col-stock">
-                        <div class="stock-info">
-                            <span>Cant: <?php echo $stock; ?></span>
-                        </div>
+                        <div class="stock-info"><span>Cant: <?php echo $stock; ?> / 100</span></div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: <?php echo $porcentaje; ?>%; background-color: <?php echo $colorBarra; ?>;"></div>
                         </div>
                     </div>
-                    <div class="col-status">
-                        <span class="badge-activo">ACTIVO</span>
-                    </div>
+                    <div class="col-status"><span class="badge-activo">ACTIVO</span></div>
                     <div class="col-actions">
                         <button class="action-btn btn-view" onclick="abrirModalView(<?php echo $prodJSON; ?>)"><i class="fas fa-eye"></i></button>
                         <button class="action-btn btn-edit" onclick="abrirModalEdit(<?php echo $prodJSON; ?>)"><i class="fas fa-edit"></i></button>
@@ -224,21 +231,12 @@ foreach ($productos as $p) {
 
 <div id="modal-add" class="modal-overlay">
     <div class="modal-container admin-form-modal animate__animated animate__zoomIn">
-        <div class="modal-header-perfil">
-            <h3>NUEVO PRODUCTO</h3>
-            <button class="close-modal" onclick="cerrarModal('modal-add')">&times;</button>
-        </div>
-        <form method="POST" action="" enctype="multipart/form-data">
+        <div class="modal-header-perfil"><h3>NUEVO PRODUCTO</h3><button class="close-modal" onclick="cerrarModal('modal-add')">&times;</button></div>
+        <form method="POST" enctype="multipart/form-data">
             <div class="modal-body">
                 <div class="admin-input-row">
-                    <div class="admin-input-group">
-                        <label>Nombre del Producto</label>
-                        <input type="text" name="nombre" required>
-                    </div>
-                    <div class="admin-input-group">
-                        <label>Código de Barras (SKU)</label>
-                        <input type="text" name="codigo_barras" required>
-                    </div>
+                    <div class="admin-input-group"><label>Nombre</label><input type="text" name="nombre" required></div>
+                    <div class="admin-input-group"><label>SKU</label><input type="text" name="codigo_barras" required></div>
                 </div>
                 <div class="admin-input-row">
                     <div class="admin-input-group">
@@ -246,110 +244,84 @@ foreach ($productos as $p) {
                         <select name="id_categoria" id="add_categoria" required onchange="detectarProveedor('add')">
                             <option value="">Selecciona...</option>
                             <?php foreach($categorias as $cat): ?>
-                                <option value="<?php echo $cat['id_categoria']; ?>" data-nombre="<?php echo htmlspecialchars($cat['nombre']); ?>"><?php echo htmlspecialchars($cat['nombre']); ?></option>
+                                <option value="<?php echo $cat['id_categoria']; ?>"><?php echo htmlspecialchars($cat['nombre']); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="admin-input-group">
-                        <label>Proveedor Sugerido</label>
-                        <input type="text" id="add_proveedor_nombre" readonly style="background: #1a1a1a; color: #a39678; cursor: not-allowed;" placeholder="Automático...">
-                        <input type="hidden" name="id_proveedor" id="add_proveedor_id">
+                        <label>Proveedor</label>
+                        <select name="id_proveedor" id="add_proveedor_id" required>
+                            <option value="">Selecciona...</option>
+                            <?php foreach($proveedores as $prov): ?>
+                                <option value="<?php echo $prov['id_proveedor']; ?>"><?php echo htmlspecialchars($prov['nombre']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 </div>
                 <div class="admin-input-row">
-                    <div class="admin-input-group">
-                        <label>Costo ($)</label>
-                        <input type="number" name="precio_compra" step="0.01" required>
-                    </div>
-                    <div class="admin-input-group">
-                        <label>Precio Venta ($)</label>
-                        <input type="number" name="precio_venta" step="0.01" required>
-                    </div>
-                    <div class="admin-input-group">
-                        <label>Stock Inicial</label>
-                        <input type="number" name="stock" required>
-                    </div>
+                    <div class="admin-input-group"><label>Costo</label><input type="number" name="precio_compra" step="0.01" required></div>
+                    <div class="admin-input-group"><label>Venta</label><input type="number" name="precio_venta" step="0.01" required></div>
+                    <div class="admin-input-group"><label>Stock Inicial</label><input type="number" name="stock" required></div>
                 </div>
                 <div class="admin-input-row">
-                    <div class="admin-input-group">
-                        <label>Imagen del Producto</label>
-                        <input type="file" name="imagen" accept="image/*" id="add_imagen_input" onchange="previewImage(event, 'add_preview')">
-                    </div>
+                    <div class="admin-input-group"><label>Imagen</label><input type="file" name="imagen" accept="image/*" onchange="previewImage(event, 'add_preview')"></div>
                 </div>
-                <div class="preview-container">
-                    <img id="add_preview" style="display:none; max-height: 100px; border-radius: 8px;">
-                </div>
+                <div class="preview-container"><img id="add_preview" style="display:none; max-height: 80px;"></div>
             </div>
-            <div class="modal-footer">
-                <button type="submit" name="btn_add" class="btn-confirmar-admin">GUARDAR PRODUCTO</button>
-            </div>
+            <div class="modal-footer"><button type="submit" name="btn_add" class="btn-confirmar-admin">GUARDAR</button></div>
         </form>
     </div>
 </div>
 
 <div id="modal-edit" class="modal-overlay">
     <div class="modal-container admin-form-modal animate__animated animate__zoomIn">
-        <div class="modal-header-perfil">
-            <h3>EDITAR PRODUCTO</h3>
-            <button class="close-modal" onclick="cerrarModal('modal-edit')">&times;</button>
-        </div>
-        <form method="POST" action="" enctype="multipart/form-data">
+        <div class="modal-header-perfil"><h3>EDITAR PRODUCTO</h3><button class="close-modal" onclick="cerrarModal('modal-edit')">&times;</button></div>
+        <form method="POST" enctype="multipart/form-data">
             <div class="modal-body">
                 <input type="hidden" name="id_producto" id="edit_id">
                 <input type="hidden" name="imagen_actual" id="edit_imagen_actual">
-                
                 <div class="admin-input-row">
-                    <div class="admin-input-group">
-                        <label>Nombre del Producto</label>
-                        <input type="text" name="nombre" id="edit_nombre" required>
-                    </div>
-                    <div class="admin-input-group">
-                        <label>Código de Barras (SKU)</label>
-                        <input type="text" name="codigo_barras" id="edit_codigo" required>
-                    </div>
+                    <div class="admin-input-group"><label>Nombre</label><input type="text" name="nombre" id="edit_nombre" required></div>
+                    <div class="admin-input-group"><label>SKU</label><input type="text" name="codigo_barras" id="edit_codigo" required></div>
                 </div>
                 <div class="admin-input-row">
                     <div class="admin-input-group">
                         <label>Categoría</label>
                         <select name="id_categoria" id="edit_categoria" required onchange="detectarProveedor('edit')">
                             <?php foreach($categorias as $cat): ?>
-                                <option value="<?php echo $cat['id_categoria']; ?>" data-nombre="<?php echo htmlspecialchars($cat['nombre']); ?>"><?php echo htmlspecialchars($cat['nombre']); ?></option>
+                                <option value="<?php echo $cat['id_categoria']; ?>"><?php echo htmlspecialchars($cat['nombre']); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="admin-input-group">
-                        <label>Proveedor Sugerido</label>
-                        <input type="text" id="edit_proveedor_nombre" readonly style="background: #1a1a1a; color: #a39678; cursor: not-allowed;" placeholder="Automático...">
-                        <input type="hidden" name="id_proveedor" id="edit_proveedor_id">
+                        <label>Proveedor</label>
+                        <select name="id_proveedor" id="edit_proveedor_id" required>
+                            <option value="">Selecciona...</option>
+                            <?php foreach($proveedores as $prov): ?>
+                                <option value="<?php echo $prov['id_proveedor']; ?>"><?php echo htmlspecialchars($prov['nombre']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 </div>
                 <div class="admin-input-row">
+                    <div class="admin-input-group"><label>Costo</label><input type="number" name="precio_compra" id="edit_costo" step="0.01" required></div>
+                    <div class="admin-input-group"><label>Venta</label><input type="number" name="precio_venta" id="edit_precio" step="0.01" required></div>
                     <div class="admin-input-group">
-                        <label>Costo ($)</label>
-                        <input type="number" name="precio_compra" id="edit_costo" step="0.01" required>
-                    </div>
-                    <div class="admin-input-group">
-                        <label>Precio Venta ($)</label>
-                        <input type="number" name="precio_venta" id="edit_precio" step="0.01" required>
-                    </div>
-                    <div class="admin-input-group">
-                        <label>Stock</label>
-                        <input type="number" name="stock" id="edit_stock" required>
+                        <label>Rellenar Stock (Máx. 100)</label>
+                        <div class="slider-container">
+                            <input type="range" id="edit_stock_slider" min="0" max="100" value="0" step="1" style="width:100%; accent-color:#c5a87a;">
+                            <span id="stock_val_display" style="color:#c5a87a; font-weight:bold; font-size:0.9rem;">0 / 100</span>
+                            <small id="costo_recarga_display" style="color:#a39678; display:block; height:15px;"></small>
+                            <input type="hidden" name="stock" id="edit_stock">
+                        </div>
                     </div>
                 </div>
                 <div class="admin-input-row">
-                    <div class="admin-input-group">
-                        <label>Cambiar Imagen</label>
-                        <input type="file" name="imagen" accept="image/*" onchange="previewImage(event, 'edit_preview')">
-                    </div>
+                    <div class="admin-input-group"><label>Cambiar Imagen</label><input type="file" name="imagen" accept="image/*" onchange="previewImage(event, 'edit_preview')"></div>
                 </div>
-                <div class="preview-container">
-                    <img id="edit_preview" style="max-height: 100px; border-radius: 8px;">
-                </div>
+                <div class="preview-container"><img id="edit_preview" style="max-height: 80px;"></div>
             </div>
-            <div class="modal-footer">
-                <button type="submit" name="btn_edit" class="btn-confirmar-admin">ACTUALIZAR PRODUCTO</button>
-            </div>
+            <div class="modal-footer"><button type="submit" name="btn_edit" class="btn-confirmar-admin">ACTUALIZAR</button></div>
         </form>
     </div>
 </div>

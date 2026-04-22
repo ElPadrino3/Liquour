@@ -44,19 +44,19 @@ while($row = $stmtChart->fetch()) {
 
 $stmtOrders = $conexion->query("
     SELECT 
-        CONCAT('ORD-', c.id_compra) as orden,
-        DATE(c.fecha) as fecha,
-        prov.nombre as proveedor,
+        IFNULL(CONCAT('ORD-', c.id_compra), 'N/A') as orden,
+        IFNULL(DATE(c.fecha), 'Sin fecha') as fecha,
+        IFNULL(prov.nombre, 'Sin proveedor') as proveedor,
         p.nombre as producto,
-        dc.cantidad as qty,
-        CONCAT('$', FORMAT(dc.precio_compra, 2)) as precio,
-        CONCAT('$', FORMAT(dc.subtotal, 2)) as total,
+        IFNULL(dc.cantidad, 0) as qty,
+        CONCAT('$', FORMAT(IFNULL(dc.precio_compra, 0), 2)) as precio,
+        CONCAT('$', FORMAT(IFNULL(dc.subtotal, 0), 2)) as total,
         'Recibido' as estado 
-    FROM detalle_compras dc
-    JOIN compras c ON dc.id_compra = c.id_compra
-    JOIN productos p ON dc.id_producto = p.id_producto
-    JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor
-    ORDER BY c.fecha DESC
+    FROM productos p
+    LEFT JOIN detalle_compras dc ON p.id_producto = dc.id_producto
+    LEFT JOIN compras c ON dc.id_compra = c.id_compra
+    LEFT JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor
+    ORDER BY c.fecha DESC, p.nombre ASC
 ");
 $ordersData = $stmtOrders->fetchAll();
 
@@ -78,7 +78,6 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
 <?php @include '../../Layout/nav_admin.php'; ?> 
 
 <div class="page">
-
   <div class="page-heading">Gestión de Compras</div>
 
   <div class="kpi-row">
@@ -89,10 +88,10 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
       <div class="kpi-tag">Actualizado</div>
     </div>
     <div class="kpi">
-      <div class="kpi-lbl">Órdenes Pendientes</div>
-      <div class="kpi-val">0</div>
-      <div class="kpi-sub">En espera de entrega</div>
-      <div class="kpi-tag warn">Revisar</div>
+      <div class="kpi-lbl">Órdenes Realizadas</div>
+      <div class="kpi-val"><?php echo $kpi['ordenes_mes']; ?></div>
+      <div class="kpi-sub">Total del mes actual</div>
+      <div class="kpi-tag warn">Info</div>
     </div>
     <div class="kpi">
       <div class="kpi-lbl">Proveedores Activos</div>
@@ -120,7 +119,6 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
     <div class="card">
       <div class="card-header">
         <div class="card-title">Top Proveedores</div>
-        <button class="card-action">Ver todos</button>
       </div>
       <div class="prov-list">
         <?php foreach($topProveedores as $prov): 
@@ -141,7 +139,7 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
   <div class="card" style="padding:0">
     <div class="toolbar">
       <div class="toolbar-left">
-        <input class="search-input" type="text" placeholder="Buscar orden…" id="searchInput" />
+        <input class="search-input" type="text" placeholder="Buscar orden o producto…" id="searchInput" />
         <select class="filter-select" id="statusFilter">
           <option value="">Todos los estados</option>
           <option value="Recibido">Recibido</option>
@@ -155,7 +153,7 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
           <?php endforeach; ?>
         </select>
       </div>
-      <button class="export-btn">↓ Exportar CSV</button>
+      <button type="button" class="export-btn" onclick="imprimirReporteCompras()">↓ Exportar PDF</button>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -179,17 +177,21 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
       <div class="page-btns" id="pageBtns"></div>
     </div>
   </div>
-
 </div>
 
 <script>
 const ORDERS = <?php echo json_encode($ordersData); ?>;
 const CHART_DATA = <?php echo json_encode($chartData); ?>;
-
 const ROWS = 7;
 let page = 1, search = '', statusF = '', provF = '';
-
 const BADGE = { Recibido:'badge-ok', Pendiente:'badge-pending', Cancelado:'badge-cancel' };
+
+function imprimirReporteCompras() {
+    const busqueda = document.getElementById('searchInput').value;
+    const proveedor = document.getElementById('provFilter').value;
+    const url = `../../../../Controller/Public/ReporteController.php?reporte=compras&busqueda=${encodeURIComponent(busqueda)}&vendedor=${encodeURIComponent(proveedor)}`;
+    window.open(url, '_blank');
+}
 
 function filtered() {
   return ORDERS.filter(r => {
@@ -204,10 +206,9 @@ function render() {
   const pages = Math.max(1, Math.ceil(rows.length / ROWS));
   if (page > pages) page = 1;
   const slice = rows.slice((page-1)*ROWS, page*ROWS);
-
   const tbody = document.getElementById('tableBody');
   if(slice.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">No hay compras registradas.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">No hay registros encontrados.</td></tr>';
   } else {
       tbody.innerHTML = slice.map(r => `
         <tr>
@@ -221,9 +222,7 @@ function render() {
           <td><span class="badge ${BADGE[r.estado] || 'badge-ok'}">${r.estado}</span></td>
         </tr>`).join('');
   }
-
   document.getElementById('pageInfo').textContent = `Página ${page} de ${pages}`;
-
   const pb = document.getElementById('pageBtns');
   pb.innerHTML = '';
   const prev = Object.assign(document.createElement('button'),{className:'page-btn',textContent:'‹',disabled:page===1});
@@ -265,8 +264,8 @@ new Chart(document.getElementById('comprasChart'),{
   }
 });
 </script>
-
-<script src="../../../Assets/JS/Catalogo_Admin.js"></script>
-
+<script id="ordersData" type="application/json"><?php echo json_encode($ordersData); ?></script>
+<script id="chartData" type="application/json"><?php echo json_encode($chartData); ?></script>
+<script src="../../../Assets/JS/Compras.js"></script>
 </body>
 </html>

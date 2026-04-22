@@ -423,3 +423,27 @@ body {
 .modal-ventas-pie { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #f9f9f9; border-radius: 0 0 13px 13px; border-top: 1px solid #eee;}
 .mostrando-txt { font-size: 0.8rem; color: var(--gris-oxford); }
 .btn-cerrar-secundario { background: var(--gris-oxford); color: var(--blanco-crema); border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+/* Ajuste para el badge de Venta Nueva */
+.v-badge.nuevo-status {
+    background-color: var(--dorado-mate) !important;
+    color: var(--negro-carbon) !important;
+    width: auto !important; /* Que se ajuste al texto */
+    padding: 2px 10px;
+    font-size: 0.65rem;
+    height: 22px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Para que el contenedor de la info no se mueva */
+.venta-item {
+    min-height: 60px;
+    align-items: center;
+}
+
+/* Si el #Nuevo sale en el listado de ventas recientes */
+.venta-item .v-badge {
+    transition: all 0.3s ease;
+}
