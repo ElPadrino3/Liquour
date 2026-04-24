@@ -1,9 +1,11 @@
+
 :root {
-    --negro-carbon: #161616;
-    --dorado-mate: #D4AF37;
-    --gris-fondo: #2c2c2c;
+    /* Colores por defecto de Liquour */
+    --dorado-mate: #C5A059;
+    --negro-carbon: #1A1A1A;
+    --blanco-crema: #F5F5DC;
     --gris-oxford: #4A4A4A;
-    --blanco-crema: #f9eed5;
+    --gris-fondo: #2c2c2c;
     --white: #ffffff;
     --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -446,4 +448,70 @@ body {
 /* Si el #Nuevo sale en el listado de ventas recientes */
 .venta-item .v-badge {
     transition: all 0.3s ease;
+}
+
+/* ============================================
+   ESTILO PARA PRODUCTOS SIN STOCK
+   ============================================ */
+
+.product-card.sin-stock {
+    opacity: 0.6;
+    filter: grayscale(0.3);
+    position: relative;
+    cursor: not-allowed !important;
+}
+
+.product-card.sin-stock::before {
+    content: "⚠️ AGOTADO";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #e74c3c;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    z-index: 10;
+    white-space: nowrap;
+    border: 1px solid #e74c3c;
+    pointer-events: none;
+}
+
+.product-card.sin-stock:hover {
+    transform: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.product-card.sin-stock .product-controls {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.product-card.sin-stock .toggle-icon {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.product-card.sin-stock .stock-pill {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+/* Animación de entrada para los productos */
+.product-card {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Efecto de vibración sutil cuando intentas agregar un producto agotado */
+@keyframes shakeWarning {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+.product-card.sin-stock:active {
+    animation: shakeWarning 0.2s ease-in-out;
 }

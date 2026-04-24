@@ -1,0 +1,75 @@
+/* ============================================
+   COLORES ORIGINALES DE LIQUOUR
+   ============================================ */
+:root {
+    /* Dorado Mate - Acentos, botones, bordes */
+    --color-dorado: #C5A059;
+    --color-dorado-oscuro: #A8883A;
+    --color-dorado-claro: #D4B87A;
+    
+    /* Negro Carbón - Fondos principales */
+    --bg-carbon: #1A1A1A;
+    --bg-carbon-claro: #2A2A2A;
+    --bg-carbon-oscuro: #0D0D0D;
+    
+    /* Gris Oxford - Tarjetas, paneles */
+    --bg-gris-oxford: #4A4A4A;
+    
+    /* Blanco Crema - Textos */
+    --text-blanco-crema: #F5F5DC;
+    --text-gris-claro: #D0D0D0;
+    
+    /* Bordes */
+    --border-fuerte: #4A4A4A;
+    --border-suave: rgba(74, 74, 74, 0.3);
+}
+
+/* Aplicación a elementos comunes */
+body {
+    background-color: var(--bg-carbon);
+    color: var(--text-blanco-crema);
+}
+
+.card, .panel, .modal-content {
+    background: var(--bg-carbon-claro);
+    border: 1px solid var(--border-fuerte);
+}
+
+.btn-primary, .btn-guardar {
+    background: var(--color-dorado);
+    color: var(--bg-carbon);
+}
+
+.btn-primary:hover, .btn-guardar:hover {
+    background: var(--color-dorado-claro);
+}
+
+th {
+    background: var(--bg-carbon-oscuro);
+    color: var(--color-dorado);
+    border-bottom: 2px solid var(--color-dorado);
+}
+
+td {
+    border-bottom: 1px solid var(--border-suave);
+    color: var(--text-gris-claro);
+}
+
+input, select, textarea {
+    background: var(--bg-carbon-oscuro);
+    border: 1px solid var(--border-fuerte);
+    color: var(--text-blanco-crema);
+}
+
+input:focus {
+    border-color: var(--color-dorado);
+    outline: none;
+}
+
+.nav-item, .menu-link {
+    color: var(--text-gris-claro);
+}
+
+.nav-item:hover, .nav-item.active {
+    color: var(--color-dorado);
+}

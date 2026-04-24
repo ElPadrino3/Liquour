@@ -1,3 +1,7 @@
+/* ============================================
+   PROVEEDORES CSS - CON VARIABLES DINÁMICAS
+   ============================================ */
+
 :root {
     --negro-carbon: #1A1A1A;
     --dorado-mate: #C5A059;
@@ -102,7 +106,8 @@ p.text-muted {
 }
 
 .btn-primary:hover {
-    background-color: #d4b272 !important;
+    background-color: var(--dorado-mate) !important;
+    filter: brightness(1.1);
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(197, 160, 89, 0.25) !important;
 }
@@ -136,6 +141,25 @@ p.text-muted {
     background-color: rgba(197, 160, 89, 0.05) !important;
 }
 
+/* Estatus Operativo */
+span[style*="background: rgba(197, 160, 89, 0.1)"] {
+    background: rgba(197, 160, 89, 0.1) !important;
+    color: var(--dorado-mate) !important;
+    border: 1px solid var(--dorado-mate) !important;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Estatus Suspendido */
+span[style*="background: rgba(220, 53, 69, 0.1)"] {
+    background: rgba(74, 74, 74, 0.1) !important;
+    color: var(--gris-oxford) !important;
+    border: 1px solid var(--gris-oxford) !important;
+}
+
 .badge.bg-success {
     background-color: rgba(197, 160, 89, 0.1) !important;
     color: var(--dorado-mate) !important;
@@ -154,4 +178,14 @@ p.text-muted {
     font-weight: 500;
     border-radius: 20px;
     letter-spacing: 0.5px;
+}
+
+/* Código de proveedor */
+td span strong {
+    color: var(--dorado-mate) !important;
+}
+
+/* Número de proveedor */
+td span[style*="color: #666;"] {
+    color: var(--gris-oxford) !important;
 }

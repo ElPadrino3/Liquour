@@ -1,11 +1,11 @@
-<header class="main-header" id="mainHeader">
-    <div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
-        <img src="/LIQUOUR/Assets/IMG/Logo.jpeg" alt="Liquour Logo" style="height: 40px; width: auto; object-fit: contain;">
-        <span class="logo-text">LIQUOUR</span>
-    </div>
-    <nav class="main-nav">
-        <a href="#inicio" class="active">Inicio</a>
-        <a href="#nosotros">Nosotros</a>
-        <a href="#catalogo">Catálogo</a>
-    </nav>
-</header>
+<head>
+    <!-- Tus CSS -->
+    <link rel="stylesheet" href="/LIQUOUR/Assets/CSS/nav.css">
+    <link rel="stylesheet" href="/LIQUOUR/Assets/CSS/theme-system.css">
+    
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Theme Manager -->
+    <script src="/LIQUOUR/Assets/JS/theme-manager.js"></script>
+</head>

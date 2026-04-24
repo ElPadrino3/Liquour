@@ -65,6 +65,58 @@ $bdd->desconectar();
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script>
+(function() {
+    const coloresGuardados = localStorage.getItem('liquour_colors');
+    if (coloresGuardados) {
+        try {
+            const colores = JSON.parse(coloresGuardados);
+            const dorado = colores['--color-dorado'] || '#C5A059';
+            const fondo = colores['--bg-carbon'] || '#1A1A1A';
+            const texto = colores['--text-blanco-crema'] || '#F5F5DC';
+            const borde = colores['--border-fuerte'] || '#4A4A4A';
+            
+            function lightenColor(hex, percent) {
+                let r = parseInt(hex.slice(1, 3), 16);
+                let g = parseInt(hex.slice(3, 5), 16);
+                let b = parseInt(hex.slice(5, 7), 16);
+                r = Math.min(255, r + (r * percent / 100));
+                g = Math.min(255, g + (g * percent / 100));
+                b = Math.min(255, b + (b * percent / 100));
+                return '#' + Math.round(r).toString(16).padStart(2, '0') + 
+                           Math.round(g).toString(16).padStart(2, '0') + 
+                           Math.round(b).toString(16).padStart(2, '0');
+            }
+            
+            function darkenColor(hex, percent) {
+                let r = parseInt(hex.slice(1, 3), 16);
+                let g = parseInt(hex.slice(3, 5), 16);
+                let b = parseInt(hex.slice(5, 7), 16);
+                r = Math.max(0, r - (r * percent / 100));
+                g = Math.max(0, g - (g * percent / 100));
+                b = Math.max(0, b - (b * percent / 100));
+                return '#' + Math.round(r).toString(16).padStart(2, '0') + 
+                           Math.round(g).toString(16).padStart(2, '0') + 
+                           Math.round(b).toString(16).padStart(2, '0');
+            }
+            
+            document.documentElement.style.setProperty('--gold', dorado);
+            document.documentElement.style.setProperty('--gold-lt', lightenColor(dorado, 15));
+            document.documentElement.style.setProperty('--gold-dk', darkenColor(dorado, 20));
+            document.documentElement.style.setProperty('--carbon', fondo);
+            document.documentElement.style.setProperty('--cream', texto);
+            document.documentElement.style.setProperty('--oxford', borde);
+            document.documentElement.style.setProperty('--border', dorado + '26');
+            document.documentElement.style.setProperty('--border-md', dorado + '4D');
+            
+        } catch(e) {}
+    }
+})();
+
+window.addEventListener('storage', function(e) {
+    if (e.key === 'liquour_colors') location.reload();
+});
+</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Liquour — Dashboard</title>
@@ -74,7 +126,76 @@ $bdd->desconectar();
 
     <?php include '../../Layout/nav_admin.php'; ?> 
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
-    <link rel="stylesheet" href="../../../Assets/CSS/dashboard.css">
+   
+    
+    <!-- =========================================== -->
+    <!-- SISTEMA DE TEMAS - SINCRONIZAR CON MENÚ -->
+    <!-- =========================================== -->
+    <style>
+        /* Variables por defecto - se actualizarán con JS */
+        :root {
+            --dorado-mate: #C5A059;
+            --negro-carbon: #1A1A1A;
+            --blanco-crema: #F5F5DC;
+            --gris-oxford: #4A4A4A;
+        }
+    </style>
+    
+    <script>
+    // ============================================
+    // SINCRONIZAR COLORES DEL TEMA CON DASHBOARD
+    // ============================================
+    (function sincronizarColoresDashboard() {
+        const coloresGuardados = localStorage.getItem('liquour_colors');
+        
+        if (coloresGuardados) {
+            try {
+                const colores = JSON.parse(coloresGuardados);
+                
+                // Mapear nombres de variables del menú a los nombres del dashboard
+                const dorado = colores['--color-dorado'] || '#C5A059';
+                const fondo = colores['--bg-carbon'] || '#1A1A1A';
+                const texto = colores['--text-blanco-crema'] || '#F5F5DC';
+                const borde = colores['--border-fuerte'] || '#4A4A4A';
+                
+                // Aplicar a las variables que usa el dashboard
+                document.documentElement.style.setProperty('--dorado-mate', dorado);
+                document.documentElement.style.setProperty('--negro-carbon', fondo);
+                document.documentElement.style.setProperty('--blanco-crema', texto);
+                document.documentElement.style.setProperty('--gris-oxford', borde);
+                
+                // También actualizar las variables del dashboard.css si las usa
+                document.documentElement.style.setProperty('--gold', dorado);
+                document.documentElement.style.setProperty('--gold-dim', dorado + '33');
+                document.documentElement.style.setProperty('--bg-dark', fondo);
+                document.documentElement.style.setProperty('--w40', texto + '99');
+                document.documentElement.style.setProperty('--w25', texto + '66');
+                
+                console.log('🎨 Colores sincronizados con Dashboard:', { dorado, fondo, texto });
+                
+                // Recargar gráficos si es necesario (para que usen el nuevo color)
+                setTimeout(() => {
+                    if (typeof window.recargarGraficos === 'function') {
+                        window.recargarGraficos();
+                    } else {
+                        // Forzar recarga de página para aplicar todos los cambios
+                        // location.reload();
+                    }
+                }, 100);
+                
+            } catch(e) {
+                console.log('Error cargando colores:', e);
+            }
+        }
+    })();
+    
+    // Escuchar cambios en tiempo real desde otra pestaña
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'liquour_colors') {
+            location.reload();
+        }
+    });
+    </script>
 </head>
 <body>
 
@@ -122,8 +243,8 @@ $bdd->desconectar();
         <div class="card-title">
           Ventas Semanales
           <div class="legend">
-            <div class="leg-item"><div class="leg-dot" style="background:#C5A059"></div>Esta Semana</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#4A4A4A"></div>Semana Pasada</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--dorado-mate, #C5A059)"></div>Esta Semana</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--gris-oxford, #4A4A4A)"></div>Semana Pasada</div>
           </div>
         </div>
         <canvas id="lineChart" height="120"></canvas>
@@ -191,7 +312,7 @@ $bdd->desconectar();
             </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <p style="font-size: 12px; color: var(--cream); padding: 10px;">Todo el stock está en niveles óptimos. ✓</p>
+            <p style="font-size: 12px; color: var(--blanco-crema, #F5F5DC); padding: 10px;">Todo el stock está en niveles óptimos. ✓</p>
         <?php endif; ?>
 
       </div>
@@ -229,12 +350,17 @@ $bdd->desconectar();
 </div>
 
 <script>
-  Chart.defaults.color = '#4A4A4A';
+  // ============================================
+  // CONFIGURACIÓN DE GRÁFICOS CON COLOR DINÁMICO
+  // ============================================
+  
+  // Obtener colores actuales del tema
+  const goldActual = getComputedStyle(document.documentElement).getPropertyValue('--dorado-mate').trim() || '#C5A059';
+  const oxfordActual = getComputedStyle(document.documentElement).getPropertyValue('--gris-oxford').trim() || '#4A4A4A';
+  
+  Chart.defaults.color = oxfordActual;
   Chart.defaults.font.family = 'Montserrat';
   Chart.defaults.font.size = 10;
-
-  const gold   = '#C5A059';
-  const oxford = '#4A4A4A';
 
   new Chart(document.getElementById('lineChart'), {
     type: 'line',
@@ -244,10 +370,10 @@ $bdd->desconectar();
         {
           label: 'Esta semana',
           data: <?= $jsonCurrentWeek ?>,
-          borderColor: gold,
+          borderColor: goldActual,
           backgroundColor: 'rgba(197,160,89,.08)',
           borderWidth: 2,
-          pointBackgroundColor: gold,
+          pointBackgroundColor: goldActual,
           pointRadius: 3.5,
           tension: 0.42,
           fill: true
@@ -255,11 +381,11 @@ $bdd->desconectar();
         {
           label: 'Semana pasada',
           data: <?= $jsonPrevWeek ?>,
-          borderColor: oxford,
+          borderColor: oxfordActual,
           backgroundColor: 'transparent',
           borderWidth: 1.5,
           borderDash: [4, 4],
-          pointBackgroundColor: oxford,
+          pointBackgroundColor: oxfordActual,
           pointRadius: 2,
           tension: 0.42
         }
@@ -269,8 +395,8 @@ $bdd->desconectar();
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: oxford } },
-        y: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: oxford, callback: v => '$'+v } }
+        x: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: oxfordActual } },
+        y: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: oxfordActual, callback: v => '$'+v } }
       }
     }
   });
@@ -281,8 +407,8 @@ $bdd->desconectar();
       labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
       datasets: [{
         data: <?= $jsonTransacciones ?>,
-        backgroundColor: 'rgba(197,160,89,.22)',
-        borderColor: gold,
+        backgroundColor: goldActual + '38',
+        borderColor: goldActual,
         borderWidth: 1,
         borderRadius: 4
       }]
@@ -291,8 +417,8 @@ $bdd->desconectar();
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: oxford } },
-        y: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: oxford } }
+        x: { grid: { display: false }, ticks: { color: oxfordActual } },
+        y: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: oxfordActual } }
       }
     }
   });

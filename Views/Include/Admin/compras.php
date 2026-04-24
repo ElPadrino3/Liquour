@@ -65,6 +65,58 @@ $proveedoresFiltro = array_unique(array_column($ordersData, 'proveedor'));
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script>
+(function() {
+    const coloresGuardados = localStorage.getItem('liquour_colors');
+    if (coloresGuardados) {
+        try {
+            const colores = JSON.parse(coloresGuardados);
+            const dorado = colores['--color-dorado'] || '#C5A059';
+            const fondo = colores['--bg-carbon'] || '#1A1A1A';
+            const texto = colores['--text-blanco-crema'] || '#F5F5DC';
+            const borde = colores['--border-fuerte'] || '#4A4A4A';
+            
+            function lightenColor(hex, percent) {
+                let r = parseInt(hex.slice(1, 3), 16);
+                let g = parseInt(hex.slice(3, 5), 16);
+                let b = parseInt(hex.slice(5, 7), 16);
+                r = Math.min(255, r + (r * percent / 100));
+                g = Math.min(255, g + (g * percent / 100));
+                b = Math.min(255, b + (b * percent / 100));
+                return '#' + Math.round(r).toString(16).padStart(2, '0') + 
+                           Math.round(g).toString(16).padStart(2, '0') + 
+                           Math.round(b).toString(16).padStart(2, '0');
+            }
+            
+            function darkenColor(hex, percent) {
+                let r = parseInt(hex.slice(1, 3), 16);
+                let g = parseInt(hex.slice(3, 5), 16);
+                let b = parseInt(hex.slice(5, 7), 16);
+                r = Math.max(0, r - (r * percent / 100));
+                g = Math.max(0, g - (g * percent / 100));
+                b = Math.max(0, b - (b * percent / 100));
+                return '#' + Math.round(r).toString(16).padStart(2, '0') + 
+                           Math.round(g).toString(16).padStart(2, '0') + 
+                           Math.round(b).toString(16).padStart(2, '0');
+            }
+            
+            document.documentElement.style.setProperty('--gold', dorado);
+            document.documentElement.style.setProperty('--gold-lt', lightenColor(dorado, 15));
+            document.documentElement.style.setProperty('--gold-dk', darkenColor(dorado, 20));
+            document.documentElement.style.setProperty('--carbon', fondo);
+            document.documentElement.style.setProperty('--cream', texto);
+            document.documentElement.style.setProperty('--oxford', borde);
+            document.documentElement.style.setProperty('--border', dorado + '26');
+            document.documentElement.style.setProperty('--border-md', dorado + '4D');
+            
+        } catch(e) {}
+    }
+})();
+
+window.addEventListener('storage', function(e) {
+    if (e.key === 'liquour_colors') location.reload();
+});
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Compras | Liquour</title>

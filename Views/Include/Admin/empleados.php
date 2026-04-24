@@ -143,22 +143,211 @@ $db->desconectar();
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
     <link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- ========================================= -->
+    <!-- SISTEMA DE TEMAS - SINCRONIZAR COLORES -->
+    <!-- ========================================= -->
     <style>
-      .estado-switch { display: inline-flex; align-items: center; justify-content: center; }
-      .switch { position: relative; display: inline-block; width: 46px; height: 24px; margin-right: 10px; }
-      .switch input { display: none; }
-      .slider { position: absolute; inset: 0; cursor: pointer; border-radius: 999px; background: #8b0000; transition: all 0.25s ease; }
-      .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: all 0.25s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
-      .switch input:checked + .slider { background: #39b51f; }
-      .switch input:checked + .slider::before { transform: translateX(22px); }
-      .status-text { font-size: 11px; font-weight: bold; text-transform: uppercase; width: 60px; display: inline-block; }
-      .status-text.activo { color: #39b51f; }
-      .status-text.inactivo { color: #8b0000; }
-      .btn-edit { background: none; border: none; color: #C5A059; cursor: pointer; font-size: 16px; transition: 0.2s; margin-left: 10px; }
-      .btn-edit:hover { color: #fff; transform: scale(1.1); }
-      .caja-input-container { display: none; }
+        :root {
+            --tema-color: #C5A059;
+            --tema-color-rgb: 197, 160, 89;
+            --bg-carbon: #1A1A1A;
+            --text-cream: #F5F5DC;
+            --border-color: #4A4A4A;
+        }
+        
+        .estado-switch { display: inline-flex; align-items: center; justify-content: center; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; margin-right: 10px; }
+        .switch input { display: none; }
+        .slider { position: absolute; inset: 0; cursor: pointer; border-radius: 999px; background: #8b0000; transition: all 0.25s ease; }
+        .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: all 0.25s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+        .switch input:checked + .slider { background: var(--tema-color); }
+        .switch input:checked + .slider::before { transform: translateX(22px); }
+        .status-text { font-size: 11px; font-weight: bold; text-transform: uppercase; width: 60px; display: inline-block; }
+        .status-text.activo { color: var(--tema-color); }
+        .status-text.inactivo { color: #8b0000; }
+        .btn-edit { background: none; border: none; color: var(--tema-color); cursor: pointer; font-size: 16px; transition: 0.2s; margin-left: 10px; }
+        .btn-edit:hover { color: #fff; transform: scale(1.1); }
+        .caja-input-container { display: none; }
+        
+        /* Forzar estilos del header */
+        .navbar-liquour {
+            background: var(--bg-carbon) !important;
+            border-bottom: 1px solid var(--tema-color) !important;
+        }
+        
+        .nav-item:hover {
+            color: var(--tema-color) !important;
+        }
+        
+        .nav-item::after {
+            background: var(--tema-color) !important;
+        }
+        
+        .add-btn {
+            background: var(--tema-color) !important;
+            color: var(--bg-carbon) !important;
+        }
+        
+        .add-btn:hover {
+            background: var(--tema-color) !important;
+            filter: brightness(1.1) !important;
+        }
+        
+        .kpi-tag, .card-title, .page-heading {
+            color: var(--tema-color) !important;
+        }
+        
+        .page-heading::after {
+            background: var(--tema-color) !important;
+        }
+        
+        .prog-fg, .rank-bar-fg {
+            background: var(--tema-color) !important;
+        }
+        
+        .td-gold, .rank-val, .emp-stat-val {
+            color: var(--tema-color) !important;
+        }
+        
+        .emp-avatar {
+            background: rgba(197, 160, 89, 0.12) !important;
+            border: 2px solid rgba(197, 160, 89, 0.3) !important;
+            color: var(--tema-color) !important;
+        }
     </style>
+    
+    <script>
+    (function sincronizarEmpleados() {
+        // Cargar colores desde localStorage
+        const coloresGuardados = localStorage.getItem('liquour_colors');
+        if (coloresGuardados) {
+            try {
+                const colores = JSON.parse(coloresGuardados);
+                const dorado = colores['--color-dorado'] || '#C5A059';
+                const fondo = colores['--bg-carbon'] || '#1A1A1A';
+                const texto = colores['--text-blanco-crema'] || '#F5F5DC';
+                const borde = colores['--border-fuerte'] || '#4A4A4A';
+                
+                document.documentElement.style.setProperty('--tema-color', dorado);
+                document.documentElement.style.setProperty('--bg-carbon', fondo);
+                document.documentElement.style.setProperty('--text-cream', texto);
+                document.documentElement.style.setProperty('--border-color', borde);
+                
+                console.log('🎨 Empleados sincronizado con tema:', dorado);
+            } catch(e) {
+                console.log('Error cargando colores:', e);
+            }
+        }
+        
+        // Cargar logo
+        const logoGuardado = localStorage.getItem('liquour_theme_logo');
+        if (logoGuardado) {
+            setTimeout(function() {
+                const logos = document.querySelectorAll('.logo-img, .theme-logo, #main-logo');
+                logos.forEach(function(img) {
+                    if (img && img.tagName === 'IMG') img.src = logoGuardado;
+                });
+            }, 100);
+        }
+    })();
+    
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo') {
+            location.reload();
+        }
+    });
+    </script>
 </head>
+<script>
+(function sincronizarEmpleados() {
+    // Obtener colores guardados desde el menú (AJUSTES)
+    const coloresGuardados = localStorage.getItem('liquour_colors');
+    if (coloresGuardados) {
+        try {
+            const colores = JSON.parse(coloresGuardados);
+            // Mapeo de variables del menú a las del CSS global
+            const dorado   = colores['--color-dorado'] || '#C5A059';
+            const fondo    = colores['--bg-carbon'] || '#1A1A1A';
+            const texto    = colores['--text-blanco-crema'] || '#F5F5DC';
+            const borde    = colores['--border-fuerte'] || '#4A4A4A';
+            
+            // Colores derivados (para mantener armonía)
+            const doradoClaro = lightenColor(dorado, 15);
+            const doradoOscuro = darkenColor(dorado, 20);
+            const superficie = darkenColor(fondo, 5);
+            const superficieClara = lightenColor(fondo, 8);
+            
+            // Variables específicas del CSS global
+            document.documentElement.style.setProperty('--gold', dorado);
+            document.documentElement.style.setProperty('--gold-lt', doradoClaro);
+            document.documentElement.style.setProperty('--gold-dk', doradoOscuro);
+            document.documentElement.style.setProperty('--carbon', fondo);
+            document.documentElement.style.setProperty('--oxford', borde);
+            document.documentElement.style.setProperty('--cream', texto);
+            document.documentElement.style.setProperty('--surface', superficie);
+            document.documentElement.style.setProperty('--surface2', superficieClara);
+            document.documentElement.style.setProperty('--border', dorado + '26');
+            document.documentElement.style.setProperty('--border-md', dorado + '4D');
+            
+            // Variables adicionales que usa empleados.php (por si acaso)
+            document.documentElement.style.setProperty('--tema-color', dorado);
+            document.documentElement.style.setProperty('--bg-carbon', fondo);
+            document.documentElement.style.setProperty('--text-cream', texto);
+            document.documentElement.style.setProperty('--border-color', borde);
+            
+            console.log('🎨 Empleados sincronizado con tema:', { dorado, fondo, texto });
+        } catch(e) {
+            console.log('Error cargando colores:', e);
+        }
+    }
+    
+    // Función para aclarar un color
+    function lightenColor(hex, percent) {
+        let r = parseInt(hex.slice(1,3), 16);
+        let g = parseInt(hex.slice(3,5), 16);
+        let b = parseInt(hex.slice(5,7), 16);
+        r = Math.min(255, r + (r * percent / 100));
+        g = Math.min(255, g + (g * percent / 100));
+        b = Math.min(255, b + (b * percent / 100));
+        return `#${Math.round(r).toString(16).padStart(2,'0')}${Math.round(g).toString(16).padStart(2,'0')}${Math.round(b).toString(16).padStart(2,'0')}`;
+    }
+    
+    // Función para oscurecer un color
+    function darkenColor(hex, percent) {
+        let r = parseInt(hex.slice(1,3), 16);
+        let g = parseInt(hex.slice(3,5), 16);
+        let b = parseInt(hex.slice(5,7), 16);
+        r = Math.max(0, r - (r * percent / 100));
+        g = Math.max(0, g - (g * percent / 100));
+        b = Math.max(0, b - (b * percent / 100));
+        return `#${Math.round(r).toString(16).padStart(2,'0')}${Math.round(g).toString(16).padStart(2,'0')}${Math.round(b).toString(16).padStart(2,'0')}`;
+    }
+    
+    // Cargar logo guardado
+    const logoGuardado = localStorage.getItem('liquour_theme_logo');
+    if (logoGuardado) {
+        setTimeout(() => {
+            const logos = document.querySelectorAll('.logo-img, .theme-logo, #main-logo');
+            logos.forEach(img => { if (img && img.tagName === 'IMG') img.src = logoGuardado; });
+        }, 100);
+    }
+})();
+
+// Escuchar cambios en localStorage (cuando se cambia el tema desde otra pestaña)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo') {
+        location.reload();
+    }
+});
+
+// Escuchar el evento personalizado que dispara el Theme Manager
+window.addEventListener('liquourThemeChanged', function() {
+    setTimeout(() => {
+        location.reload();
+    }, 100);
+});
+</script>
 <body>
 
 <?php @include '../../Layout/nav_admin.php'; ?> 
@@ -210,7 +399,7 @@ $db->desconectar();
             <input type="hidden" name="action" value="edit_employee">
             <input type="hidden" name="id_usuario" id="edit_id_usuario">
             <div class="admin-input-group" style="margin-bottom:15px; text-align:center;">
-                <img id="edit_preview_foto" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:2px solid #C5A059; display:none;">
+                <img id="edit_preview_foto" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:2px solid var(--tema-color); display:none;">
                 <label style="display:block; margin-bottom:5px;">Foto de Perfil</label>
                 <input type="file" name="foto_perfil" accept="image/*" style="color:#fff;">
             </div>
@@ -444,8 +633,8 @@ function render() {
   document.getElementById('tableBody').innerHTML = fData.map(r => {
       let pct = (r.total_ventas / maxVentasGbl) * 100;
       let avatarHTML = r.foto_perfil 
-        ? `<img src="${r.foto_perfil}?v=${new Date().getTime()}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid #C5A059;">` 
-        : `<div style="width:28px;height:28px;border-radius:50%;background:rgba(197,160,89,.1);border:1px solid rgba(197,160,89,.3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gold);font-weight:600;flex-shrink:0">${initials(r.nombre)}</div>`;
+        ? `<img src="${r.foto_perfil}?v=${new Date().getTime()}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--tema-color);">` 
+        : `<div style="width:28px;height:28px;border-radius:50%;background:rgba(197,160,89,.1);border:1px solid rgba(197,160,89,.3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--tema-color);font-weight:600;flex-shrink:0">${initials(r.nombre)}</div>`;
       
       let normRol = (r.rol === 'admin' || r.rol === 'administrador') ? 'admin' : 'cajero';
       let rolCaja = normRol === 'cajero' ? `Cajero (Caja ${r.num_caja || 'N/A'})` : `Administrador`;
@@ -455,11 +644,11 @@ function render() {
       <td>
         <div style="display:flex;align-items:center;gap:9px">
           ${avatarHTML}
-          <span style="color:var(--cream);font-weight:500">${r.nombre}</span>
+          <span style="color:var(--text-cream);font-weight:500">${r.nombre}</span>
         </div>
       </td>
       <td style="text-transform: capitalize;">${rolCaja}</td>
-      <td style="color:var(--oxford);font-size:10px;letter-spacing:1px">${r.fecha_ingreso}</td>
+      <td style="color:var(--border-color);font-size:10px;letter-spacing:1px">${r.fecha_ingreso}</td>
       <td class="td-gold">$${Number(r.total_ventas).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
       <td style="text-align:center">${r.total_ordenes}</td>
       <td>
@@ -476,7 +665,7 @@ function render() {
 
   document.getElementById('empGridCards').innerHTML = fData.slice(0, 6).map(r => {
       let avatarHTML = r.foto_perfil 
-        ? `<img src="${r.foto_perfil}?v=${new Date().getTime()}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin:0 auto;display:block;border:2px solid #C5A059;">` 
+        ? `<img src="${r.foto_perfil}?v=${new Date().getTime()}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin:0 auto;display:block;border:2px solid var(--tema-color);">` 
         : `<div class="emp-avatar">${initials(r.nombre)}</div>`;
       
       let normRol = (r.rol === 'admin' || r.rol === 'administrador') ? 'admin' : 'cajero';
@@ -504,7 +693,7 @@ function render() {
   fData.slice(0, 5).forEach(r => {
       let pct = (r.total_ventas / maxVentasGbl) * 100;
       let avatarHTML = r.foto_perfil 
-        ? `<img src="${r.foto_perfil}?v=${new Date().getTime()}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid #C5A059;">` 
+        ? `<img src="${r.foto_perfil}?v=${new Date().getTime()}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--tema-color);">` 
         : `<div class="rank-av">${initials(r.nombre)}</div>`;
       
       let normRol = (r.rol === 'admin' || r.rol === 'administrador') ? 'admin' : 'cajero';
@@ -532,34 +721,53 @@ document.getElementById('statusFilter').addEventListener('change', e => { status
 
 render();
 
-Chart.defaults.color = '#4A4A4A';
-Chart.defaults.font.family = 'Montserrat';
-Chart.defaults.font.size = 10;
-
-const topNombres = dbEmpleados.slice(0, 7).map(e => e.nombre.split(' ')[0]);
-const topVentasData = dbEmpleados.slice(0, 7).map(e => e.total_ventas);
-
-new Chart(document.getElementById('empChart'),{
-  type:'bar',
-  data:{
-    labels: topNombres.length > 0 ? topNombres : ['Sin datos'],
-    datasets:[{
-      data: topVentasData.length > 0 ? topVentasData : [0],
-      backgroundColor:'rgba(197,160,89,.2)',
-      borderColor:'#C5A059',
-      borderWidth:1,
-      borderRadius:5
-    }]
-  },
-  options:{
-    indexAxis:'y',
-    responsive:true,
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#4A4A4A',callback:v=>'$'+v.toLocaleString()}},
-      y:{grid:{display:false},ticks:{color:'#9A7A3F'}}
+// Forzar actualización de colores del gráfico con el tema
+function actualizarGrafico() {
+    const temaColor = getComputedStyle(document.documentElement).getPropertyValue('--tema-color').trim() || '#C5A059';
+    
+    const topNombres = dbEmpleados.slice(0, 7).map(e => e.nombre.split(' ')[0]);
+    const topVentasData = dbEmpleados.slice(0, 7).map(e => e.total_ventas);
+    
+    const canvas = document.getElementById('empChart');
+    if (canvas.chart) {
+        canvas.chart.destroy();
     }
-  }
+    
+    canvas.chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: topNombres.length > 0 ? topNombres : ['Sin datos'],
+            datasets: [{
+                data: topVentasData.length > 0 ? topVentasData : [0],
+                backgroundColor: temaColor + '33',
+                borderColor: temaColor,
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: 'rgba(255,255,255,.03)' }, ticks: { color: '#4A4A4A', callback: v => '$' + v.toLocaleString() } },
+                y: { grid: { display: false }, ticks: { color: '#9A7A3F' } }
+            }
+        }
+    });
+}
+
+// Inicializar gráfico después de cargar
+setTimeout(() => {
+    actualizarGrafico();
+}, 100);
+
+// Escuchar cambios de tema
+window.addEventListener('liquourThemeChanged', function() {
+    setTimeout(() => {
+        actualizarGrafico();
+        render();
+    }, 100);
 });
 </script>
 <script src="../../../Assets/JS/Catalogo_Admin.js"></script>

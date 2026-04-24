@@ -1,309 +1,281 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+/* ─── VARIABLES & RESET ─── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Raleway:wght@300;400;500;600&family=Inter:wght@300;400;600;700&display=swap');
 
-* {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #0a0a0a;
-    color: #ffffff;
-    overflow-x: hidden;
+:root {
+    --gold: #C5A059;
+    --gold-l: #e5c158;
+    --gold-dim: rgba(197, 160, 89, 0.22);
+    --bg-dark: #050505;
+    --w60: rgba(255, 255, 255, 0.6);
+    --w40: rgba(255, 255, 255, 0.4);
+    --w25: rgba(255, 255, 255, 0.22);
 }
 
-/* --- Header Fijo y Sólido --- */
-.main-header {
+body {
+    background-color: var(--bg-dark);
+    color: #fff;
+    font-family: 'Raleway', sans-serif;
+    overflow-x: hidden;
+    cursor: none; /* Ocultamos el puntero para usar el cursor dorado */
+}
+
+/* ─── MOTOR VISUAL (GRADIENTE) ─── */
+#webGLApp {
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
-    padding: 15px 50px; /* Un poco más compacto */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #030303; /* Negro casi puro, sólido desde el inicio */
-    border-bottom: 2px solid #e5c158; /* Línea dorada permanente */
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.9); /* Sombra pesada para separarlo del fondo */
-    z-index: 1000;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
 }
 
-/* Como ahora es sólido siempre, ya no necesitamos la clase .scrolled 
-   Puedes borrar el efecto de scroll de tu archivo landing.js si gustas */
-
-/* Clase que se añade con JS al hacer scroll */
-.main-header.scrolled {
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(229, 193, 88, 0.2);
-    padding: 15px 50px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: #e5c158;
-    font-size: 1.2rem;
-}
-
-.logo-container .dot {
-    height: 8px;
-    width: 8px;
-    background-color: #e5c158;
+/* Cursor Dorado Premium */
+.custom-cursor {
+    position: fixed;
+    width: 35px;
+    height: 35px;
+    border: 1.5px solid var(--gold-l);
     border-radius: 50%;
-    margin-right: 10px;
-    box-shadow: 0 0 10px #e5c158;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    background: rgba(229, 193, 88, 0.05);
+    backdrop-filter: blur(3px);
+    transition: width 0.2s, height 0.2s;
 }
 
-.main-nav {
+/* ─── NAVEGACIÓN ─── */
+.lq-nav {
     display: flex;
-    gap: 30px;
     align-items: center;
+    justify-content: space-between;
+    padding: 22px 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(9, 9, 9, 0.8);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--gold-dim);
 }
 
-.main-nav a {
-    color: #ffffff;
+.lq-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 25px;
+    letter-spacing: 8px;
+    color: var(--gold);
+    text-transform: uppercase;
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: color 0.3s;
 }
 
-.main-nav a:hover, .main-nav a.active {
-    color: #e5c158;
+.lq-nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
 }
 
-.btn-vip {
-    border: 1px solid #e5c158;
-    padding: 8px 20px;
-    border-radius: 30px;
-    color: #e5c158 !important;
-    transition: all 0.3s ease !important;
+.lq-nav-links a {
+    color: var(--w60);
+    text-decoration: none;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color .3s;
 }
 
-.btn-vip:hover {
-    background: #e5c158;
-    color: #000 !important;
-    box-shadow: 0 0 15px rgba(229, 193, 88, 0.4);
-}
+.lq-nav-links a:hover { color: var(--gold); }
 
-/* --- Hero Section --- */
-.hero-section {
+/* ─── SECCIONES (TRANSPARENTES PARA VER EL GRADIENTE) ─── */
+section, .lq-hero, .lq-stats, .lq-process, .lq-exp {
     position: relative;
-    height: 80vh; /* Ocupa el 80% de la pantalla */
-    /* Aquí puedes poner una foto de licores de fondo. Por ahora es un gradiente premium */
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1560508180-03f285f67e03?q=80&w=2070') center/cover;
+    z-index: 10;
+    background: transparent !important;
+}
+
+/* ─── HERO ─── */
+.lq-hero {
+    height: 90vh;
+    display: flex;
+    align-items: center;
+    padding: 0 80px;
+}
+
+.lq-hero-content { max-width: 650px; }
+
+.lq-hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(45px, 8vw, 80px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 30px;
+}
+
+.lq-hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+}
+
+.lq-btn-primary {
+    background: var(--gold);
+    color: #090909;
+    padding: 18px 45px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all .4s;
+}
+
+.lq-btn-primary:hover {
+    background: var(--gold-l);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* ─── PRODUCT CARDS (CRISTALISMO) ─── */
+.lq-products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--gold-dim);
+}
+
+.lq-product-card {
+    background: rgba(15, 15, 15, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.lq-product-card:hover {
+    background: rgba(229, 193, 88, 0.08);
+    transform: translateY(-15px);
+    border-color: var(--gold);
+}
+
+.lq-product-img {
+    height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding-bottom: 50px; /* Espacio para las tarjetas que suben */
-}
-
-.hero-content h1 {
-    font-size: 4rem;
-    font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
-    letter-spacing: 2px;
-}
-
-.subtitle-box {
-    background: rgba(229, 193, 88, 0.15);
-    border: 1px solid rgba(229, 193, 88, 0.3);
-    backdrop-filter: blur(5px);
-    padding: 10px 30px;
-    border-radius: 5px;
-    display: inline-block;
-}
-
-.subtitle-box p {
-    color: #e5c158;
-    font-weight: 400;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-}
-
-/* --- Tarjetas Superpuestas --- */
-.features-section {
-    position: relative;
-    z-index: 10;
-    max-width: 1200px;
-    margin: 0 auto;
-    /* ESTO ES LO QUE HACE EL EFECTO DE MONTARSE EN LA IMAGEN */
-    margin-top: -80px; 
-    padding: 0 20px;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-}
-
-.feature-card {
-    background: linear-gradient(145deg, #151515, #0a0a0a);
-    padding: 40px 30px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-    border: 1px solid rgba(229, 193, 88, 0.1);
-    transition: transform 0.3s ease, border-color 0.3s;
-}
-
-.feature-card:hover {
-    transform: translateY(-10px);
-    border-color: rgba(229, 193, 88, 0.5);
-}
-
-.feature-card i {
-    font-size: 2.5rem;
-    color: #e5c158;
     margin-bottom: 20px;
 }
 
-.feature-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    color: #ffffff;
+.lq-product-img img {
+    max-height: 100%;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+    animation: wineFlow 5s ease-in-out infinite;
 }
 
-.feature-card p {
-    font-size: 0.9rem;
-    color: #aaaaaa;
-    line-height: 1.6;
+@keyframes wineFlow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px) rotate(2deg); }
 }
 
-/* --- Destacados --- */
-.destacados-section {
-    padding: 80px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.section-header {
+/* ─── STATS ─── */
+.lq-stats {
     display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 40px;
+    border-top: 1px solid var(--gold-dim);
+    border-bottom: 1px solid var(--gold-dim);
 }
 
-.gold-line {
-    height: 3px;
-    width: 40px;
-    background-color: #e5c158;
-}
-
-.section-header h2 {
-    font-size: 2rem;
-    color: #ffffff;
-}
-
-
-/* --- Estilos del Grid de Productos --- */
-.productos-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
-    margin-top: 30px;
-}
-
-.producto-card {
-    background: linear-gradient(145deg, #111111, #080808);
-    border: 1px solid rgba(229, 193, 88, 0.15);
-    border-radius: 15px;
-    overflow: hidden;
-    transition: all 0.4s ease;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-}
-
-.producto-card:hover {
-    transform: translateY(-8px);
-    border-color: #e5c158;
-    box-shadow: 0 15px 30px rgba(229, 193, 88, 0.15);
-}
-
-.img-container {
-    width: 100%;
-    height: 300px; /* Altura fija para que todas se vean igual */
-    overflow: hidden;
-    background: #000;
-}
-
-.img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Ajusta la imagen sin deformarla */
-    opacity: 0.8;
-    transition: transform 0.5s ease, opacity 0.5s ease;
-}
-
-.producto-card:hover .img-container img {
-    transform: scale(1.1); /* Zoom elegante al pasar el mouse */
-    opacity: 1;
-}
-
-.producto-info {
-    padding: 25px 20px;
+.lq-stat {
+    flex: 1;
+    padding: 40px;
     text-align: center;
+    border-right: 1px solid var(--gold-dim);
 }
 
-.categoria {
-    font-size: 0.75rem;
-    color: #e5c158;
+.lq-stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 35px;
+    color: var(--gold);
+}
+
+/* ─── FOOTER REANIMADO ─── */
+.lq-footer {
+    position: relative;
+    z-index: 20;
+    padding: 100px 80px 40px;
+    background: linear-gradient(to top, #000 70%, transparent) !important;
+    border-top: 1px solid var(--gold-dim);
+}
+
+.lq-footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 80px;
+}
+
+.lq-ft-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    letter-spacing: 10px;
+    color: var(--gold);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 700;
+    margin-bottom: 25px;
     display: block;
-    margin-bottom: 8px;
 }
 
-.producto-info h4 {
-    font-size: 1.3rem;
-    color: #ffffff;
-    margin-bottom: 15px;
-    font-weight: 600;
+.lq-ft-tagline {
+    color: var(--w40);
+    font-size: 14px;
+    line-height: 1.8;
 }
 
-.precio {
-    font-size: 1.5rem;
-    color: #e5c158;
-    font-weight: 700;
-    margin-bottom: 20px;
+.lq-ft-col-title {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    margin-bottom: 30px;
+    text-transform: uppercase;
 }
 
-.btn-comprar {
-    background: transparent;
-    border: 1px solid #e5c158;
-    color: #e5c158;
-    padding: 10px 25px;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
+.lq-ft-links { list-style: none; }
+.lq-ft-links li { margin-bottom: 15px; }
+.lq-ft-links a {
+    color: var(--w40);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.4s;
 }
 
-.btn-comprar:hover {
-    background: #e5c158;
-    color: #000000;
-    box-shadow: 0 0 15px rgba(229, 193, 88, 0.5);
+.lq-ft-links a:hover {
+    color: #fff;
+    transform: translateX(10px);
+    padding-left: 5px;
 }
 
-/* Responsivo para móviles */
-@media (max-width: 900px) {
-    .productos-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.lq-footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--w25);
+    text-transform: uppercase;
 }
 
-@media (max-width: 600px) {
-    .productos-grid {
-        grid-template-columns: 1fr;
-    }
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1100px) {
+    .lq-products { grid-template-columns: repeat(2, 1fr); }
+    .lq-footer-top { grid-template-columns: 1fr 1fr; }
+    .lq-hero { padding: 0 40px; }
+}
+
+@media (max-width: 700px) {
+    .lq-products { grid-template-columns: 1fr; }
+    .lq-stats { flex-direction: column; }
+    .lq-footer-top { grid-template-columns: 1fr; }
 }

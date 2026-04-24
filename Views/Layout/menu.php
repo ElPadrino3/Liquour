@@ -16,26 +16,41 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
+        /* ============================================
+           VARIABLES DE COLOR - LIQUOUR ORIGINAL
+           ============================================ */
         :root {
-            --tema-color: #e5c158; 
+            --color-dorado: #C5A059;
+            --color-dorado-oscuro: #A8883A;
+            --color-dorado-claro: #D4B87A;
+            --bg-carbon: #1A1A1A;
+            --bg-carbon-claro: #2A2A2A;
+            --bg-carbon-oscuro: #0D0D0D;
+            --bg-gris-oxford: #4A4A4A;
+            --text-blanco-crema: #F5F5DC;
+            --text-gris-claro: #D0D0D0;
+            --border-fuerte: #4A4A4A;
+            --border-suave: rgba(74, 74, 74, 0.3);
+            --transition: all 0.3s ease;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            color: #ffffff;
+            background-color: var(--bg-carbon);
+            color: var(--text-blanco-crema);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
             overflow-x: hidden;
-            background-color: #050505;
         }
 
-        /* --- FONDO DE VIDEO (MÁS VISIBLE) --- */
+        /* Fondo de video */
         .video-background {
             position: fixed;
             top: 0; left: 0;
@@ -52,7 +67,7 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
             width: auto; height: auto;
             transform: translate(-50%, -50%);
             object-fit: cover;
-            opacity: 1; /* Video al 100% de opacidad */
+            opacity: 0.5;
         }
 
         .video-overlay {
@@ -60,150 +75,152 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             z-index: -1;
-            /* Filtro mucho más suave para dejar pasar el video */
-            background: rgba(0, 0, 0, 0.4); 
-            backdrop-filter: blur(3px); /* Desenfoque más ligero */
+            background: var(--bg-carbon);
+            opacity: 0.7;
+            backdrop-filter: blur(3px);
         }
 
-        /* --- TOP BAR --- */
+        /* Top Bar */
         .top-bar {
             position: fixed; top: 0; left: 0; width: 100%;
             padding: 15px 30px;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(10, 10, 10, 0.75);
+            background: var(--bg-carbon-claro);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid var(--border-fuerte);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            transition: border-color 0.3s ease;
+            transition: var(--transition);
         }
         
-        .top-bar:hover { border-bottom: 1px solid var(--tema-color); }
+        .top-bar:hover { border-bottom-color: var(--color-dorado); }
 
         .brand {
             font-weight: 700; letter-spacing: 2px;
             display: flex; align-items: center; font-size: 0.95rem;
-            color: var(--tema-color); text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+            color: var(--color-dorado); text-transform: uppercase;
         }
 
         .user-section { display: flex; align-items: center; gap: 20px; }
 
         .user-info {
             display: flex; align-items: center; gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--bg-carbon-oscuro);
+            border: 1px solid var(--border-fuerte);
             padding: 6px 18px; border-radius: 30px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
         
-        .user-info:hover {
-            border-color: var(--tema-color);
-            background: rgba(20, 20, 20, 0.8);
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-        }
+        .user-info:hover { border-color: var(--color-dorado); }
 
-        .user-text { display: flex; flex-direction: column; text-align: left; }
-        .username { font-size: 0.8rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
-        .role { font-size: 0.65rem; font-weight: 600; color: var(--tema-color); text-transform: uppercase; }
+        .username { font-size: 0.8rem; font-weight: 700; color: var(--text-blanco-crema); }
+        .role { font-size: 0.65rem; font-weight: 600; color: var(--color-dorado); text-transform: uppercase; }
 
         .btn-exit {
-            color: #fff; text-decoration: none; font-size: 0.85rem; font-weight: 600;
-            background: rgba(255,255,255,0.1); padding: 8px 18px;
-            border-radius: 8px; transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-blanco-crema); text-decoration: none; font-size: 0.85rem;
+            background: var(--bg-carbon-oscuro); padding: 8px 18px;
+            border-radius: 8px; border: 1px solid var(--border-fuerte);
+            transition: var(--transition);
         }
 
         .btn-exit:hover {
             background: #e74c3c; color: #fff; border-color: #e74c3c;
-            box-shadow: 0 0 15px rgba(231, 76, 60, 0.4); transform: scale(1.05);
+            transform: scale(1.05);
         }
 
-        /* --- CONTENEDOR PRINCIPAL --- */
+        /* Contenedor principal */
         .main-container { margin-top: 130px; width: 100%; max-width: 1000px; text-align: center; }
 
         .header h1 {
-            font-size: 3rem; letter-spacing: 4px; margin-bottom: 10px; font-weight: 800;
-            color: #fff;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.9);
+            font-size: 3rem; letter-spacing: 4px; margin-bottom: 10px;
+            color: var(--color-dorado);
         }
         .header p {
-            font-size: 1.1rem; opacity: 0.9; margin-bottom: 50px; font-weight: 400; color: #ddd;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+            font-size: 1.1rem; opacity: 0.8; margin-bottom: 50px;
+            color: var(--text-gris-claro);
         }
 
+        /* Grid de tarjetas */
         .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-        /* --- ESTILOS DE TARJETAS (MÁS VISIBLES) --- */
         .card {
-            text-decoration: none; color: #fff;
+            text-decoration: none;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(15, 15, 15, 0.65) !important; /* Más transparente para ver el video */
+            background: var(--bg-carbon-claro);
             padding: 30px 15px; border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important; /* Borde un poco más blanco */
-            backdrop-filter: blur(8px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-            position: relative; overflow: hidden;
-            z-index: 1;
+            border: 1px solid var(--border-fuerte);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
-
-        .card::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            transform: skewX(-25deg); transition: left 0.6s ease; z-index: -1;
-        }
-
-        .card:hover::before { left: 150%; }
 
         .card:hover {
             transform: translateY(-8px) scale(1.02);
-            border-color: var(--tema-color) !important;
-            background: rgba(20, 20, 20, 0.85) !important; /* Se oscurece al pasar el mouse para leer mejor */
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255, 0.1) !important;
+            border-color: var(--color-dorado);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
 
         .card i {
-            font-size: 2.2rem; margin-bottom: 12px; color: #fff;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            font-size: 2.2rem; margin-bottom: 12px;
+            color: var(--color-dorado);
+            transition: transform 0.3s ease;
         }
 
-        .card:hover i {
-            transform: scale(1.25) translateY(-5px);
-            color: var(--tema-color) !important;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.9);
-        }
+        .card:hover i { transform: scale(1.25) translateY(-5px); }
 
         .card h3 { 
-            font-size: 0.95rem; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700; 
-            text-transform: uppercase; transition: color 0.3s ease;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            font-size: 0.95rem; letter-spacing: 1px; margin-bottom: 8px; 
+            text-transform: uppercase; color: var(--text-blanco-crema);
         }
         
-        .card:hover h3 { color: var(--tema-color); }
+        .card:hover h3 { color: var(--color-dorado); }
         
         .card p { 
-            font-size: 0.8rem; font-weight: 400; color: #ccc; 
-            text-shadow: 0 1px 5px rgba(0,0,0,0.8);
+            font-size: 0.75rem; opacity: 0.7; color: var(--text-gris-claro);
         }
 
+        /* Responsive */
         @media (max-width: 900px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 480px) { .grid-container { grid-template-columns: 1fr; } .header h1 { font-size: 2rem; } }
 
-        /* --- ESTILOS MODAL SWAL2 --- */
-        @keyframes modalAparicion { 0% { opacity: 0; transform: translateY(30px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        /* Estilos del modal */
         .swal2-popup.modal-elegante {
-            border: 1px solid rgba(255, 255, 255, 0.1) !important; border-top: 4px solid var(--tema-color) !important;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important; border-radius: 12px !important; font-family: 'Inter', sans-serif !important;
-            animation: modalAparicion 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+            border-radius: 20px !important;
+            border-top: 4px solid var(--color-dorado) !important;
+            background: var(--bg-carbon) !important;
         }
-        .swal2-cancel.btn-cancelar { border: 1px solid rgba(255, 255, 255, 0.2) !important; transition: all 0.3s ease; }
-        .swal2-cancel.btn-cancelar:hover { background: rgba(255, 255, 255, 0.1) !important; }
-        .swal2-confirm.btn-guardar { background-color: var(--tema-color) !important; color: #000 !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; transition: all 0.3s ease; }
-        .swal2-confirm.btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0, 0.4) !important; }
+        .swal2-confirm.btn-guardar {
+            background: var(--color-dorado) !important;
+            color: #1A1A1A !important;
+            padding: 12px 28px !important;
+            border-radius: 10px !important;
+            font-weight: 700 !important;
+            letter-spacing: 1px !important;
+            transition: all 0.3s ease !important;
+        }
+        .swal2-confirm.btn-guardar:hover {
+            transform: translateY(-2px) !important;
+            filter: brightness(1.1) !important;
+        }
+        .swal2-cancel.btn-cancelar {
+            background: var(--bg-carbon-oscuro) !important;
+            color: var(--text-gris-claro) !important;
+            border: 1px solid var(--border-fuerte) !important;
+            padding: 12px 28px !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease !important;
+        }
+        .swal2-cancel.btn-cancelar:hover {
+            background: #e74c3c !important;
+            color: #fff !important;
+            border-color: #e74c3c !important;
+        }
+        .palette-option {
+            transition: all 0.2s ease;
+        }
+        .palette-option:hover {
+            transform: translateY(-3px);
+        }
     </style>
 </head>
 <body>
@@ -221,7 +238,7 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
         </div>
         <div class="user-section">
             <div class="user-info">
-                <i class="fa-solid fa-circle-user" style="color: var(--tema-color);"></i>
+                <i class="fa-solid fa-circle-user" style="color: var(--color-dorado);"></i>
                 <div class="user-text">
                     <span class="username"><?php echo htmlspecialchars($nombreUsuario); ?></span>
                     <span class="role"><?php echo htmlspecialchars($rolUsuario); ?></span>
@@ -240,44 +257,44 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
         </header>
 
         <div class="grid-container">
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="venta">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <h3>PUNTO DE VENTA</h3>
                 <p>Registrar ventas</p>
             </a>
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="inventario">
                 <i class="fa-solid fa-box-archive"></i>
                 <h3>INVENTARIO</h3>
                 <p>Productos y stock</p>
             </a>
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="web">
                 <i class="fa-solid fa-globe"></i>
                 <h3>PÁGINA WEB</h3>
                 <p>Presentación del negocio</p>
             </a>
 
             <?php if ($esAdmin): ?>
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="ventas">
                 <i class="fa-solid fa-wine-bottle"></i>
                 <h3>VENTAS</h3>
                 <p>Historial de ventas</p>
             </a>
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="estadisticas">
                 <i class="fa-solid fa-chart-pie"></i>
                 <h3>ESTADÍSTICAS</h3>
                 <p>Reportes y análisis</p>
             </a>
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="usuarios">
                 <i class="fa-solid fa-users"></i>
                 <h3>USUARIOS</h3>
                 <p>Gestión de accesos</p>
             </a>
-            <a href="#" class="card">
+            <a href="#" class="card" id="btn-ajustes" data-module="configuracion">
                 <i class="fa-solid fa-gear"></i>
                 <h3>AJUSTES</h3>
                 <p>Configuración general</p>
             </a>
-            <a href="#" class="card">
+            <a href="#" class="card" data-module="compras">
                 <i class="fa-solid fa-calendar-check"></i>
                 <h3>COMPRAS</h3>
                 <p>Gestión de compras</p>
@@ -286,6 +303,390 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
         </div>
     </div>
 
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // ============================================
+        // SISTEMA DE TEMAS - COLORES ORIGINALES
+        // ============================================
+        
+        const DEFAULT_COLORS = {
+            '--color-dorado': '#C5A059',
+            '--color-dorado-oscuro': '#A8883A',
+            '--color-dorado-claro': '#D4B87A',
+            '--bg-carbon': '#1A1A1A',
+            '--bg-carbon-claro': '#2A2A2A',
+            '--bg-carbon-oscuro': '#0D0D0D',
+            '--bg-gris-oxford': '#4A4A4A',
+            '--text-blanco-crema': '#F5F5DC',
+            '--text-gris-claro': '#D0D0D0',
+            '--border-fuerte': '#4A4A4A'
+        };
+        
+        const PALETTES = {
+            original: { nombre: 'Original', desc: 'Clásico Liquour', colores: DEFAULT_COLORS },
+            noche: { nombre: 'Noche Profunda', desc: 'Misterioso y premium', colores: {
+                '--color-dorado': '#D4AF37',
+                '--color-dorado-oscuro': '#B8960C',
+                '--color-dorado-claro': '#FFD700',
+                '--bg-carbon': '#0A0A0A',
+                '--bg-carbon-claro': '#1A1A1A',
+                '--bg-carbon-oscuro': '#050505',
+                '--bg-gris-oxford': '#333333',
+                '--text-blanco-crema': '#FFFFFF',
+                '--text-gris-claro': '#CCCCCC',
+                '--border-fuerte': '#333333'
+            }},
+            vino: { nombre: 'Vino Tinto', desc: 'Pasión y elegancia', colores: {
+                '--color-dorado': '#8B1A1A',
+                '--color-dorado-oscuro': '#6B1010',
+                '--color-dorado-claro': '#B84040',
+                '--bg-carbon': '#1A0A0A',
+                '--bg-carbon-claro': '#2A1515',
+                '--bg-carbon-oscuro': '#0A0505',
+                '--bg-gris-oxford': '#5A3030',
+                '--text-blanco-crema': '#F5E6E6',
+                '--text-gris-claro': '#C4A0A0',
+                '--border-fuerte': '#5A3030'
+            }},
+            esmeralda: { nombre: 'Esmeralda', desc: 'Naturaleza y frescura', colores: {
+                '--color-dorado': '#8B9A46',
+                '--color-dorado-oscuro': '#6B7A36',
+                '--color-dorado-claro': '#B0C060',
+                '--bg-carbon': '#1A1A0A',
+                '--bg-carbon-claro': '#2A2A15',
+                '--bg-carbon-oscuro': '#0A0A05',
+                '--bg-gris-oxford': '#4A4A30',
+                '--text-blanco-crema': '#F0F0E0',
+                '--text-gris-claro': '#B0B0A0',
+                '--border-fuerte': '#4A4A30'
+            }}
+        };
+        
+        function applyColors(colors) {
+            const root = document.documentElement;
+            for (const [key, value] of Object.entries(colors)) {
+                root.style.setProperty(key, value);
+            }
+            localStorage.setItem('liquour_colors', JSON.stringify(colors));
+        }
+        
+        function loadColors() {
+            const saved = localStorage.getItem('liquour_colors');
+            if (saved) {
+                try {
+                    const colors = JSON.parse(saved);
+                    applyColors(colors);
+                } catch(e) {
+                    applyColors(DEFAULT_COLORS);
+                }
+            } else {
+                applyColors(DEFAULT_COLORS);
+            }
+        }
+        
+        function getCurrentColors() {
+            const root = getComputedStyle(document.documentElement);
+            return {
+                '--color-dorado': root.getPropertyValue('--color-dorado').trim() || '#C5A059',
+                '--bg-carbon': root.getPropertyValue('--bg-carbon').trim() || '#1A1A1A',
+                '--bg-carbon-claro': root.getPropertyValue('--bg-carbon-claro').trim() || '#2A2A2A',
+                '--bg-gris-oxford': root.getPropertyValue('--bg-gris-oxford').trim() || '#4A4A4A',
+                '--text-blanco-crema': root.getPropertyValue('--text-blanco-crema').trim() || '#F5F5DC',
+                '--border-fuerte': root.getPropertyValue('--border-fuerte').trim() || '#4A4A4A'
+            };
+        }
+        
+        function adjustBrightness(hex, percent) {
+            let r = parseInt(hex.slice(1, 3), 16);
+            let g = parseInt(hex.slice(3, 5), 16);
+            let b = parseInt(hex.slice(5, 7), 16);
+            r = Math.min(255, Math.max(0, r + (r * percent / 100)));
+            g = Math.min(255, Math.max(0, g + (g * percent / 100)));
+            b = Math.min(255, Math.max(0, b + (b * percent / 100)));
+            return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
+        }
+        
+        loadColors();
+        
+        const savedLogo = localStorage.getItem('liquour_logo');
+        if (savedLogo) {
+            const logoImg = document.getElementById('logo-sistema');
+            if (logoImg) logoImg.src = savedLogo;
+        }
+        
+        const roleElement = document.querySelector('.role');
+        let rol = roleElement ? roleElement.innerText.trim().toLowerCase() : 'empleado';
+        
+        // ============================================
+        // MODAL DE CONFIGURACIÓN (CORREGIDO)
+        // ============================================
+        function openColorConfigModal() {
+            const currentColors = getCurrentColors();
+            const currentLogo = localStorage.getItem('liquour_logo') || '/LIQUOUR/Assets/IMG/Logo.jpeg';
+            
+            Swal.fire({
+                title: '<span style="font-size: 1.3rem; letter-spacing: 2px;">🎨 PERSONALIZAR LIQUOUR</span>',
+                html: `
+                    <div style="text-align: left; max-height: 65vh; overflow-y: auto; padding: 0 5px;">
+                        
+                        <!-- PALETAS RÁPIDAS -->
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color: var(--color-dorado); margin-bottom: 12px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;">
+                                <i class="fa-solid fa-palette"></i> Paletas Rápidas
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <button type="button" class="palette-option" data-palette="original" style="background: linear-gradient(135deg, #1A1A1A, #C5A059); border: none; padding: 12px; border-radius: 12px; color: white; cursor: pointer; font-weight: 600;">⚜️ ORIGINAL</button>
+                                <button type="button" class="palette-option" data-palette="noche" style="background: linear-gradient(135deg, #0A0A0A, #D4AF37); border: none; padding: 12px; border-radius: 12px; color: white; cursor: pointer; font-weight: 600;">🌙 NOCHE</button>
+                                <button type="button" class="palette-option" data-palette="vino" style="background: linear-gradient(135deg, #1A0A0A, #8B1A1A); border: none; padding: 12px; border-radius: 12px; color: white; cursor: pointer; font-weight: 600;">🍷 VINO</button>
+                                <button type="button" class="palette-option" data-palette="esmeralda" style="background: linear-gradient(135deg, #1A1A0A, #8B9A46); border: none; padding: 12px; border-radius: 12px; color: white; cursor: pointer; font-weight: 600;">🫒 ESMERALDA</button>
+                            </div>
+                        </div>
+                        
+                        <div style="border-top: 1px solid var(--border-fuerte); margin: 15px 0;"></div>
+                        
+                        <!-- COLOR DORADO -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                ✨ DORADO MATE (Acentos / Botones)
+                            </label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="color" id="color-dorado" value="${currentColors['--color-dorado']}" style="width: 55px; height: 45px; border-radius: 10px; border: 2px solid var(--color-dorado); cursor: pointer;">
+                                <input type="text" id="color-dorado-hex" value="${currentColors['--color-dorado']}" style="flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-family: monospace; font-size: 14px;">
+                            </div>
+                            <small style="color: #888;">Botones, enlaces activos, bordes decorativos</small>
+                        </div>
+                        
+                        <!-- FONDO NEGRO CARBÓN -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                🖤 NEGRO CARBÓN (Fondo Principal)
+                            </label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="color" id="bg-carbon" value="${currentColors['--bg-carbon']}" style="width: 55px; height: 45px; border-radius: 10px; border: 2px solid var(--color-dorado); cursor: pointer;">
+                                <input type="text" id="bg-carbon-hex" value="${currentColors['--bg-carbon']}" style="flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-family: monospace; font-size: 14px;">
+                            </div>
+                            <small style="color: #888;">Fondo general del sistema</small>
+                        </div>
+                        
+                        <!-- GRIS OXFORD (Tarjetas) -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                📦 GRIS OXFORD (Fondo Tarjetas)
+                            </label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="color" id="bg-gris" value="${currentColors['--bg-gris-oxford']}" style="width: 55px; height: 45px; border-radius: 10px; border: 2px solid var(--color-dorado); cursor: pointer;">
+                                <input type="text" id="bg-gris-hex" value="${currentColors['--bg-gris-oxford']}" style="flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-family: monospace; font-size: 14px;">
+                            </div>
+                            <small style="color: #888;">Tarjetas, paneles, modales</small>
+                        </div>
+                        
+                        <!-- BLANCO CREMA (Texto) -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                📝 BLANCO CREMA (Texto Principal)
+                            </label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="color" id="text-color" value="${currentColors['--text-blanco-crema']}" style="width: 55px; height: 45px; border-radius: 10px; border: 2px solid var(--color-dorado); cursor: pointer;">
+                                <input type="text" id="text-color-hex" value="${currentColors['--text-blanco-crema']}" style="flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-family: monospace; font-size: 14px;">
+                            </div>
+                            <small style="color: #888;">Textos principales, títulos</small>
+                        </div>
+                        
+                        <!-- COLOR DE BORDES -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                🔲 COLOR DE BORDES
+                            </label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="color" id="border-color" value="${currentColors['--border-fuerte']}" style="width: 55px; height: 45px; border-radius: 10px; border: 2px solid var(--color-dorado); cursor: pointer;">
+                                <input type="text" id="border-color-hex" value="${currentColors['--border-fuerte']}" style="flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-family: monospace; font-size: 14px;">
+                            </div>
+                            <small style="color: #888;">Bordes de tarjetas, inputs, tablas</small>
+                        </div>
+                        
+                        <div style="border-top: 1px solid var(--border-fuerte); margin: 15px 0;"></div>
+                        
+                        <!-- LOGOTIPO -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                🏷️ LOGOTIPO DE LA EMPRESA
+                            </label>
+                            <input type="text" id="input-logo" value="${currentLogo}" style="width: 100%; padding: 12px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-size: 14px;">
+                            <small style="color: #888;">Pega la URL de tu logo o cámbiala aquí</small>
+                        </div>
+                        
+                        <div style="background: rgba(197,160,89,0.1); padding: 12px; border-radius: 10px; margin-top: 15px; border-left: 3px solid var(--color-dorado);">
+                            <small style="color: #aaa;">✨ Los cambios se guardan automáticamente y se aplican en todo el sistema</small>
+                        </div>
+                    </div>
+                `,
+                background: '#1A1A1A',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check"></i> Guardar Cambios',
+                cancelButtonText: '<i class="fa-solid fa-times"></i> Cancelar',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'modal-elegante',
+                    confirmButton: 'swal2-confirm btn-guardar',
+                    cancelButton: 'swal2-cancel btn-cancelar'
+                },
+                didOpen: () => {
+                    // Paletas rápidas
+                    document.querySelectorAll('.palette-option').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const paletteName = btn.getAttribute('data-palette');
+                            const palette = PALETTES[paletteName];
+                            if (palette) {
+                                applyColors(palette.colores);
+                                Swal.fire({
+                                    title: `🎨 ${palette.nombre}`,
+                                    text: palette.desc,
+                                    icon: 'success',
+                                    timer: 1200,
+                                    showConfirmButton: false,
+                                    background: '#1A1A1A',
+                                    color: '#F5F5DC'
+                                });
+                                const modal = Swal.getPopup();
+                                if (modal) Swal.close();
+                            }
+                        });
+                    });
+                    
+                    // Sincronizar colores
+                    const syncColor = (colorId, hexId, variable) => {
+                        const colorInput = document.getElementById(colorId);
+                        const hexInput = document.getElementById(hexId);
+                        if (colorInput && hexInput) {
+                            colorInput.addEventListener('input', () => {
+                                hexInput.value = colorInput.value;
+                                document.documentElement.style.setProperty(variable, colorInput.value);
+                            });
+                            hexInput.addEventListener('input', () => {
+                                if (hexInput.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+                                    colorInput.value = hexInput.value;
+                                    document.documentElement.style.setProperty(variable, hexInput.value);
+                                }
+                            });
+                        }
+                    };
+                    syncColor('color-dorado', 'color-dorado-hex', '--color-dorado');
+                    syncColor('bg-carbon', 'bg-carbon-hex', '--bg-carbon');
+                    syncColor('bg-gris', 'bg-gris-hex', '--bg-gris-oxford');
+                    syncColor('text-color', 'text-color-hex', '--text-blanco-crema');
+                    syncColor('border-color', 'border-color-hex', '--border-fuerte');
+                },
+                preConfirm: () => {
+                    return {
+                        '--color-dorado': document.getElementById('color-dorado').value,
+                        '--color-dorado-oscuro': adjustBrightness(document.getElementById('color-dorado').value, -15),
+                        '--color-dorado-claro': adjustBrightness(document.getElementById('color-dorado').value, 15),
+                        '--bg-carbon': document.getElementById('bg-carbon').value,
+                        '--bg-carbon-claro': adjustBrightness(document.getElementById('bg-carbon').value, 20),
+                        '--bg-carbon-oscuro': adjustBrightness(document.getElementById('bg-carbon').value, -15),
+                        '--bg-gris-oxford': document.getElementById('bg-gris').value,
+                        '--text-blanco-crema': document.getElementById('text-color').value,
+                        '--text-gris-claro': adjustBrightness(document.getElementById('text-color').value, -20),
+                        '--border-fuerte': document.getElementById('border-color').value,
+                        'logo': document.getElementById('input-logo').value
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    const { logo, ...colors } = result.value;
+                    applyColors(colors);
+                    localStorage.setItem('liquour_logo', logo);
+                    const logoImg = document.getElementById('logo-sistema');
+                    if (logoImg) logoImg.src = logo;
+                    
+                    Swal.fire({
+                        title: '✅ ¡Configuración Guardada!',
+                        text: 'Los cambios se han aplicado en todo el sistema.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: '#1A1A1A',
+                        color: '#F5F5DC'
+                    });
+                }
+            });
+        }
+        
+        // ============================================
+        // MANEJADOR DE CLICS EN TARJETAS
+        // ============================================
+        const cards = document.querySelectorAll('.card');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                e.preventDefault();
+                const titulo = this.querySelector('h3').innerText.trim();
+                
+                const rutas = {
+                    "PUNTO DE VENTA": "../Include/Admin/Tienda_pos.php",
+                    "INVENTARIO": (rol === "administrador" || rol === "admin") ? "../Include/Admin/Catalogo_Admin.php" : "../Include/empleado/Catalogo_Empleado.php",
+                    "PÁGINA WEB": "../Include/empleado/principal.php",
+                    "USUARIOS": "../Include/Admin/empleados.php",
+                    "ESTADÍSTICAS": "../Include/Admin/dashboard.php",
+                    "VENTAS": "../Include/Admin/reportes.php",
+                    "COMPRAS": "../Include/Admin/compras.php"
+                };
+                
+                if (rutas[titulo]) {
+                    window.location.href = rutas[titulo];
+                }
+                else if (titulo === "AJUSTES") {
+                    openColorConfigModal();
+                }
+                else {
+                    Swal.fire({
+                        title: '<span style="color:var(--color-dorado); letter-spacing: 2px;">EN CONSTRUCCIÓN</span>',
+                        html: '<span style="color:#cccccc;">Estamos preparándote una experiencia VIP. ¡Pronto estará lista! 🚧</span>',
+                        icon: 'info',
+                        iconColor: 'var(--color-dorado)',
+                        background: '#1a1a1a',
+                        confirmButtonText: 'Aceptar',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'modal-elegante',
+                            confirmButton: 'swal2-confirm btn-guardar'
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Botón de salir
+        const btnExit = document.querySelector('.btn-exit');
+        if (btnExit) {
+            btnExit.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                
+                Swal.fire({
+                    title: '<span style="color:var(--color-dorado); letter-spacing: 2px;">¿CERRAR SESIÓN?</span>',
+                    html: '<span style="color:#cccccc;">Saldrás de tu panel de Liquour.</span>',
+                    icon: 'warning',
+                    iconColor: 'var(--color-dorado)',
+                    showCancelButton: true,
+                    background: '#1a1a1a',
+                    confirmButtonText: 'Sí, salir',
+                    cancelButtonText: 'Cancelar',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'modal-elegante',
+                        confirmButton: 'swal2-confirm btn-guardar',
+                        cancelButton: 'swal2-cancel btn-cancelar'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        }
+    });
+    </script>
 </body>
-<script src="../../Assets/JS/menu.js"></script>
 </html>

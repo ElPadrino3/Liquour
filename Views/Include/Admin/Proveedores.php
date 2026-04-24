@@ -52,14 +52,117 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
     <link rel="stylesheet" href="../../../Assets/CSS/Proveedores.css?v=<?php echo time(); ?>">
+    
+    <!-- ========================================= -->
+    <!-- FORZAR ESTILOS DEL HEADER Y TEMA -->
+    <!-- ========================================= -->
     <style>
+        :root {
+            --tema-color: #C5A059;
+            --tema-color-rgb: 197, 160, 89;
+            --bg-carbon: #1A1A1A;
+            --text-cream: #F5F5DC;
+            --border-color: #4A4A4A;
+            --negro-carbon: #1A1A1A;
+            --dorado-mate: #C5A059;
+            --gris-oxford: #4A4A4A;
+            --blanco-crema: #F5F5DC;
+        }
+        
+        /* ============================================
+           FORZAR ESTILOS DEL HEADER - SOLUCIÓN DEFINITIVA
+        ============================================ */
+        .navbar-liquour {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            background: var(--bg-carbon) !important;
+            padding: 8px 5% !important;
+            height: 76px !important;
+            border-bottom: 1px solid var(--tema-color) !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 9999 !important;
+            margin-bottom: 20px !important;
+        }
+        
+        .logo-container {
+            display: flex !important;
+            align-items: center !important;
+            height: 100% !important;
+        }
+        
+        .logo-img {
+            height: 60px !important;
+            max-height: 60px !important;
+            width: auto !important;
+            transition: transform 0.3s ease !important;
+            object-fit: contain !important;
+        }
+        
+        .nav-menu {
+            display: flex !important;
+            gap: 10px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+        
+        .nav-item {
+            background: var(--bg-carbon) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-cream) !important;
+            padding: 8px 16px !important;
+            font-family: 'Montserrat', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            border-radius: 6px !important;
+            transition: all 0.3s ease !important;
+            display: inline-block !important;
+        }
+        
+        .nav-item:hover {
+            background: var(--tema-color) !important;
+            color: var(--bg-carbon) !important;
+            border-color: var(--tema-color) !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* Reset para que Bootstrap no afecte los botones del header */
+        .navbar-liquour a {
+            all: unset;
+            background: var(--bg-carbon) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-cream) !important;
+            padding: 8px 16px !important;
+            font-family: 'Montserrat', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            margin: 0 !important;
+        }
+        
+        .navbar-liquour a:hover {
+            background: var(--tema-color) !important;
+            color: var(--bg-carbon) !important;
+            border-color: var(--tema-color) !important;
+            transform: translateY(-2px) !important;
+        }
+        
         .liquour-page-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at 50% 50%, #1A1A1A 0%, #0d0d0d 100%);
+            background: radial-gradient(circle at 50% 50%, var(--bg-carbon) 0%, #0d0d0d 100%);
             z-index: -2;
         }
 
@@ -101,15 +204,71 @@ try {
             50% { opacity: 1; }
             100% { transform: translateY(-20vh) scale(1.5); opacity: 0; }
         }
+        
+        /* Ajustes para el contenedor principal */
+        .container.mt-5 {
+            margin-top: 30px !important;
+        }
     </style>
+    
+    <script>
+    (function sincronizarProveedores() {
+        // Cargar colores desde localStorage
+        const coloresGuardados = localStorage.getItem('liquour_colors');
+        if (coloresGuardados) {
+            try {
+                const colores = JSON.parse(coloresGuardados);
+                const dorado = colores['--color-dorado'] || '#C5A059';
+                const fondo = colores['--bg-carbon'] || '#1A1A1A';
+                const texto = colores['--text-blanco-crema'] || '#F5F5DC';
+                const borde = colores['--border-fuerte'] || '#4A4A4A';
+                
+                // Aplicar variables CSS
+                document.documentElement.style.setProperty('--tema-color', dorado);
+                document.documentElement.style.setProperty('--dorado-mate', dorado);
+                document.documentElement.style.setProperty('--bg-carbon', fondo);
+                document.documentElement.style.setProperty('--negro-carbon', fondo);
+                document.documentElement.style.setProperty('--text-cream', texto);
+                document.documentElement.style.setProperty('--blanco-crema', texto);
+                document.documentElement.style.setProperty('--border-color', borde);
+                document.documentElement.style.setProperty('--gris-oxford', borde);
+                
+                // Calcular RGB
+                const r = parseInt(dorado.slice(1,3), 16);
+                const g = parseInt(dorado.slice(3,5), 16);
+                const b = parseInt(dorado.slice(5,7), 16);
+                document.documentElement.style.setProperty('--tema-color-rgb', `${r}, ${g}, ${b}`);
+                
+                console.log('🎨 Proveedores sincronizado con tema:', dorado);
+            } catch(e) {
+                console.log('Error cargando colores:', e);
+            }
+        }
+        
+        // Cargar logo
+        const logoGuardado = localStorage.getItem('liquour_theme_logo');
+        if (logoGuardado) {
+            setTimeout(function() {
+                const logos = document.querySelectorAll('.logo-img, .theme-logo, #main-logo');
+                logos.forEach(function(img) {
+                    if (img && img.tagName === 'IMG') img.src = logoGuardado;
+                });
+            }, 100);
+        }
+    })();
+    
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo') {
+            location.reload();
+        }
+    });
+    </script>
 </head>
 <body>
-
+<?php @include '../../Layout/nav_admin.php'; ?>
 <div class="liquour-page-bg"></div>
 <div class="liquour-bg-animated"></div>
 <div class="floating-particles" id="particles"></div>
-
-<?php @include '../../Layout/nav_admin.php'; ?>
 
 <div class="container mt-5" style="max-width: 1200px; position: relative; z-index: 1;">
     
@@ -121,7 +280,7 @@ try {
     </div>
 
     <?php if ($mensaje): ?>
-        <div class="alert alert-success alert-dismissible fade show shadow-sm animate__animated animate__fadeIn" style="background: rgba(197, 160, 89, 0.1); border: 1px solid #C5A059; color: #C5A059;" role="alert">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm animate__animated animate__fadeIn" style="background: rgba(197, 160, 89, 0.1); border: 1px solid var(--dorado-mate); color: var(--dorado-mate);" role="alert">
             <?php echo $mensaje; ?>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -138,20 +297,20 @@ try {
         <div class="col-lg-4 animate__animated animate__fadeInLeft" style="animation-delay: 0.2s;">
             <div class="card h-100" style="background: rgba(26, 26, 26, 0.8); backdrop-filter: blur(10px);">
                 <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
-                    <h5 class="mb-0" style="color: #C5A059; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px;">Registrar Nuevo</h5>
+                    <h5 class="mb-0" style="color: var(--dorado-mate); font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px;">Registrar Nuevo</h5>
                     <hr style="border-color: rgba(197, 160, 89, 0.3); margin-top: 15px;">
                 </div>
                 <div class="card-body">
                     <form method="POST" action="">
                         <div class="mb-4">
-                            <label for="nombre" class="form-label" style="color: #F5F5DC; font-size: 0.85rem;">Nombre de la Empresa</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej. Distribuidora El Oasis" required style="background: rgba(0,0,0,0.5); border: 1px solid rgba(197, 160, 89, 0.2); color: #F5F5DC;">
+                            <label for="nombre" class="form-label" style="color: var(--blanco-crema); font-size: 0.85rem;">Nombre de la Empresa</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej. Distribuidora El Oasis" required style="background: rgba(0,0,0,0.5); border: 1px solid rgba(197, 160, 89, 0.2); color: var(--blanco-crema);">
                         </div>
                         <div class="mb-4">
-                            <label for="telefono" class="form-label" style="color: #F5F5DC; font-size: 0.85rem;">Teléfono de Contacto</label>
-                            <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ej. 555-1234" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(197, 160, 89, 0.2); color: #F5F5DC;">
+                            <label for="telefono" class="form-label" style="color: var(--blanco-crema); font-size: 0.85rem;">Teléfono de Contacto</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ej. 555-1234" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(197, 160, 89, 0.2); color: var(--blanco-crema);">
                         </div>
-                        <button type="submit" name="btn_agregar" class="btn btn-primary w-100 mt-2" style="background: #C5A059; border: none; color: #1A1A1A; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Agregar Proveedor</button>
+                        <button type="submit" name="btn_agregar" class="btn btn-primary w-100 mt-2" style="background: var(--dorado-mate); border: none; color: #1A1A1A; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Agregar Proveedor</button>
                     </form>
                 </div>
             </div>
@@ -160,30 +319,30 @@ try {
         <div class="col-lg-8 animate__animated animate__fadeInRight" style="animation-delay: 0.4s;">
             <div class="card h-100" style="background: rgba(26, 26, 26, 0.8); backdrop-filter: blur(10px);">
                 <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
-                    <h5 class="mb-0" style="color: #C5A059; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px;">Contactos Activos</h5>
+                    <h5 class="mb-0" style="color: var(--dorado-mate); font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px;">Contactos Activos</h5>
                     <hr style="border-color: rgba(197, 160, 89, 0.3); margin-top: 15px;">
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0 align-middle" style="color: #F5F5DC; background: transparent;">
+                        <table class="table table-hover mb-0 align-middle" style="color: var(--blanco-crema); background: transparent;">
                             <thead style="background: transparent;">
                                 <tr style="border-bottom: 1px solid rgba(197, 160, 89, 0.2); background: transparent;">
-                                    <th scope="col" style="background: transparent; width: 15%; padding-left: 25px; color: #888; font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Código</th>
-                                    <th scope="col" style="background: transparent; width: 45%; color: #888; font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Razón Social</th>
-                                    <th scope="col" style="background: transparent; width: 25%; color: #888; font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Contacto</th>
-                                    <th scope="col" style="background: transparent; width: 15%; color: #888; font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Estatus</th>
+                                    <th scope="col" style="background: transparent; width: 15%; padding-left: 25px; color: var(--gris-oxford); font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Código</th>
+                                    <th scope="col" style="background: transparent; width: 45%; color: var(--gris-oxford); font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Razón Social</th>
+                                    <th scope="col" style="background: transparent; width: 25%; color: var(--gris-oxford); font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Contacto</th>
+                                    <th scope="col" style="background: transparent; width: 15%; color: var(--gris-oxford); font-weight: normal; text-transform: uppercase; font-size: 0.8rem;">Estatus</th>
                                 </tr>
                             </thead>
                             <tbody style="background: transparent;">
                                 <?php if (!empty($listaProveedores)): ?>
                                     <?php foreach ($listaProveedores as $prov): ?>
                                         <tr style="background: transparent; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;" onmouseover="this.style.background='rgba(197, 160, 89, 0.05)'" onmouseout="this.style.background='transparent'">
-                                            <td style="background: transparent; padding-left: 25px; padding-top: 15px; padding-bottom: 15px;"><span style="color: #666;">PRV-</span><strong style="color: #C5A059;"><?php echo str_pad($prov['id_proveedor'], 3, '0', STR_PAD_LEFT); ?></strong></td>
+                                            <td style="background: transparent; padding-left: 25px; padding-top: 15px; padding-bottom: 15px;"><span style="color: var(--gris-oxford);">PRV-</span><strong style="color: var(--dorado-mate);"><?php echo str_pad($prov['id_proveedor'], 3, '0', STR_PAD_LEFT); ?></strong></td>
                                             <td style="background: transparent; font-weight: 500; font-size: 1.05rem;"><?php echo htmlspecialchars($prov['nombre']); ?></td>
                                             <td style="background: transparent; color: #A0A0A0;"><?php echo htmlspecialchars($prov['telefono'] ?? 'N/D'); ?></td>
                                             <td style="background: transparent;">
                                                 <?php if ($prov['estado']): ?>
-                                                    <span style="background: rgba(197, 160, 89, 0.1); color: #C5A059; border: 1px solid #C5A059; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Operativo</span>
+                                                    <span style="background: rgba(197, 160, 89, 0.1); color: var(--dorado-mate); border: 1px solid var(--dorado-mate); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Operativo</span>
                                                 <?php else: ?>
                                                     <span style="background: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid #dc3545; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Suspendido</span>
                                                 <?php endif; ?>
@@ -193,7 +352,7 @@ try {
                                 <?php else: ?>
                                     <tr style="background: transparent;">
                                         <td colspan="4" class="text-center py-5" style="background: transparent;">
-                                            <div style="color: #4A4A4A; font-size: 1.1rem; margin-bottom: 10px;">No hay registros en el directorio</div>
+                                            <div style="color: var(--gris-oxford); font-size: 1.1rem; margin-bottom: 10px;">No hay registros en el directorio</div>
                                             <div style="color: #A0A0A0; font-size: 0.9rem;">Utiliza el panel para registrar tu primer proveedor.</div>
                                         </td>
                                     </tr>

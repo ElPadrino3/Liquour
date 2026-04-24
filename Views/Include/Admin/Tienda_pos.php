@@ -122,20 +122,35 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
 <link rel="stylesheet" href="../../../Assets/CSS/pos.css?v=<?php echo time(); ?>">
 
 <style>
+    /* ============================================
+       VARIABLES DE COLOR - LIQUOUR ORIGINAL
+       ============================================ */
     :root {
-        --tema-color: #e5c158; 
+        --color-dorado: #C5A059;
+        --color-dorado-oscuro: #A8883A;
+        --color-dorado-claro: #D4B87A;
+        --bg-carbon: #1A1A1A;
+        --bg-carbon-claro: #2A2A2A;
+        --bg-carbon-oscuro: #0D0D0D;
+        --bg-gris-oxford: #4A4A4A;
+        --text-blanco-crema: #F5F5DC;
+        --text-gris-claro: #D0D0D0;
+        --border-fuerte: #4A4A4A;
+        --border-suave: rgba(74, 74, 74, 0.3);
+        --tema-color: #C5A059;
     }
+    
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
         font-family: 'Inter', sans-serif;
-        color: #ffffff;
+        color: var(--text-blanco-crema);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 20px;
         overflow-x: hidden;
-        background-color: #050505;
+        background-color: var(--bg-carbon);
     }
     .video-background {
         position: fixed;
@@ -159,48 +174,49 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
         top: 0; left: 0;
         width: 100vw; height: 100vh;
         z-index: -1;
-        background: rgba(0, 0, 0, 0.4); 
+        background: var(--bg-carbon);
+        opacity: 0.5;
         backdrop-filter: blur(3px);
     }
     .top-bar {
         position: fixed; top: 0; left: 0; width: 100%;
         padding: 15px 30px;
         display: flex; justify-content: space-between; align-items: center;
-        background: rgba(10, 10, 10, 0.75);
+        background: var(--bg-carbon-claro);
         backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        border-bottom: 1px solid var(--border-fuerte);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
         z-index: 1000;
         transition: border-color 0.3s ease;
     }
-    .top-bar:hover { border-bottom: 1px solid var(--tema-color); }
+    .top-bar:hover { border-bottom: 1px solid var(--color-dorado); }
     .brand {
         font-weight: 700; letter-spacing: 2px;
         display: flex; align-items: center; font-size: 0.95rem;
-        color: var(--tema-color); text-transform: uppercase;
+        color: var(--color-dorado); text-transform: uppercase;
         text-shadow: 0 0 10px rgba(0,0,0,0.8);
     }
     .user-section { display: flex; align-items: center; gap: 20px; }
     .user-info {
         display: flex; align-items: center; gap: 10px;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: var(--bg-carbon-oscuro);
+        border: 1px solid var(--border-fuerte);
         padding: 6px 18px; border-radius: 30px;
         transition: all 0.3s ease;
     }
     .user-info:hover {
-        border-color: var(--tema-color);
-        background: rgba(20, 20, 20, 0.8);
+        border-color: var(--color-dorado);
+        background: var(--bg-carbon-claro);
         box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
     .user-text { display: flex; flex-direction: column; text-align: left; }
-    .username { font-size: 0.8rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
-    .role { font-size: 0.65rem; font-weight: 600; color: var(--tema-color); text-transform: uppercase; }
+    .username { font-size: 0.8rem; font-weight: 700; color: var(--text-blanco-crema); letter-spacing: 0.5px; }
+    .role { font-size: 0.65rem; font-weight: 600; color: var(--color-dorado); text-transform: uppercase; }
     .btn-exit {
-        color: #fff; text-decoration: none; font-size: 0.85rem; font-weight: 600;
-        background: rgba(255,255,255,0.1); padding: 8px 18px;
+        color: var(--text-blanco-crema); text-decoration: none; font-size: 0.85rem; font-weight: 600;
+        background: var(--bg-carbon-oscuro); padding: 8px 18px;
         border-radius: 8px; transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid var(--border-fuerte);
     }
     .btn-exit:hover {
         background: #e74c3c; color: #fff; border-color: #e74c3c;
@@ -209,22 +225,22 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
     .main-container { margin-top: 130px; width: 100%; max-width: 1000px; text-align: center; }
     .header h1 {
         font-size: 3rem; letter-spacing: 4px; margin-bottom: 10px; font-weight: 800;
-        color: #fff;
+        color: var(--text-blanco-crema);
         text-shadow: 0 4px 15px rgba(0,0,0,0.9);
     }
     .header p {
-        font-size: 1.1rem; opacity: 0.9; margin-bottom: 50px; font-weight: 400; color: #ddd;
+        font-size: 1.1rem; opacity: 0.9; margin-bottom: 50px; font-weight: 400; color: var(--text-gris-claro);
         text-shadow: 0 2px 10px rgba(0,0,0,0.9);
     }
     .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
     .card {
-        text-decoration: none; color: #fff;
+        text-decoration: none; color: var(--text-blanco-crema);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        background: rgba(15, 15, 15, 0.65) !important; 
+        background: var(--bg-carbon-claro) !important; 
         padding: 30px 15px; border-radius: 12px;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important; 
+        border: 1px solid var(--border-fuerte) !important; 
         backdrop-filter: blur(8px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
         position: relative; overflow: hidden;
@@ -239,18 +255,18 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
     .card:hover::before { left: 150%; }
     .card:hover {
         transform: translateY(-8px) scale(1.02);
-        border-color: var(--tema-color) !important;
-        background: rgba(20, 20, 20, 0.85) !important; 
+        border-color: var(--color-dorado) !important;
+        background: var(--bg-carbon) !important; 
         box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255, 0.1) !important;
     }
     .card i {
-        font-size: 2.2rem; margin-bottom: 12px; color: #fff;
+        font-size: 2.2rem; margin-bottom: 12px; color: var(--text-blanco-crema);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         text-shadow: 0 2px 10px rgba(0,0,0,0.8);
     }
     .card:hover i {
         transform: scale(1.25) translateY(-5px);
-        color: var(--tema-color) !important;
+        color: var(--color-dorado) !important;
         text-shadow: 0 5px 15px rgba(0,0,0,0.9);
     }
     .card h3 { 
@@ -258,24 +274,57 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
         text-transform: uppercase; transition: color 0.3s ease;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
     }
-    .card:hover h3 { color: var(--tema-color); }
+    .card:hover h3 { color: var(--color-dorado); }
     .card p { 
-        font-size: 0.8rem; font-weight: 400; color: #ccc; 
+        font-size: 0.8rem; font-weight: 400; color: var(--text-gris-claro); 
         text-shadow: 0 1px 5px rgba(0,0,0,0.8);
     }
     @media (max-width: 900px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 480px) { .grid-container { grid-template-columns: 1fr; } .header h1 { font-size: 2rem; } }
     @keyframes modalAparicion { 0% { opacity: 0; transform: translateY(30px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     .swal2-popup.modal-elegante {
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; border-top: 4px solid var(--tema-color) !important;
+        border: 1px solid var(--border-fuerte) !important; border-top: 4px solid var(--color-dorado) !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important; border-radius: 12px !important; font-family: 'Inter', sans-serif !important;
         animation: modalAparicion 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+        background: var(--bg-carbon) !important;
     }
-    .swal2-cancel.btn-cancelar { border: 1px solid rgba(255, 255, 255, 0.2) !important; transition: all 0.3s ease; }
+    .swal2-cancel.btn-cancelar { border: 1px solid var(--border-fuerte) !important; transition: all 0.3s ease; background: var(--bg-carbon-oscuro) !important; color: var(--text-blanco-crema) !important; }
     .swal2-cancel.btn-cancelar:hover { background: rgba(255, 255, 255, 0.1) !important; }
-    .swal2-confirm.btn-guardar { background-color: var(--tema-color) !important; color: #000 !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; transition: all 0.3s ease; }
+    .swal2-confirm.btn-guardar { background-color: var(--color-dorado) !important; color: #000 !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; transition: all 0.3s ease; }
     .swal2-confirm.btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0, 0.4) !important; }
 </style>
+
+<!-- SCRIPT PARA CARGAR COLORES GUARDADOS DESDE EL MENÚ -->
+<script>
+    (function() {
+        // Cargar colores guardados desde localStorage
+        const coloresGuardados = localStorage.getItem('liquour_colors');
+        if (coloresGuardados) {
+            try {
+                const colores = JSON.parse(coloresGuardados);
+                const root = document.documentElement;
+                for (const [key, value] of Object.entries(colores)) {
+                    root.style.setProperty(key, value);
+                }
+                // Actualizar también la variable tema-color que usa tu CSS
+                if (colores['--color-dorado']) {
+                    root.style.setProperty('--tema-color', colores['--color-dorado']);
+                }
+            } catch(e) {
+                console.log('Error cargando colores:', e);
+            }
+        }
+        
+        // Cargar logo guardado
+        const logoGuardado = localStorage.getItem('liquour_logo');
+        if (logoGuardado) {
+            const logos = document.querySelectorAll('#logo-sistema, .logo-img, img[src*="Logo"]');
+            logos.forEach(img => {
+                if (img.tagName === 'IMG') img.src = logoGuardado;
+            });
+        }
+    })();
+</script>
 
 <div class="video-background">
     <video autoplay muted loop playsinline id="bg-video">
@@ -449,7 +498,7 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div style="text-align: center; color: var(--gris-oxford); padding: 20px; font-weight: bold; width: 100%;">No hay ventas en los últimos 7 días.</div>
+                    <div style="text-align: center; color: var(--text-gris-claro); padding: 20px; font-weight: bold; width: 100%;">No hay ventas en los últimos 7 días.</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -468,11 +517,11 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
         </div>
         <div class="modal-pago-cuerpo" style="padding: 20px;">
             <img id="det-img" src="" alt="Producto" style="max-width: 150px; border-radius: 8px; margin-bottom: 15px;">
-            <h3 id="det-nombre" style="color: var(--dorado-mate); margin-bottom: 10px;">Nombre</h3>
-            <p style="color: var(--blanco-crema); margin-bottom: 5px;"><strong>Categoría:</strong> <span id="det-cat"></span></p>
-            <p style="color: var(--blanco-crema); margin-bottom: 5px;"><strong>Código:</strong> <span id="det-cod"></span></p>
-            <p style="color: var(--blanco-crema); margin-bottom: 5px;"><strong>Stock Disponible:</strong> <span id="det-stock"></span></p>
-            <h2 id="det-precio" style="color: var(--dorado-mate); margin-top: 15px; font-size: 1.8rem;">$0.00</h2>
+            <h3 id="det-nombre" style="color: var(--color-dorado); margin-bottom: 10px;">Nombre</h3>
+            <p style="color: var(--text-blanco-crema); margin-bottom: 5px;"><strong>Categoría:</strong> <span id="det-cat"></span></p>
+            <p style="color: var(--text-blanco-crema); margin-bottom: 5px;"><strong>Código:</strong> <span id="det-cod"></span></p>
+            <p style="color: var(--text-blanco-crema); margin-bottom: 5px;"><strong>Stock Disponible:</strong> <span id="det-stock"></span></p>
+            <h2 id="det-precio" style="color: var(--color-dorado); margin-top: 15px; font-size: 1.8rem;">$0.00</h2>
         </div>
     </div>
 </div>
@@ -484,11 +533,11 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
             <span class="btn-cerrar-modal" id="cerrar-modal-desc-avanzado">&times;</span>
         </div>
         <div class="modal-pago-cuerpo" style="padding: 20px;">
-            <p style="color: var(--dorado-mate); margin-bottom: 10px; font-weight: bold;">Descuentos Individuales (%):</p>
-            <div style="max-height: 200px; overflow-y: auto; background-color: var(--gris-fondo); border: 1px solid var(--gris-oxford); border-radius: 8px; padding: 10px; margin-bottom: 20px;">
-                <table style="width: 100%; border-collapse: collapse; color: var(--blanco-crema); font-size: 0.9rem;">
+            <p style="color: var(--color-dorado); margin-bottom: 10px; font-weight: bold;">Descuentos Individuales (%):</p>
+            <div style="max-height: 200px; overflow-y: auto; background-color: var(--bg-carbon-oscuro); border: 1px solid var(--border-fuerte); border-radius: 8px; padding: 10px; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; color: var(--text-blanco-crema); font-size: 0.9rem;">
                     <thead>
-                        <tr style="border-bottom: 2px solid var(--dorado-mate); text-align: left;">
+                        <tr style="border-bottom: 2px solid var(--color-dorado); text-align: left;">
                             <th style="padding-bottom: 5px;">Cant.</th>
                             <th style="padding-bottom: 5px;">Producto</th>
                             <th style="padding-bottom: 5px;">Subtotal</th>
@@ -499,11 +548,11 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                     </tbody>
                 </table>
             </div>
-            <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--gris-fondo); border: 1px solid var(--gris-oxford); padding: 15px; border-radius: 8px;">
-                <label style="color: var(--dorado-mate); font-weight: bold;">Descuento a TODO el carrito (%):</label>
+            <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-carbon-oscuro); border: 1px solid var(--border-fuerte); padding: 15px; border-radius: 8px;">
+                <label style="color: var(--color-dorado); font-weight: bold;">Descuento a TODO el carrito (%):</label>
                 <div style="display: flex; align-items: center; gap: 5px;">
-                    <input type="number" id="desc-global-input" placeholder="0" min="0" max="100" style="width: 80px; padding: 8px; border-radius: 4px; border: none; font-size: 1.1rem; text-align: center; background: var(--negro-carbon); color: var(--blanco-crema);">
-                    <span style="color: var(--white); font-size: 1.2rem; font-weight: bold;">%</span>
+                    <input type="number" id="desc-global-input" placeholder="0" min="0" max="100" style="width: 80px; padding: 8px; border-radius: 4px; border: none; font-size: 1.1rem; text-align: center; background: var(--bg-carbon); color: var(--text-blanco-crema);">
+                    <span style="color: var(--text-blanco-crema); font-size: 1.2rem; font-weight: bold;">%</span>
                 </div>
             </div>
         </div>
@@ -516,5 +565,43 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
 <script>
     window.vendedorActual = "<?php echo htmlspecialchars($texto_atendido_por, ENT_QUOTES); ?>";
     window.datosVentasHistoricas = <?php echo json_encode($datos_ventas_js, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+</script>
+<script>
+// ============================================
+// SINCRONIZAR COLORES DEL TEMA CON CSS DE POS
+// ============================================
+(function sincronizarColores() {
+    const coloresGuardados = localStorage.getItem('liquour_colors');
+    
+    if (coloresGuardados) {
+        try {
+            const colores = JSON.parse(coloresGuardados);
+            
+            // Mapear nombres de variables del menú a los nombres del POS
+            const dorado = colores['--color-dorado'] || '#C5A059';
+            const fondo = colores['--bg-carbon'] || '#1A1A1A';
+            const texto = colores['--text-blanco-crema'] || '#F5F5DC';
+            const borde = colores['--border-fuerte'] || '#4A4A4A';
+            
+            // Aplicar a las variables que usa el POS
+            document.documentElement.style.setProperty('--dorado-mate', dorado);
+            document.documentElement.style.setProperty('--negro-carbon', fondo);
+            document.documentElement.style.setProperty('--blanco-crema', texto);
+            document.documentElement.style.setProperty('--gris-oxford', borde);
+            
+            console.log('🎨 Colores sincronizados con POS:', { dorado, fondo, texto });
+            
+        } catch(e) {
+            console.log('Error cargando colores:', e);
+        }
+    }
+})();
+
+// Escuchar cambios en tiempo real
+window.addEventListener('storage', function(e) {
+    if (e.key === 'liquour_colors') {
+        location.reload();
+    }
+});
 </script>
 <script src="../../../Assets/JS/pos.js?v=<?php echo time(); ?>"></script>
