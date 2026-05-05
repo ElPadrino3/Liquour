@@ -1322,7 +1322,7 @@ $categorias = $stmt_cats->fetchAll(PDO::FETCH_ASSOC);
 <nav class="lq-nav">
     <a href="#inicio" class="lq-logo">LI<span>QUO</span>UR</a>
     <ul class="lq-nav-links">
-        <li><a href="../../Layout/menu.php">Inicio</a></li>
+        <li><a href="#inicio">Inicio</a></li>
         <li><a href="#catalogo">Catálogo</a></li>
         <li><a href="#colecciones">Colecciones</a></li>
         <li><a href="#maridaje">Maridaje</a></li>
@@ -1330,18 +1330,6 @@ $categorias = $stmt_cats->fetchAll(PDO::FETCH_ASSOC);
     </ul>
 </nav>
 
-<div class="color-palette-btn" id="colorPaletteBtn">
-    <i class="fas fa-palette"></i>
-</div>
-
-<div class="color-modal" id="colorModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-tint" style="margin-right: 10px;"></i> COLOR ADJUSTER</h3>
-            <div class="modal-close" id="modalClose">
-                <i class="fas fa-times"></i>
-            </div>
-        </div>
 
         <div class="color-section">
             <div class="color-label">

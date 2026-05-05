@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Forzar logo desde localStorage
-    const logoGuardado = localStorage.getItem('liquour_theme_logo');
+    const logoGuardado = localStorage.getItem('liquour_theme_logo') || localStorage.getItem('liquour_logo');
     if (logoGuardado) {
         const logoImg = document.querySelector('.logo-img, .theme-logo, #main-logo');
         if (logoImg) {
@@ -513,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 window.addEventListener('storage', function(e) {
-    if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo') {
+    if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo' || e.key === 'liquour_logo') {
         location.reload();
     }
 });
@@ -521,7 +521,7 @@ window.addEventListener('storage', function(e) {
 <script>
 // Forzar actualización del logo desde localStorage
 (function() {
-    const logoGuardado = localStorage.getItem('liquour_theme_logo');
+    const logoGuardado = localStorage.getItem('liquour_theme_logo') || localStorage.getItem('liquour_logo');
     if (logoGuardado) {
         const logoImg = document.getElementById('main-logo');
         if (logoImg) {

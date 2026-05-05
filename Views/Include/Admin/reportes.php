@@ -160,7 +160,7 @@ window.addEventListener('storage', function(e) {
       </div>
       <div class="toolbar-right">
         <span class="record-count" id="recordCount">Mostrando 0 registros</span>
-        <button class="export-btn" id="btnExportarPDF" style="background: #e74c3c; color: white;">↓ Exportar PDF</button>
+        <button class="export-btn" id="btnExportarPDF">↓ Exportar PDF</button>
       </div>
     </div>
 
@@ -175,6 +175,7 @@ window.addEventListener('storage', function(e) {
             <th data-col="precio">Precio <span class="sort-icon">↕</span></th>
             <th data-col="subtotal">Subtotal <span class="sort-icon">↕</span></th>
             <th data-col="vendedor">Usuario / Relación <span class="sort-icon">↕</span></th>
+            <th style="text-align:center">Acciones</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -184,6 +185,49 @@ window.addEventListener('storage', function(e) {
     <div class="pagination">
       <div class="page-info" id="pageInfo">Página 1 de 1</div>
       <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Previsualizar Detalle -->
+<div id="previewModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+  <div class="modal-content" style="background:var(--carbon); border:1px solid var(--gold); border-radius:8px; width:400px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:'Montserrat', sans-serif;">
+    <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">Detalles de la Transacción</h3>
+    <div id="modalDetails" style="color:var(--cream); font-size:14px; line-height:1.6;">
+      <!-- Contenido dinámico -->
+    </div>
+    <div style="text-align:right; margin-top:20px;">
+      <button onclick="closeModal()" style="background:transparent; border:1px solid var(--gold); color:var(--gold); padding:8px 16px; border-radius:4px; cursor:pointer; transition:0.3s;">Cerrar</button>
+      <button id="modalPrintBtn" style="background:var(--gold); border:none; color:var(--carbon); padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600; margin-left:10px;">Imprimir PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Exportación PDF -->
+<div id="exportModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+  <div class="modal-content" style="background:var(--carbon); border:1px solid var(--gold); border-radius:8px; width:350px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:'Montserrat', sans-serif;">
+    <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">Opciones de Exportación</h3>
+    <div style="margin:20px 0;">
+      <label style="color:var(--cream); display:block; margin-bottom:8px;">Selecciona el periodo:</label>
+      <select id="exportMonth" style="width:100%; padding:10px; background:#1A1A1A; color:var(--cream); border:1px solid var(--gold); border-radius:4px; outline:none; font-family:'Montserrat', sans-serif;">
+        <option value="">Todo el histórico</option>
+        <option value="1">Enero</option>
+        <option value="2">Febrero</option>
+        <option value="3">Marzo</option>
+        <option value="4">Abril</option>
+        <option value="5">Mayo</option>
+        <option value="6">Junio</option>
+        <option value="7">Julio</option>
+        <option value="8">Agosto</option>
+        <option value="9">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+      </select>
+    </div>
+    <div style="text-align:right;">
+      <button onclick="closeExportModal()" style="background:transparent; border:1px solid var(--gold); color:var(--gold); padding:8px 16px; border-radius:4px; cursor:pointer; transition:0.3s;">Cancelar</button>
+      <button id="confirmExportBtn" style="background:var(--gold); border:none; color:var(--carbon); padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600; margin-left:10px;">Exportar</button>
     </div>
   </div>
 </div>
@@ -201,6 +245,36 @@ let vendorFilter = '';
 function initials(name) {
     if (!name || name === '-' || name === 'Almacén') return 'LG';
     return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+
+function imprimirItem(id, tipo) {
+    const url = `../../../Controller/Public/generar_pdf.php?reporte=${tipo}&id=${encodeURIComponent(id)}`;
+    window.open(url, '_blank');
+}
+
+function previewItem(btn, tipo) {
+    const data = JSON.parse(btn.getAttribute('data-json'));
+    
+    let tipoTexto = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+    let relacionLabel = (tipo === 'compras') ? 'Proveedor' : ((tipo === 'ventas') ? 'Vendedor' : 'Usuario/Relación');
+
+    document.getElementById('modalDetails').innerHTML = `
+      <p><strong>Tipo:</strong> ${tipoTexto}</p>
+      <p><strong>ID/Código:</strong> ${data.id}</p>
+      <p><strong>Fecha:</strong> ${data.fecha}</p>
+      <p><strong>${relacionLabel}:</strong> ${data.vendedor}</p>
+      <p><strong>Producto:</strong> ${data.producto}</p>
+      <p><strong>Cantidad:</strong> ${data.cantidad}</p>
+      <p><strong>Precio Unitario:</strong> ${data.precio}</p>
+      <p><strong>Subtotal:</strong> <span style="color:var(--gold); font-weight:bold;">${data.subtotal}</span></p>
+    `;
+    
+    document.getElementById('modalPrintBtn').onclick = function() { imprimirItem(data.id, tipo); };
+    document.getElementById('previewModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('previewModal').style.display = 'none';
 }
 
 function getFiltered() {
@@ -230,7 +304,7 @@ function render() {
 
     const tbody = document.getElementById('tableBody');
     if (slice.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">No hay datos registrados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px;">No hay datos registrados.</td></tr>`;
     } else {
         tbody.innerHTML = slice.map(r => `
             <tr>
@@ -241,6 +315,14 @@ function render() {
               <td class="td-price">${r.precio || '$0.00'}</td>
               <td class="td-sub">${r.subtotal || '$0.00'}</td>
               <td><div class="td-vendor"><div class="vendor-av">${initials(r.vendedor)}</div>${r.vendedor || '-'}</div></td>
+              <td style="text-align:center;">
+                 <button class="action-btn" onclick="previewItem(this, '${currentTab}')" data-json='${JSON.stringify(r).replace(/'/g, "&#39;")}' title="Ver Detalles" style="background:transparent; border:none; cursor:pointer; color:var(--gold); display:inline-flex; align-items:center; justify-content:center; padding:4px; transition:0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--gold)'">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                 </button>
+                 <button class="action-btn" onclick="imprimirItem('${r.id}', '${currentTab}')" title="Imprimir PDF" style="background:transparent; border:none; cursor:pointer; color:var(--gold); display:inline-flex; align-items:center; justify-content:center; padding:4px; margin-left:5px; transition:0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--gold)'">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                 </button>
+              </td>
             </tr>
         `).join('');
     }
@@ -298,17 +380,26 @@ document.getElementById('vendorFilter').addEventListener('change', e => {
 });
 
 document.getElementById('btnExportarPDF').addEventListener('click', function() {
-    const params = new URLSearchParams({
-        reporte: currentTab,
-        busqueda: searchTerm,
-        vendedor: vendorFilter
-    });
+    document.getElementById('exportModal').style.display = 'flex';
+    document.getElementById('confirmExportBtn').onclick = function() {
+        const mes = document.getElementById('exportMonth').value;
+        const params = new URLSearchParams({
+            reporte: currentTab,
+            busqueda: searchTerm,
+            vendedor: vendorFilter,
+            mes: mes
+        });
 
-    const url = `../../../Controller/Public/generar_pdf.php?${params.toString()}`;
-    
-    console.log("Intentando abrir:", url);
-    window.open(url, '_blank');
+        const url = `../../../Controller/Public/generar_pdf.php?${params.toString()}`;
+        
+        window.open(url, '_blank');
+        closeExportModal();
+    };
 });
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
 
 render();
 </script>

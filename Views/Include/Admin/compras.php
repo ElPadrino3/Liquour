@@ -205,7 +205,7 @@ window.addEventListener('storage', function(e) {
           <?php endforeach; ?>
         </select>
       </div>
-      <button type="button" class="export-btn" onclick="imprimirReporteCompras()">↓ Exportar PDF</button>
+      <button type="button" class="export-btn" onclick="openExportModal()">↓ Exportar PDF</button>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -219,6 +219,7 @@ window.addEventListener('storage', function(e) {
             <th>Precio Unit.</th>
             <th>Total</th>
             <th>Estado</th>
+            <th style="text-align:center">Acciones</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -231,6 +232,49 @@ window.addEventListener('storage', function(e) {
   </div>
 </div>
 
+<!-- Modal para Previsualizar Compra -->
+<div id="previewModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+  <div class="modal-content" style="background:var(--carbon); border:1px solid var(--gold); border-radius:8px; width:400px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:'Montserrat', sans-serif;">
+    <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">Detalles de la Compra</h3>
+    <div id="modalDetails" style="color:var(--cream); font-size:14px; line-height:1.6;">
+      <!-- Contenido dinámico -->
+    </div>
+    <div style="text-align:right; margin-top:20px;">
+      <button onclick="closeModal()" style="background:transparent; border:1px solid var(--gold); color:var(--gold); padding:8px 16px; border-radius:4px; cursor:pointer; transition:0.3s;">Cerrar</button>
+      <button id="modalPrintBtn" style="background:var(--gold); border:none; color:var(--carbon); padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600; margin-left:10px;">Imprimir PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Exportación PDF -->
+<div id="exportModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+  <div class="modal-content" style="background:var(--carbon); border:1px solid var(--gold); border-radius:8px; width:350px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:'Montserrat', sans-serif;">
+    <h3 style="color:var(--gold); margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">Opciones de Exportación</h3>
+    <div style="margin:20px 0;">
+      <label style="color:var(--cream); display:block; margin-bottom:8px;">Selecciona el periodo:</label>
+      <select id="exportMonth" style="width:100%; padding:10px; background:#1A1A1A; color:var(--cream); border:1px solid var(--gold); border-radius:4px; outline:none; font-family:'Montserrat', sans-serif;">
+        <option value="">Todo el histórico</option>
+        <option value="1">Enero</option>
+        <option value="2">Febrero</option>
+        <option value="3">Marzo</option>
+        <option value="4">Abril</option>
+        <option value="5">Mayo</option>
+        <option value="6">Junio</option>
+        <option value="7">Julio</option>
+        <option value="8">Agosto</option>
+        <option value="9">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+      </select>
+    </div>
+    <div style="text-align:right;">
+      <button onclick="closeExportModal()" style="background:transparent; border:1px solid var(--gold); color:var(--gold); padding:8px 16px; border-radius:4px; cursor:pointer; transition:0.3s;">Cancelar</button>
+      <button id="confirmExportBtn" style="background:var(--gold); border:none; color:var(--carbon); padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600; margin-left:10px;">Exportar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const ORDERS = <?php echo json_encode($ordersData); ?>;
 const CHART_DATA = <?php echo json_encode($chartData); ?>;
@@ -238,11 +282,48 @@ const ROWS = 7;
 let page = 1, search = '', statusF = '', provF = '';
 const BADGE = { Recibido:'badge-ok', Pendiente:'badge-pending', Cancelado:'badge-cancel' };
 
-function imprimirReporteCompras() {
-    const busqueda = document.getElementById('searchInput').value;
-    const proveedor = document.getElementById('provFilter').value;
-    const url = `../../../../Controller/Public/ReporteController.php?reporte=compras&busqueda=${encodeURIComponent(busqueda)}&vendedor=${encodeURIComponent(proveedor)}`;
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'flex';
+    document.getElementById('confirmExportBtn').onclick = function() {
+        const mes = document.getElementById('exportMonth').value;
+        const busqueda = document.getElementById('searchInput').value;
+        const proveedor = document.getElementById('provFilter').value;
+        const url = `../../../Controller/Public/generar_pdf.php?reporte=compras&busqueda=${encodeURIComponent(busqueda)}&vendedor=${encodeURIComponent(proveedor)}&mes=${encodeURIComponent(mes)}`;
+        window.open(url, '_blank');
+        closeExportModal();
+    };
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function imprimirItem(id) {
+    const url = `../../../Controller/Public/generar_pdf.php?reporte=compras&id=${encodeURIComponent(id)}`;
     window.open(url, '_blank');
+}
+
+function previewItem(btn) {
+    const data = JSON.parse(btn.getAttribute('data-json'));
+    const id = data.orden.replace('ORD-', '');
+    
+    document.getElementById('modalDetails').innerHTML = `
+      <p><strong>Orden:</strong> ${data.orden}</p>
+      <p><strong>Fecha:</strong> ${data.fecha}</p>
+      <p><strong>Proveedor:</strong> ${data.proveedor}</p>
+      <p><strong>Producto:</strong> ${data.producto}</p>
+      <p><strong>Cantidad:</strong> ${data.qty}</p>
+      <p><strong>Precio Unitario:</strong> ${data.precio}</p>
+      <p><strong>Total:</strong> <span style="color:var(--gold); font-weight:bold;">${data.total}</span></p>
+      <p><strong>Estado:</strong> ${data.estado}</p>
+    `;
+    
+    document.getElementById('modalPrintBtn').onclick = function() { imprimirItem(id); };
+    document.getElementById('previewModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('previewModal').style.display = 'none';
 }
 
 function filtered() {
@@ -272,6 +353,14 @@ function render() {
           <td>${r.precio}</td>
           <td class="td-price">${r.total}</td>
           <td><span class="badge ${BADGE[r.estado] || 'badge-ok'}">${r.estado}</span></td>
+          <td style="text-align:center;">
+             <button class="action-btn" onclick="previewItem(this)" data-json='${JSON.stringify(r).replace(/'/g, "&#39;")}' title="Ver Detalles" style="background:transparent; border:none; cursor:pointer; color:var(--gold); display:inline-flex; align-items:center; justify-content:center; padding:4px; transition:0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--gold)'">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+             </button>
+             <button class="action-btn" onclick="imprimirItem('${r.orden.replace('ORD-','')}')" title="Imprimir PDF" style="background:transparent; border:none; cursor:pointer; color:var(--gold); display:inline-flex; align-items:center; justify-content:center; padding:4px; margin-left:5px; transition:0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--gold)'">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+             </button>
+          </td>
         </tr>`).join('');
   }
   document.getElementById('pageInfo').textContent = `Página ${page} de ${pages}`;
@@ -318,6 +407,5 @@ new Chart(document.getElementById('comprasChart'),{
 </script>
 <script id="ordersData" type="application/json"><?php echo json_encode($ordersData); ?></script>
 <script id="chartData" type="application/json"><?php echo json_encode($chartData); ?></script>
-<script src="../../../Assets/JS/Compras.js"></script>
 </body>
 </html>

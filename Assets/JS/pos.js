@@ -508,6 +508,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data.success) {
                 modalPago.style.display = 'none';
+                
+                // Auto-imprimir ticket inmediatamente al completar la venta
+                const vendedorStr = window.vendedorActual || "Usuario";
+                window.imprimirTicketDirecto(cart, subtotalParaTicket, descuentoParaTicket, totalParaTicket, recibido, cambioParaTicket, vendedorStr, new Date().toLocaleString('es-ES'));
+
                 const doradoMate = getComputedStyle(document.documentElement).getPropertyValue('--dorado-mate').trim() || '#C5A059';
                 const successAnim = document.createElement('div');
                 successAnim.innerHTML = `

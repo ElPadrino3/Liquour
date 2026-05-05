@@ -323,6 +323,21 @@ $url_perfil = "/LIQUOUR/Views/Include/Admin/perfil_Admin.php";
                 if (img.tagName === 'IMG') img.src = logoGuardado;
             });
         }
+
+        // Cargar video guardado
+        const videoGuardado = localStorage.getItem('liquour_video');
+        if (videoGuardado) {
+            const container = document.querySelector('.video-background');
+            if (container) {
+                const ytMatch = videoGuardado.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                if (ytMatch) {
+                    const videoId = ytMatch[1];
+                    container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&autohide=1&loop=1&playlist=${videoId}&playsinline=1&enablejsapi=1" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+                } else {
+                    container.innerHTML = `<video autoplay muted loop playsinline id="bg-video"><source src="${videoGuardado}"></video>`;
+                }
+            }
+        }
     })();
 </script>
 
@@ -605,3 +620,4 @@ window.addEventListener('storage', function(e) {
 });
 </script>
 <script src="../../../Assets/JS/pos.js?v=<?php echo time(); ?>"></script>
+

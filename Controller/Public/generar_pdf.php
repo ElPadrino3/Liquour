@@ -23,53 +23,130 @@ if (file_exists($logoPath)) {
 $datos = [];
 $tituloReporte = "";
 
+$id = isset($_GET['id']) ? $_GET['id'] : '';
+
+$mes = isset($_GET['mes']) ? $_GET['mes'] : '';
+
 switch ($tipoReporte) {
     case 'compras':
-        $tituloReporte = "Historial de Compras";
-        $stmt = $conexion->query("
-            SELECT DATE(c.fecha) as fecha, c.id_compra as id, p.nombre as producto, 
-                   dc.cantidad, dc.precio_compra as precio, dc.subtotal, prov.nombre as usuario_rel
-            FROM detalle_compras dc
-            JOIN compras c ON dc.id_compra = c.id_compra
-            JOIN productos p ON dc.id_producto = p.id_producto
-            JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor
-            ORDER BY c.fecha DESC
-        ");
+        $whereClause = "";
+        $params = [];
+        if ($id) {
+            $tituloReporte = "Detalle de Compra #" . $id;
+            $whereClause = "WHERE c.id_compra = :id";
+            $params['id'] = $id;
+        } elseif ($mes !== '') {
+            $tituloReporte = "Historial de Compras - Mes " . $mes;
+            $whereClause = "WHERE MONTH(c.fecha) = :mes AND YEAR(c.fecha) = YEAR(CURRENT_DATE)";
+            $params['mes'] = $mes;
+        } else {
+            $tituloReporte = "Historial de Compras";
+        }
+        
+        $sql = "SELECT DATE(c.fecha) as fecha, c.id_compra as id, p.nombre as producto, 
+                       dc.cantidad, dc.precio_compra as precio, dc.subtotal, prov.nombre as usuario_rel
+                FROM detalle_compras dc
+                JOIN compras c ON dc.id_compra = c.id_compra
+                JOIN productos p ON dc.id_producto = p.id_producto
+                JOIN proveedores prov ON dc.id_proveedor = prov.id_proveedor
+                $whereClause
+                ORDER BY c.fecha DESC";
+                
+        if ($whereClause) {
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute($params);
+        } else {
+            $stmt = $conexion->query($sql);
+        }
         break;
 
     case 'productos':
-        $tituloReporte = "Productos Más Vendidos";
-        $stmt = $conexion->query("
-            SELECT MAX(DATE(v.fecha)) as fecha, p.codigo_barras as id, p.nombre as producto, 
-                   SUM(dv.cantidad) as cantidad, p.precio_venta as precio, SUM(dv.subtotal) as subtotal, '-' as usuario_rel
-            FROM detalle_ventas dv
-            JOIN productos p ON dv.id_producto = p.id_producto
-            JOIN ventas v ON dv.id_venta = v.id_venta
-            GROUP BY p.id_producto ORDER BY cantidad DESC
-        ");
+        $whereClause = "";
+        $params = [];
+        if ($id) {
+            $tituloReporte = "Detalle de Producto #" . $id;
+            $whereClause = "WHERE p.codigo_barras = :id";
+            $params['id'] = $id;
+        } elseif ($mes !== '') {
+            $tituloReporte = "Productos Más Vendidos - Mes " . $mes;
+            $whereClause = "WHERE MONTH(v.fecha) = :mes AND YEAR(v.fecha) = YEAR(CURRENT_DATE)";
+            $params['mes'] = $mes;
+        } else {
+            $tituloReporte = "Productos Más Vendidos";
+        }
+
+        $sql = "SELECT MAX(DATE(v.fecha)) as fecha, p.codigo_barras as id, p.nombre as producto, 
+                       SUM(dv.cantidad) as cantidad, p.precio_venta as precio, SUM(dv.subtotal) as subtotal, '-' as usuario_rel
+                FROM detalle_ventas dv
+                JOIN productos p ON dv.id_producto = p.id_producto
+                JOIN ventas v ON dv.id_venta = v.id_venta
+                $whereClause
+                GROUP BY p.id_producto ORDER BY cantidad DESC";
+
+        if ($whereClause) {
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute($params);
+        } else {
+            $stmt = $conexion->query($sql);
+        }
         break;
 
     case 'inventario':
-        $tituloReporte = "Inventario de Almacén";
-        $stmt = $conexion->query("
-            SELECT DATE(NOW()) as fecha, p.codigo_barras as id, p.nombre as producto, 
-                   p.stock as cantidad, p.precio_venta as precio, (p.stock * p.precio_venta) as subtotal, 'Almacén' as usuario_rel
-            FROM productos p ORDER BY p.stock DESC
-        ");
+        $whereClause = "";
+        $params = [];
+        if ($id) {
+            $tituloReporte = "Detalle de Inventario #" . $id;
+            $whereClause = "WHERE p.codigo_barras = :id";
+            $params['id'] = $id;
+        } else {
+            $tituloReporte = "Inventario de Almacén";
+        }
+
+        $sql = "SELECT DATE(NOW()) as fecha, p.codigo_barras as id, p.nombre as producto, 
+                       p.stock as cantidad, p.precio_venta as precio, (p.stock * p.precio_venta) as subtotal, 'Almacén' as usuario_rel
+                FROM productos p 
+                $whereClause
+                ORDER BY p.stock DESC";
+
+        if ($whereClause) {
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute($params);
+        } else {
+            $stmt = $conexion->query($sql);
+        }
         break;
 
     case 'ventas':
     default:
-        $tituloReporte = "Historial de Ventas";
-        $stmt = $conexion->query("
-            SELECT DATE(v.fecha) as fecha, v.id_venta as id, p.nombre as producto, 
-                   dv.cantidad, dv.precio as precio, dv.subtotal, u.nombre as usuario_rel
-            FROM detalle_ventas dv
-            JOIN ventas v ON dv.id_venta = v.id_venta
-            JOIN productos p ON dv.id_producto = p.id_producto
-            JOIN usuarios u ON v.id_usuario = u.id_usuario
-            ORDER BY v.fecha DESC
-        ");
+        $whereClause = "";
+        $params = [];
+        if ($id) {
+            $tituloReporte = "Detalle de Venta #" . $id;
+            $whereClause = "WHERE v.id_venta = :id";
+            $params['id'] = $id;
+        } elseif ($mes !== '') {
+            $tituloReporte = "Historial de Ventas - Mes " . $mes;
+            $whereClause = "WHERE MONTH(v.fecha) = :mes AND YEAR(v.fecha) = YEAR(CURRENT_DATE)";
+            $params['mes'] = $mes;
+        } else {
+            $tituloReporte = "Historial de Ventas";
+        }
+
+        $sql = "SELECT DATE(v.fecha) as fecha, v.id_venta as id, p.nombre as producto, 
+                       dv.cantidad, dv.precio as precio, dv.subtotal, u.nombre as usuario_rel
+                FROM detalle_ventas dv
+                JOIN ventas v ON dv.id_venta = v.id_venta
+                JOIN productos p ON dv.id_producto = p.id_producto
+                JOIN usuarios u ON v.id_usuario = u.id_usuario
+                $whereClause
+                ORDER BY v.fecha DESC";
+
+        if ($whereClause) {
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute($params);
+        } else {
+            $stmt = $conexion->query($sql);
+        }
         break;
 }
 $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -414,6 +414,20 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
             const logoImg = document.getElementById('logo-sistema');
             if (logoImg) logoImg.src = savedLogo;
         }
+
+        const savedVideo = localStorage.getItem('liquour_video');
+        if (savedVideo) {
+            const container = document.querySelector('.video-background');
+            if (container) {
+                const ytMatch = savedVideo.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                if (ytMatch) {
+                    const videoId = ytMatch[1];
+                    container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&autohide=1&loop=1&playlist=${videoId}&playsinline=1&enablejsapi=1" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+                } else {
+                    container.innerHTML = `<video autoplay muted loop playsinline id="bg-video"><source src="${savedVideo}"></video>`;
+                }
+            }
+        }
         
         const roleElement = document.querySelector('.role');
         let rol = roleElement ? roleElement.innerText.trim().toLowerCase() : 'empleado';
@@ -516,6 +530,15 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
                             <small style="color: #888;">Pega la URL de tu logo o cámbiala aquí</small>
                         </div>
                         
+                        <!-- VIDEO DE FONDO -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                🎥 VIDEO DE FONDO
+                            </label>
+                            <input type="text" id="input-video" value="${localStorage.getItem('liquour_video') || '../../Assets/IMG/licores.mp4'}" style="width: 100%; padding: 12px; border-radius: 10px; background: #111; border: 1px solid var(--border-fuerte); color: #fff; font-size: 14px;">
+                            <small style="color: #888;">Pega la URL de tu video (MP4) o déjalo por defecto</small>
+                        </div>
+                        
                         <div style="background: rgba(197,160,89,0.1); padding: 12px; border-radius: 10px; margin-top: 15px; border-left: 3px solid var(--color-dorado);">
                             <small style="color: #aaa;">✨ Los cambios se guardan automáticamente y se aplican en todo el sistema</small>
                         </div>
@@ -589,16 +612,30 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
                         '--text-blanco-crema': document.getElementById('text-color').value,
                         '--text-gris-claro': adjustBrightness(document.getElementById('text-color').value, -20),
                         '--border-fuerte': document.getElementById('border-color').value,
-                        'logo': document.getElementById('input-logo').value
+                        'logo': document.getElementById('input-logo').value,
+                        'video': document.getElementById('input-video').value
                     };
                 }
             }).then((result) => {
                 if (result.isConfirmed && result.value) {
-                    const { logo, ...colors } = result.value;
+                    const { logo, video, ...colors } = result.value;
                     applyColors(colors);
                     localStorage.setItem('liquour_logo', logo);
+                    localStorage.setItem('liquour_theme_logo', logo);
+                    localStorage.setItem('liquour_video', video);
                     const logoImg = document.getElementById('logo-sistema');
                     if (logoImg) logoImg.src = logo;
+                    
+                    const container = document.querySelector('.video-background');
+                    if (container && video) {
+                        const ytMatch = video.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                        if (ytMatch) {
+                            const videoId = ytMatch[1];
+                            container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&autohide=1&loop=1&playlist=${videoId}&playsinline=1&enablejsapi=1" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+                        } else {
+                            container.innerHTML = `<video autoplay muted loop playsinline id="bg-video"><source src="${video}"></video>`;
+                        }
+                    }
                     
                     Swal.fire({
                         title: '✅ ¡Configuración Guardada!',
@@ -686,7 +723,49 @@ $rolUsuario = $esAdmin ? 'Administrador' : 'Empleado';
                 });
             });
         }
+        
+        // ============================================
+        // CONTROL DE SONIDO PARA VIDEOS
+        // ============================================
+        let isMuted = true;
+        const btnSound = document.getElementById('btn-toggle-sound');
+        if (btnSound) {
+            btnSound.addEventListener('click', () => {
+                isMuted = !isMuted;
+                btnSound.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+                btnSound.style.boxShadow = isMuted ? '0 4px 15px rgba(0,0,0,0.5)' : '0 4px 15px var(--color-dorado)';
+                
+                // HTML5 Video
+                const videoElement = document.getElementById('bg-video');
+                if (videoElement && videoElement.tagName === 'VIDEO') {
+                    videoElement.muted = isMuted;
+                }
+                
+                // YouTube Iframe
+                const iframeElement = document.querySelector('.video-background iframe');
+                if (iframeElement) {
+                    iframeElement.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: isMuted ? 'mute' : 'unMute',
+                        args: []
+                    }), '*');
+                    
+                    if (!isMuted) {
+                        iframeElement.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'setVolume',
+                            args: [100]
+                        }), '*');
+                    }
+                }
+            });
+        }
     });
     </script>
+    
+    <!-- Botón flotante para sonido -->
+    <button id="btn-toggle-sound" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; background: var(--bg-carbon-oscuro, #0D0D0D); color: var(--color-dorado, #C5A059); border: 2px solid var(--color-dorado, #C5A059); border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.3s ease; font-size: 1.2rem;">
+        <i class="fas fa-volume-mute"></i>
+    </button>
 </body>
 </html>
