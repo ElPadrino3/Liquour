@@ -142,44 +142,7 @@ foreach ($productos as $p) {
     </style>
     
     <script>
-    (function sincronizarCatalogo() {
-        const coloresGuardados = localStorage.getItem('liquour_colors');
-        if (coloresGuardados) {
-            try {
-                const colores = JSON.parse(coloresGuardados);
-                const dorado = colores['--color-dorado'] || '#C5A059';
-                const fondo = colores['--bg-carbon'] || '#1A1A1A';
-                const texto = colores['--text-blanco-crema'] || '#F5F5DC';
-                const borde = colores['--border-fuerte'] || '#4A4A4A';
-                
-                document.documentElement.style.setProperty('--tema-color', dorado);
-                document.documentElement.style.setProperty('--bg-carbon', fondo);
-                document.documentElement.style.setProperty('--text-cream', texto);
-                document.documentElement.style.setProperty('--border-color', borde);
-                
-                const r = parseInt(dorado.slice(1,3), 16);
-                const g = parseInt(dorado.slice(3,5), 16);
-                const b = parseInt(dorado.slice(5,7), 16);
-                document.documentElement.style.setProperty('--tema-color-rgb', `${r}, ${g}, ${b}`);
-                
-                console.log('🎨 Catálogo sincronizado con tema:', dorado);
-            } catch(e) {}
-        }
-        
-        const logoGuardado = localStorage.getItem('liquour_theme_logo');
-        if (logoGuardado) {
-            const logos = document.querySelectorAll('.logo-img, .theme-logo');
-            logos.forEach(img => {
-                if (img && img.tagName === 'IMG') img.src = logoGuardado;
-            });
-        }
-    })();
-    
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo') {
-            location.reload();
-        }
-    });
+    // LiquourThemeManager en nav_admin.php ahora controla el tema
     </script>
 </head>
 <body>

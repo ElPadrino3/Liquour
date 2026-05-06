@@ -1,4 +1,7 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once '../../../Config/Liquour_bdd.php';
 
 $db = new BDD();
@@ -212,56 +215,7 @@ try {
     </style>
     
     <script>
-    (function sincronizarProveedores() {
-        // Cargar colores desde localStorage
-        const coloresGuardados = localStorage.getItem('liquour_colors');
-        if (coloresGuardados) {
-            try {
-                const colores = JSON.parse(coloresGuardados);
-                const dorado = colores['--color-dorado'] || '#C5A059';
-                const fondo = colores['--bg-carbon'] || '#1A1A1A';
-                const texto = colores['--text-blanco-crema'] || '#F5F5DC';
-                const borde = colores['--border-fuerte'] || '#4A4A4A';
-                
-                // Aplicar variables CSS
-                document.documentElement.style.setProperty('--tema-color', dorado);
-                document.documentElement.style.setProperty('--dorado-mate', dorado);
-                document.documentElement.style.setProperty('--bg-carbon', fondo);
-                document.documentElement.style.setProperty('--negro-carbon', fondo);
-                document.documentElement.style.setProperty('--text-cream', texto);
-                document.documentElement.style.setProperty('--blanco-crema', texto);
-                document.documentElement.style.setProperty('--border-color', borde);
-                document.documentElement.style.setProperty('--gris-oxford', borde);
-                
-                // Calcular RGB
-                const r = parseInt(dorado.slice(1,3), 16);
-                const g = parseInt(dorado.slice(3,5), 16);
-                const b = parseInt(dorado.slice(5,7), 16);
-                document.documentElement.style.setProperty('--tema-color-rgb', `${r}, ${g}, ${b}`);
-                
-                console.log('🎨 Proveedores sincronizado con tema:', dorado);
-            } catch(e) {
-                console.log('Error cargando colores:', e);
-            }
-        }
-        
-        // Cargar logo
-        const logoGuardado = localStorage.getItem('liquour_theme_logo');
-        if (logoGuardado) {
-            setTimeout(function() {
-                const logos = document.querySelectorAll('.logo-img, .theme-logo, #main-logo');
-                logos.forEach(function(img) {
-                    if (img && img.tagName === 'IMG') img.src = logoGuardado;
-                });
-            }, 100);
-        }
-    })();
-    
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo') {
-            location.reload();
-        }
-    });
+    // LiquourThemeManager en nav_admin.php ahora controla el tema
     </script>
 </head>
 <body>

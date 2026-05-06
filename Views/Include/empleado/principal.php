@@ -58,7 +58,6 @@ $categorias = $stmt_cats->fetchAll(PDO::FETCH_ASSOC);
             color: #fff;
             font-family: 'Raleway', sans-serif;
             overflow-x: hidden;
-            cursor: none;
         }
 
         #webGLApp {
@@ -71,19 +70,7 @@ $categorias = $stmt_cats->fetchAll(PDO::FETCH_ASSOC);
             pointer-events: none;
         }
 
-        .custom-cursor {
-            position: fixed;
-            width: 35px;
-            height: 35px;
-            border: 1.5px solid var(--gold-l);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000;
-            transform: translate(-50%, -50%);
-            background: rgba(229, 193, 88, 0.05);
-            backdrop-filter: blur(3px);
-            transition: width 0.2s, height 0.2s;
-        }
+
 
         .lq-nav, main, section, footer {
             position: relative;
@@ -1330,6 +1317,18 @@ $categorias = $stmt_cats->fetchAll(PDO::FETCH_ASSOC);
     </ul>
 </nav>
 
+<button class="color-palette-btn" id="colorPaletteBtn">
+    <i class="fa-solid fa-palette"></i>
+</button>
+
+<div class="color-modal" id="colorModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Atmósfera Visual</h3>
+            <div class="modal-close" id="modalClose">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+        </div>
 
         <div class="color-section">
             <div class="color-label">

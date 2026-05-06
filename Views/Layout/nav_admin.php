@@ -189,7 +189,24 @@ $b = hexdec(substr($themeColor, 5, 2));
 <script>
 class LiquourThemeManager {
     constructor() {
-        this.color = localStorage.getItem('liquour_theme_color') || '<?php echo $themeColor; ?>';
+        this.color = null;
+        
+        // Primero sincronizar con la configuración de menu.php
+        const coloresMenu = localStorage.getItem('liquour_colors');
+        if (coloresMenu) {
+            try {
+                const coloresObj = JSON.parse(coloresMenu);
+                if (coloresObj['--color-dorado']) {
+                    this.color = coloresObj['--color-dorado'];
+                    localStorage.setItem('liquour_theme_color', this.color);
+                }
+            } catch(e) {}
+        }
+        
+        if (!this.color) {
+            this.color = localStorage.getItem('liquour_theme_color') || '<?php echo $themeColor; ?>';
+        }
+        
         this.logo = localStorage.getItem('liquour_theme_logo') || '<?php echo $themeLogo; ?>';
         this.init();
     }
@@ -212,7 +229,11 @@ class LiquourThemeManager {
     }
 
     applyTheme() {
+        // Set all variations of the gold color used across the system
         document.documentElement.style.setProperty('--tema-color', this.color);
+        document.documentElement.style.setProperty('--color-dorado', this.color);
+        document.documentElement.style.setProperty('--dorado-mate', this.color);
+        document.documentElement.style.setProperty('--gold', this.color);
         
         const rgb = this.hexToRgb(this.color);
         if (rgb) {
@@ -262,6 +283,13 @@ class LiquourThemeManager {
             }
         });
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+        
+        // Sincronizar cambios hechos desde otras pestañas (como menu.php)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo' || e.key === 'liquour_logo') {
+                location.reload();
+            }
+        });
     }
 
     async syncWithServer() {
@@ -290,10 +318,19 @@ class LiquourThemeManager {
         if (color && color !== this.color) {
             this.color = color;
             localStorage.setItem('liquour_theme_color', this.color);
+            
+            // Sincronizar también con liquour_colors para compatibilidad global
+            try {
+                const coloresGuardados = localStorage.getItem('liquour_colors');
+                let coloresObj = coloresGuardados ? JSON.parse(coloresGuardados) : {};
+                coloresObj['--color-dorado'] = this.color;
+                localStorage.setItem('liquour_colors', JSON.stringify(coloresObj));
+            } catch(e) {}
         }
         if (logo && logo !== this.logo) {
             this.logo = logo;
             localStorage.setItem('liquour_theme_logo', this.logo);
+            localStorage.setItem('liquour_logo', this.logo);
         }
         
         this.applyTheme();
@@ -366,12 +403,15 @@ function openLiquourThemeConfig() {
         `,
         background: '#121212',
         showCancelButton: true,
+        showDenyButton: true,
         confirmButtonText: '<i class="fa-solid fa-check"></i> Aplicar Cambios',
+        denyButtonText: '<i class="fa-solid fa-rotate-left"></i> Por defecto',
         cancelButtonText: 'Cancelar',
         buttonsStyling: false,
         customClass: {
             popup: 'theme-config-modal',
             confirmButton: 'theme-btn-confirm',
+            denyButton: 'theme-btn-cancel swal2-deny btn-restablecer',
             cancelButton: 'theme-btn-cancel'
         },
         didOpen: () => {
@@ -430,6 +470,22 @@ function openLiquourThemeConfig() {
             }).then(() => {
                 location.reload();
             });
+        } else if (result.isDenied) {
+            // Restablecer por defecto
+            if (window.liquourTheme) {
+                window.liquourTheme.updateTheme('#C5A059', '/LIQUOUR/Assets/IMG/Logo.jpeg');
+            }
+            Swal.fire({
+                title: '¡Restaurado!',
+                html: 'Se han restaurado el color dorado y el logo original.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                background: '#121212',
+                color: '#fff'
+            }).then(() => {
+                location.reload();
+            });
         }
     });
 }
@@ -479,45 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </nav>
 </header>
 
-<script>
-(function sincronizarHeader() {
-    const coloresGuardados = localStorage.getItem('liquour_colors');
-    if (coloresGuardados) {
-        try {
-            const colores = JSON.parse(coloresGuardados);
-            const dorado = colores['--color-dorado'] || '#C5A059';
-            const fondo = colores['--bg-carbon'] || '#1A1A1A';
-            const texto = colores['--text-blanco-crema'] || '#F5F5DC';
-            const borde = colores['--border-fuerte'] || '#4A4A4A';
-            
-            document.documentElement.style.setProperty('--tema-color', dorado);
-            document.documentElement.style.setProperty('--bg-carbon', fondo);
-            document.documentElement.style.setProperty('--text-cream', texto);
-            document.documentElement.style.setProperty('--border-color', borde);
-            
-            console.log('🎨 Header sincronizado con tema:', dorado);
-        } catch(e) {
-            console.log('Error sincronizando:', e);
-        }
-    }
-    
-    // Forzar logo desde localStorage
-    const logoGuardado = localStorage.getItem('liquour_theme_logo') || localStorage.getItem('liquour_logo');
-    if (logoGuardado) {
-        const logoImg = document.querySelector('.logo-img, .theme-logo, #main-logo');
-        if (logoImg) {
-            logoImg.src = logoGuardado;
-            console.log('🖼️ Logo actualizado a:', logoGuardado);
-        }
-    }
-})();
 
-window.addEventListener('storage', function(e) {
-    if (e.key === 'liquour_colors' || e.key === 'liquour_theme_logo' || e.key === 'liquour_logo') {
-        location.reload();
-    }
-});
-</script>
 <script>
 // Forzar actualización del logo desde localStorage
 (function() {
