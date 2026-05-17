@@ -99,6 +99,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Error al eliminar: " . $e->getMessage();
         }
     }
+
+    if (isset($_POST['btn_import_csv'])) {
+        if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === 0) {
+            $archivo = $_FILES['csv_file']['tmp_name'];
+            $handle = fopen($archivo, "r");
+            if ($handle !== FALSE) {
+                fgetcsv($handle, 1000, ",");
+                $importados = 0;
+                $actualizados = 0;
+                
+                try {
+                    $conexion->beginTransaction();
+                    $stmtCheck = $conexion->prepare("SELECT id_producto FROM productos WHERE codigo_barras = ?");
+                    $stmtInsert = $conexion->prepare("INSERT INTO productos (nombre, codigo_barras, precio_compra, precio_venta, stock, stock_maximo, id_categoria, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
+                    $stmtUpdate = $conexion->prepare("UPDATE productos SET nombre=?, precio_compra=?, precio_venta=?, stock=?, stock_maximo=?, id_categoria=? WHERE codigo_barras=?");
+                    
+                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        if (count($data) >= 7) {
+                            $nombre = $data[0];
+                            $sku = $data[1];
+                            $id_cat = (int)$data[2] ?: 1;
+                            $costo = (float)$data[3];
+                            $venta = (float)$data[4];
+                            $stock = (int)$data[5];
+                            $stock_max = (int)$data[6] ?: 100;
+                            
+                            $stmtCheck->execute([$sku]);
+                            if ($stmtCheck->rowCount() > 0) {
+                                $stmtUpdate->execute([$nombre, $costo, $venta, $stock, $stock_max, $id_cat, $sku]);
+                                $actualizados++;
+                            } else {
+                                $stmtInsert->execute([$nombre, $sku, $costo, $venta, $stock, $stock_max, $id_cat]);
+                                $importados++;
+                            }
+                        }
+                    }
+                    $conexion->commit();
+                    $mensaje = "CSV Procesado exitosamente: $importados importados, $actualizados actualizados.";
+                } catch (Exception $e) {
+                    $conexion->rollBack();
+                    $error = "Error importando CSV: " . $e->getMessage();
+                }
+                fclose($handle);
+            } else {
+                $error = "No se pudo leer el archivo CSV.";
+            }
+        } else {
+            $error = "Por favor suba un archivo CSV válido.";
+        }
+    }
 }
 
 $sqlProd = "SELECT p.*, c.nombre as nombre_categoria FROM productos p LEFT JOIN categorias c ON p.id_categoria = c.id_categoria WHERE p.estado = 1 ORDER BY p.id_producto DESC";
@@ -196,6 +246,7 @@ foreach ($productos as $p) {
 
     <div class="action-bar-top">
         <button class="btn-new-product" onclick="abrirModalAdd()"><i class="fas fa-plus"></i> Nuevo Producto</button>
+        <button class="btn-new-product" onclick="abrirModalImport()" style="background:#27ae60; margin-left: 10px;"><i class="fas fa-file-csv"></i> Importar CSV</button>
     </div>
 
     <section class="inventory-section">
@@ -395,6 +446,22 @@ foreach ($productos as $p) {
     </div>
 </div>
 
+<div id="modal-import" class="modal-overlay">
+    <div class="modal-container admin-form-modal animate__animated animate__zoomIn" style="width: 500px;">
+        <div class="modal-header-perfil"><h3>IMPORTAR INVENTARIO (CSV)</h3><button class="close-modal" onclick="cerrarModal('modal-import')">&times;</button></div>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="modal-body" style="text-align:center;">
+                <i class="fas fa-file-csv" style="font-size: 50px; color: #27ae60; margin-bottom: 15px;"></i>
+                <p style="color:var(--text-cream); margin-bottom: 20px;">Sube un archivo CSV con las siguientes columnas (con encabezado):<br>
+                <small style="color:var(--tema-color);">Nombre, SKU, ID Categoria, Precio Costo, Precio Venta, Stock Inicial, Stock Máximo</small></p>
+                
+                <input type="file" name="csv_file" accept=".csv" required style="margin: 0 auto; display: block; color: var(--text-cream); background: #111; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px;">
+            </div>
+            <div class="modal-footer"><button type="submit" name="btn_import_csv" class="btn-confirmar-admin" style="background:#27ae60; border-color:#27ae60;">IMPORTAR</button></div>
+        </form>
+    </div>
+</div>
+
 <script>
     const proveedoresDB = <?php echo json_encode($proveedores); ?>;
     let stockActualBase = 0;
@@ -460,6 +527,10 @@ foreach ($productos as $p) {
 
     function abrirModalAdd() {
         document.getElementById('modal-add').style.display = 'flex';
+    }
+
+    function abrirModalImport() {
+        document.getElementById('modal-import').style.display = 'flex';
     }
 
     function abrirModalView(producto) {

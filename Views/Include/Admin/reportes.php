@@ -7,6 +7,48 @@ require_once '../../../Config/Liquour_bdd.php';
 $db = new BDD();
 $conexion = $db->conectar();
 
+// LÓGICA DE REVERSIÓN DE VENTA
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'revertir_venta') {
+    $id_venta = $_POST['id_venta'] ?? null;
+    $response = ['success' => false, 'message' => 'Error desconocido.'];
+    
+    if ($id_venta) {
+        try {
+            $conexion->beginTransaction();
+            
+            // 1. Obtener detalles de la venta
+            $stmtDetalles = $conexion->prepare("SELECT id_producto, cantidad FROM detalle_ventas WHERE id_venta = ?");
+            $stmtDetalles->execute([$id_venta]);
+            $detalles = $stmtDetalles->fetchAll(PDO::FETCH_ASSOC);
+            
+            // 2. Devolver stock
+            foreach ($detalles as $detalle) {
+                $stmtUpdateStock = $conexion->prepare("UPDATE productos SET stock = stock + ? WHERE id_producto = ?");
+                $stmtUpdateStock->execute([$detalle['cantidad'], $detalle['id_producto']]);
+            }
+            
+            // 3. Eliminar la venta y sus detalles
+            $stmtDelDetalles = $conexion->prepare("DELETE FROM detalle_ventas WHERE id_venta = ?");
+            $stmtDelDetalles->execute([$id_venta]);
+            
+            $stmtDelVenta = $conexion->prepare("DELETE FROM ventas WHERE id_venta = ?");
+            $stmtDelVenta->execute([$id_venta]);
+            
+            $conexion->commit();
+            $response = ['success' => true, 'message' => 'Venta revertida exitosamente. El stock ha sido devuelto.'];
+        } catch (Exception $e) {
+            $conexion->rollBack();
+            $response = ['success' => false, 'message' => 'Error al revertir: ' . $e->getMessage()];
+        }
+    } else {
+        $response = ['success' => false, 'message' => 'ID de venta no proporcionado.'];
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
+
 $stmtSum = $conexion->query("SELECT IFNULL(SUM(total), 0) as total_ventas, COUNT(id_venta) as transacciones, COUNT(DISTINCT id_usuario) as vendedores FROM ventas");
 $summary = $stmtSum->fetch();
 $totalVentas = $summary['total_ventas'];
@@ -79,6 +121,7 @@ $DATA_DB = [
     <link rel="stylesheet" href="../../../Assets/CSS/-Catalogo_Admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../../Assets/CSS/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -276,6 +319,10 @@ function render() {
                  <button class="action-btn" onclick="imprimirItem('${r.id}', '${currentTab}')" title="Imprimir PDF" style="background:transparent; border:none; cursor:pointer; color:var(--gold); display:inline-flex; align-items:center; justify-content:center; padding:4px; margin-left:5px; transition:0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--gold)'">
                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                  </button>
+                 ${currentTab === 'ventas' ? `
+                 <button class="action-btn" onclick="revertirVenta('${r.id}')" title="Revertir Venta" style="background:transparent; border:none; cursor:pointer; color:#e74c3c; display:inline-flex; align-items:center; justify-content:center; padding:4px; margin-left:5px; transition:0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='#e74c3c'">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                 </button>` : ''}
               </td>
             </tr>
         `).join('');
@@ -353,6 +400,66 @@ document.getElementById('btnExportarPDF').addEventListener('click', function() {
 
 function closeExportModal() {
     document.getElementById('exportModal').style.display = 'none';
+}
+
+function revertirVenta(idVenta) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡Esta acción devolverá los productos al stock y eliminará la venta del registro!",
+        icon: 'warning',
+        showCancelButton: true,
+        background: '#1A1A1A',
+        color: '#F5F5DC',
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#3d3428',
+        confirmButtonText: 'Sí, revertir venta',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=revertir_venta&id_venta=' + encodeURIComponent(idVenta)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: '¡Revertida!',
+                        text: data.message,
+                        icon: 'success',
+                        background: '#1A1A1A',
+                        color: '#F5F5DC',
+                        confirmButtonColor: '#C5A059'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error',
+                        background: '#1A1A1A',
+                        color: '#F5F5DC',
+                        confirmButtonColor: '#C5A059'
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo comunicar con el servidor.',
+                    icon: 'error',
+                    background: '#1A1A1A',
+                    color: '#F5F5DC',
+                    confirmButtonColor: '#C5A059'
+                });
+            });
+        }
+    });
 }
 
 render();
