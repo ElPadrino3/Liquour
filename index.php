@@ -179,7 +179,7 @@
         }
     }
 
-    function sendMessage() {
+    async function sendMessage() {
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
         if (!text) return;
@@ -187,30 +187,49 @@
         appendMessage('user-message', text);
         input.value = '';
         
-        // Simular "Escribiendo..."
-        setTimeout(() => {
-            const response = getBotResponse(text.toLowerCase());
-            appendMessage('bot-message', response);
-        }, 600);
+        // Mostrar "Escribiendo..."
+        const typingId = 'typing-' + Date.now();
+        appendMessage('bot-message', '...', typingId);
+        
+        try {
+            const response = await fetch('Controller/ChatbotController.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: text })
+            });
+            
+            const data = await response.json();
+            
+            // Remover "Escribiendo..."
+            const typingMsg = document.getElementById(typingId);
+            if (typingMsg) typingMsg.remove();
+            
+            if (data.error) {
+                appendMessage('bot-message', data.error);
+            } else {
+                appendMessage('bot-message', data.response);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            const typingMsg = document.getElementById(typingId);
+            if (typingMsg) typingMsg.remove();
+            appendMessage('bot-message', 'Lo siento, hubo un error de conexión.');
+        }
     }
 
-    function appendMessage(className, text) {
+    function appendMessage(className, text, id = null) {
         const container = document.getElementById('chatbot-messages');
         const msgDiv = document.createElement('div');
         msgDiv.className = 'message ' + className;
-        msgDiv.textContent = text;
+        if (id) msgDiv.id = id;
+        
+        // Convertir saltos de línea en <br>
+        msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+        
         container.appendChild(msgDiv);
         container.scrollTop = container.scrollHeight;
-    }
-
-    function getBotResponse(text) {
-        if (text.includes('hola') || text.includes('buenas') || text.includes('saludos')) return '¡Hola! Bienvenido a Liquour. ¿Te ayudo con algo?';
-        if (text.includes('horario') || text.includes('hora')) return 'Nuestro horario de atención es de Lunes a Sábado de 10:00 AM a 10:00 PM.';
-        if (text.includes('ubicacion') || text.includes('donde') || text.includes('direccion') || text.includes('están')) return 'Nos encontramos en el centro de la ciudad, en la Avenida Principal #123, esquina con Calle 4.';
-        if (text.includes('producto') || text.includes('licor') || text.includes('vino') || text.includes('catalogo') || text.includes('venden')) return 'Tenemos una exclusiva selección de licores premium, vinos reserva y destilados de colección. Por favor, visita nuestra tienda física para descubrir el catálogo completo o ingresa con tu cuenta si eres miembro.';
-        if (text.includes('contacto') || text.includes('telefono') || text.includes('llamar')) return 'Puedes llamarnos directamente al 555-0192 o escribirnos a contacto@liquour.com';
-        if (text.includes('precio') || text.includes('costo') || text.includes('cuanto')) return 'Nuestros precios varían según la exclusividad del producto. Te invitamos a visitarnos para conocer nuestras ofertas especiales.';
-        return 'Lo siento, soy un asistente virtual y no entiendo esa consulta. Puedes preguntar por nuestros horarios, ubicación, catálogo de productos o información de contacto.';
     }
 </script>
 </body>
